@@ -5,6 +5,7 @@ import { Modal } from '../shared/Modal';
 import { Button } from '../shared/Button';
 import { Input } from '../shared/Input';
 import { Select } from '../shared/Select';
+import { TagInput } from '../shared/TagInput';
 import { isValidEmail, isValidUrl } from '../../utils/validators';
 
 interface LeadModalProps {
@@ -29,6 +30,7 @@ export const LeadModal: React.FC<LeadModalProps> = ({
     notes: '',
     linkedinUrl: '',
     phoneNumber: '',
+    tags: [],
   });
   const [stage, setStage] = useState<StageId>(initialStage || 'target');
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -43,6 +45,7 @@ export const LeadModal: React.FC<LeadModalProps> = ({
         notes: lead.notes || '',
         linkedinUrl: lead.linkedinUrl || '',
         phoneNumber: lead.phoneNumber || '',
+        tags: lead.tags || [],
       });
       setStage(lead.stage);
     } else {
@@ -53,6 +56,7 @@ export const LeadModal: React.FC<LeadModalProps> = ({
         notes: '',
         linkedinUrl: '',
         phoneNumber: '',
+        tags: [],
       });
       setStage(initialStage || 'target');
     }
@@ -167,6 +171,17 @@ export const LeadModal: React.FC<LeadModalProps> = ({
             options={stageOptions}
           />
         )}
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Tags
+          </label>
+          <TagInput
+            tags={formData.tags || []}
+            onChange={(tags) => setFormData({ ...formData, tags })}
+            placeholder="Agregar tags (ej: VC, Seed, Series A)"
+          />
+        </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">

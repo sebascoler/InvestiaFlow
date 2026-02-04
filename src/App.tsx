@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ErrorBoundary } from './components/shared/ErrorBoundary'
 import { AuthProvider } from './contexts/AuthContext'
 import Layout from './components/layout/Layout'
+import DashboardPage from './pages/DashboardPage'
 import CRMPage from './pages/CRMPage'
 import DataRoomPage from './pages/DataRoomPage'
 import AutomationPage from './pages/AutomationPage'
@@ -17,7 +18,8 @@ function App() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/" element={<Layout />}>
-              <Route index element={<CRMPage />} />
+              <Route index element={<DashboardPage />} />
+              <Route path="dashboard" element={<DashboardPage />} />
               <Route path="crm" element={<CRMPage />} />
               <Route path="dataroom" element={<DataRoomPage />} />
               <Route path="automation" element={<AutomationPage />} />

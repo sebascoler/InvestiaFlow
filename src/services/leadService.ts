@@ -108,15 +108,34 @@ const leadServiceMock = {
     const newLead: Lead = {
       id: `lead-${Date.now()}`,
       userId,
-      ...data,
+      name: data.name,
+      email: data.email,
+      firm: data.firm,
       stage: 'target',
       stageEnteredAt: now,
       createdAt: now,
       updatedAt: now,
       lastContactDate: null,
       notes: data.notes || '',
+      tags: data.tags || [],
+      linkedinUrl: data.linkedinUrl,
+      phoneNumber: data.phoneNumber,
     };
     leadsDB.push(newLead);
+    
+    // Registrar actividad de creación
+    try {
+      const { leadHistoryService } = await import('./leadHistoryService');
+      await leadHistoryService.addActivity(
+        newLead.id,
+        userId,
+        'created',
+        `Lead "${data.name}" creado`
+      );
+    } catch (error) {
+      console.warn('[leadService] Error recording activity:', error);
+    }
+    
     return newLead;
   },
 
@@ -138,6 +157,51 @@ const leadServiceMock = {
       ...currentLead,
       ...finalUpdates,
     };
+    
+    // Registrar actividad de actualización
+    try {
+      const { leadHistoryService } = await import('./leadHistoryService');
+      const changedFields = Object.keys(updates).filter(key => 
+        key !== 'updatedAt' && updates[key as keyof Lead] !== currentLead[key as keyof Lead]
+      );
+      
+      if (changedFields.length > 0) {
+        // Si cambió tags, registrar actividad específica
+        if (updates.tags && JSON.stringify(updates.tags) !== JSON.stringify(currentLead.tags)) {
+          const addedTags = (updates.tags || []).filter(t => !currentLead.tags?.includes(t));
+          const removedTags = (currentLead.tags || []).filter(t => !updates.tags?.includes(t));
+          
+          if (addedTags.length > 0) {
+            await leadHistoryService.addActivity(
+              id,
+              currentLead.userId,
+              'tag_added',
+              `Tags agregados: ${addedTags.join(', ')}`,
+              { tags: addedTags }
+            );
+          }
+          if (removedTags.length > 0) {
+            await leadHistoryService.addActivity(
+              id,
+              currentLead.userId,
+              'tag_removed',
+              `Tags eliminados: ${removedTags.join(', ')}`,
+              { tags: removedTags }
+            );
+          }
+        } else {
+          await leadHistoryService.addActivity(
+            id,
+            currentLead.userId,
+            'updated',
+            `Lead actualizado: ${changedFields.join(', ')}`
+          );
+        }
+      }
+    } catch (error) {
+      console.warn('[leadService] Error recording activity:', error);
+    }
+    
     return leadsDB[index];
   },
 

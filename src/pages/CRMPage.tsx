@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Plus } from 'lucide-react';
 import { KanbanBoard } from '../components/crm/KanbanBoard';
 import { LeadModal } from '../components/crm/LeadModal';
 import { LeadDetailPanel } from '../components/crm/LeadDetailPanel';
 import { StageChangeModal } from '../components/crm/StageChangeModal';
+import { SearchAndFilters, FilterOptions } from '../components/crm/SearchAndFilters';
 import { Button } from '../components/shared/Button';
 import { ToastContainer, ToastType } from '../components/shared/Toast';
 import { useLeads } from '../contexts/LeadsContext';
 import { Lead, LeadFormData } from '../types/lead';
 import { StageId } from '../types/stage';
+import { filterAndSortLeads } from '../utils/leadFilters';
 
 interface Toast {
   id: string;
@@ -17,7 +19,7 @@ interface Toast {
 }
 
 const CRMPage: React.FC = () => {
-  const { createLead, updateLead, deleteLead, changeStage } = useLeads();
+  const { leads, createLead, updateLead, deleteLead, changeStage } = useLeads();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
@@ -30,6 +32,28 @@ const CRMPage: React.FC = () => {
     otherUpdates: Partial<Lead>;
   } | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [filters, setFilters] = useState<FilterOptions>({
+    searchQuery: '',
+    stages: [],
+    tags: [],
+    dateRange: { start: null, end: null },
+    sortBy: 'name',
+    sortOrder: 'asc',
+  });
+
+  // Obtener todos los tags únicos de los leads
+  const availableTags = useMemo(() => {
+    const tagSet = new Set<string>();
+    leads.forEach(lead => {
+      lead.tags?.forEach(tag => tagSet.add(tag));
+    });
+    return Array.from(tagSet).sort();
+  }, [leads]);
+
+  // Filtrar y ordenar leads
+  const filteredLeads = useMemo(() => {
+    return filterAndSortLeads(leads, filters);
+  }, [leads, filters]);
 
   const addToast = (message: string, type: ToastType) => {
     const id = Math.random().toString(36).substr(2, 9);
@@ -129,6 +153,17 @@ const CRMPage: React.FC = () => {
     }
   };
 
+  const handleClearFilters = () => {
+    setFilters({
+      searchQuery: '',
+      stages: [],
+      tags: [],
+      dateRange: { start: null, end: null },
+      sortBy: 'name',
+      sortOrder: 'asc',
+    });
+  };
+
   return (
     <div className={`relative ${isDetailPanelOpen ? 'mr-96' : ''} transition-all duration-300`}>
       <div className="flex items-center justify-between mb-6">
@@ -142,7 +177,16 @@ const CRMPage: React.FC = () => {
         </Button>
       </div>
 
+      <SearchAndFilters
+        filters={filters}
+        onFiltersChange={setFilters}
+        onClearFilters={handleClearFilters}
+        availableTags={availableTags}
+      />
+
       <KanbanBoard
+        leads={filteredLeads}
+        filteredStages={filters.stages.length > 0 ? filters.stages : undefined}
         onLeadClick={handleLeadClick}
         onAddLead={handleAddLead}
       />

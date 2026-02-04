@@ -14,6 +14,7 @@ export interface Lead {
   notes: string;
   linkedinUrl?: string;
   phoneNumber?: string;
+  tags?: string[]; // Tags/etiquetas para categorizar leads
   customFields?: Record<string, any>;
 }
 
@@ -35,4 +36,5 @@ export interface LeadFormData {
   notes?: string;
   linkedinUrl?: string;
   phoneNumber?: string;
+  tags?: string[];
 }

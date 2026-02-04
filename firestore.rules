@@ -73,6 +73,21 @@ service cloud.firestore {
       );
     }
     
+    // Lead Activities (historial de cambios)
+    match /leadActivities/{activityId} {
+      // Allow read for authenticated users (activities are tied to leads which have their own security)
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Lead Comments (comentarios)
+    match /leadComments/{commentId} {
+      // Allow read for authenticated users (comments are tied to leads which have their own security)
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && isOwner(resource.data.userId);
+    }
+    
     // Deny all other access
     match /{document=**} {
       allow read, write: if false;

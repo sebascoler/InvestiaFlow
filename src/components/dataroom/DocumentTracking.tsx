@@ -53,18 +53,69 @@ export const DocumentTracking: React.FC<DocumentTrackingProps> = ({ documentId }
     );
   }
 
+  const viewedCount = shares.filter(s => s.viewedAt).length;
+  const downloadedCount = shares.filter(s => s.downloadedAt).length;
+  const viewRate = shares.length > 0 ? Math.round((viewedCount / shares.length) * 100) : 0;
+  const downloadRate = shares.length > 0 ? Math.round((downloadedCount / shares.length) * 100) : 0;
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
+      {/* Summary Stats */}
+      <div className="bg-gradient-to-r from-primary-50 to-blue-50 rounded-lg p-4 border border-primary-200">
+        <h3 className="font-semibold text-gray-900 mb-3">Resumen de Estadísticas</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-white rounded-lg p-3 border border-gray-200">
+            <div className="flex items-center gap-2 mb-1">
+              <Eye className="text-green-600" size={18} />
+              <span className="text-sm font-medium text-gray-700">Vistos</span>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold text-gray-900">{viewedCount}</span>
+              <span className="text-sm text-gray-500">de {shares.length}</span>
+            </div>
+            <div className="mt-2">
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-green-500 h-2 rounded-full transition-all"
+                  style={{ width: `${viewRate}%` }}
+                />
+              </div>
+              <span className="text-xs text-gray-500 mt-1">{viewRate}%</span>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg p-3 border border-gray-200">
+            <div className="flex items-center gap-2 mb-1">
+              <Download className="text-blue-600" size={18} />
+              <span className="text-sm font-medium text-gray-700">Descargados</span>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold text-gray-900">{downloadedCount}</span>
+              <span className="text-sm text-gray-500">de {shares.length}</span>
+            </div>
+            <div className="mt-2">
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-blue-500 h-2 rounded-full transition-all"
+                  style={{ width: `${downloadRate}%` }}
+                />
+              </div>
+              <span className="text-xs text-gray-500 mt-1">{downloadRate}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Detailed List */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-gray-900">Compartido con {shares.length} lead(s)</h3>
         <div className="flex items-center gap-4 text-xs text-gray-500">
           <div className="flex items-center gap-1">
             <Eye className="text-green-600" size={14} />
-            <span>{shares.filter(s => s.viewedAt).length} visto(s)</span>
+            <span>{viewedCount} visto(s)</span>
           </div>
           <div className="flex items-center gap-1">
             <Download className="text-blue-600" size={14} />
-            <span>{shares.filter(s => s.downloadedAt).length} descargado(s)</span>
+            <span>{downloadedCount} descargado(s)</span>
           </div>
         </div>
       </div>

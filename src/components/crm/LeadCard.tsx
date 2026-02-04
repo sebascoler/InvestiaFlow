@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Draggable } from '@hello-pangea/dnd';
 import { Mail, Calendar, FileText } from 'lucide-react';
 import { Lead } from '../../types/lead';
@@ -11,7 +11,7 @@ interface LeadCardProps {
   onClick: () => void;
 }
 
-export const LeadCard: React.FC<LeadCardProps> = ({ lead, index, onClick }) => {
+export const LeadCard: React.FC<LeadCardProps> = memo(({ lead, index, onClick }) => {
   const daysSinceContact = lead.lastContactDate
     ? Math.floor((new Date().getTime() - lead.lastContactDate.getTime()) / (1000 * 60 * 60 * 24))
     : null;
@@ -68,6 +68,19 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, index, onClick }) => {
           </div>
         )}
 
+            {lead.tags && lead.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {lead.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
             {lead.notes && (
               <div className="flex items-start gap-2 text-sm text-gray-600 mt-2">
                 <FileText size={14} className="mt-0.5 flex-shrink-0" />
@@ -79,4 +92,13 @@ export const LeadCard: React.FC<LeadCardProps> = ({ lead, index, onClick }) => {
       )}
     </Draggable>
   );
-};
+}, (prevProps, nextProps) => {
+  // Custom comparison for memo
+  return (
+    prevProps.lead.id === nextProps.lead.id &&
+    prevProps.lead.stage === nextProps.lead.stage &&
+    prevProps.lead.lastContactDate?.getTime() === nextProps.lead.lastContactDate?.getTime() &&
+    JSON.stringify(prevProps.lead.tags) === JSON.stringify(nextProps.lead.tags) &&
+    prevProps.index === nextProps.index
+  );
+});

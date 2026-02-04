@@ -52,14 +52,17 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 transition-opacity duration-200"
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${
+        isOpen ? 'bg-black bg-opacity-50' : 'bg-black bg-opacity-0'
+      }`}
       onClick={onClose}
     >
       <div
         className={`
           bg-white rounded-lg shadow-xl w-full ${sizeStyles[size]}
-          transform transition-all duration-200
+          transform transition-all duration-300 ease-out
           max-h-[90vh] overflow-y-auto
+          ${isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-0 translate-y-4'}
         `}
         onClick={(e) => e.stopPropagation()}
       >

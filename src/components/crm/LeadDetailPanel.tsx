@@ -1,9 +1,10 @@
 import React from 'react';
-import { X, Mail, Building, Calendar, FileText, Linkedin, Phone, Trash2, Edit } from 'lucide-react';
+import { X, Mail, Building, Calendar, FileText, Linkedin, Phone, Trash2, Edit, Tag } from 'lucide-react';
 import { Lead } from '../../types/lead';
 import { formatDate } from '../../utils/formatters';
 import { Button } from '../shared/Button';
 import { SharedDocumentsList } from './SharedDocumentsList';
+import { LeadHistory } from './LeadHistory';
 
 interface LeadDetailPanelProps {
   lead: Lead | null;
@@ -132,6 +133,25 @@ export const LeadDetailPanel: React.FC<LeadDetailPanelProps> = ({
             </div>
           </div>
 
+          {lead.tags && lead.tags.length > 0 && (
+            <div className="flex items-start gap-3">
+              <Tag className="text-gray-400 mt-1" size={20} />
+              <div className="flex-1">
+                <p className="text-sm text-gray-500 mb-2">Tags</p>
+                <div className="flex flex-wrap gap-2">
+                  {lead.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {lead.notes && (
             <div className="flex items-start gap-3">
               <FileText className="text-gray-400 mt-1" size={20} />
@@ -145,6 +165,10 @@ export const LeadDetailPanel: React.FC<LeadDetailPanelProps> = ({
 
         <div className="pt-6 border-t border-gray-200">
           <SharedDocumentsList lead={lead} />
+        </div>
+
+        <div className="pt-6 border-t border-gray-200">
+          <LeadHistory leadId={lead.id} />
         </div>
       </div>
 

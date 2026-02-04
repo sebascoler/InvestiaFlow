@@ -8,12 +8,15 @@ import { useLeads } from '../../contexts/LeadsContext';
 import { Loader } from '../shared/Loader';
 
 interface KanbanBoardProps {
+  leads?: Lead[]; // Leads filtrados (opcional, si no se pasa usa todos)
+  filteredStages?: StageId[]; // Stages seleccionados en el filtro (opcional)
   onLeadClick: (lead: Lead) => void;
   onAddLead: (stageId?: string) => void;
 }
 
-export const KanbanBoard: React.FC<KanbanBoardProps> = ({ onLeadClick, onAddLead }) => {
-  const { leads, loading, changeStage } = useLeads();
+export const KanbanBoard: React.FC<KanbanBoardProps> = ({ leads: filteredLeads, filteredStages, onLeadClick, onAddLead }) => {
+  const { leads: allLeads, loading, changeStage } = useLeads();
+  const leads = filteredLeads || allLeads;
   const [pendingStageChange, setPendingStageChange] = useState<{
     leadId: string;
     leadName: string;
@@ -88,7 +91,10 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ onLeadClick, onAddLead
           </div>
         ) : (
           <div className="flex gap-4 overflow-x-auto pb-4">
-            {STAGES.map((stage) => (
+            {(filteredStages && filteredStages.length > 0
+              ? STAGES.filter(stage => filteredStages.includes(stage.id))
+              : STAGES
+            ).map((stage) => (
               <StageColumn
                 key={stage.id}
                 stage={stage}

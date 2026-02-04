@@ -105,6 +105,7 @@ export const leadServiceFirebase = {
       updatedAt: now,
       lastContactDate: null,
       notes: data.notes || '',
+      tags: data.tags || [],
     };
 
     console.log('[leadServiceFirebase] Creating lead with userId:', userId);
@@ -112,6 +113,19 @@ export const leadServiceFirebase = {
 
     const firestoreData = leadToFirestore(newLead);
     await firestoreService.setDoc(COLLECTION_NAME, newLead.id, firestoreData);
+    
+    // Registrar actividad de creación
+    try {
+      const { leadHistoryService } = await import('./leadHistoryService');
+      await leadHistoryService.addActivity(
+        newLead.id,
+        userId,
+        'created',
+        `Lead "${data.name}" creado`
+      );
+    } catch (error) {
+      console.warn('[leadServiceFirebase] Error recording activity:', error);
+    }
     
     console.log('[leadServiceFirebase] Lead created successfully:', newLead.id);
     
@@ -136,6 +150,50 @@ export const leadServiceFirebase = {
     const firestoreData = leadToFirestore(updatedLead);
     await firestoreService.updateDoc(COLLECTION_NAME, id, firestoreData);
     
+    // Registrar actividad de actualización
+    try {
+      const { leadHistoryService } = await import('./leadHistoryService');
+      const changedFields = Object.keys(updates).filter(key => 
+        key !== 'updatedAt' && updates[key as keyof Lead] !== currentLead[key as keyof Lead]
+      );
+      
+      if (changedFields.length > 0) {
+        // Si cambió tags, registrar actividad específica
+        if (updates.tags && JSON.stringify(updates.tags) !== JSON.stringify(currentLead.tags)) {
+          const addedTags = (updates.tags || []).filter(t => !currentLead.tags?.includes(t));
+          const removedTags = (currentLead.tags || []).filter(t => !updates.tags?.includes(t));
+          
+          if (addedTags.length > 0) {
+            await leadHistoryService.addActivity(
+              id,
+              currentLead.userId,
+              'tag_added',
+              `Tags agregados: ${addedTags.join(', ')}`,
+              { tags: addedTags }
+            );
+          }
+          if (removedTags.length > 0) {
+            await leadHistoryService.addActivity(
+              id,
+              currentLead.userId,
+              'tag_removed',
+              `Tags eliminados: ${removedTags.join(', ')}`,
+              { tags: removedTags }
+            );
+          }
+        } else {
+          await leadHistoryService.addActivity(
+            id,
+            currentLead.userId,
+            'updated',
+            `Lead actualizado: ${changedFields.join(', ')}`
+          );
+        }
+      }
+    } catch (error) {
+      console.warn('[leadServiceFirebase] Error recording activity:', error);
+    }
+    
     return updatedLead;
   },
 
@@ -146,6 +204,33 @@ export const leadServiceFirebase = {
 
     const oldStage = lead.stage;
     const now = new Date();
+    
+    // Registrar actividad de cambio de stage
+    try {
+      const { leadHistoryService } = await import('./leadHistoryService');
+      const stageNames: Record<StageId, string> = {
+        target: 'Target',
+        first_contact: 'First Contact',
+        in_conversation: 'In Conversation',
+        pitch_shared: 'Pitch Shared',
+        due_diligence: 'Due Diligence',
+        term_sheet: 'Term Sheet',
+        committed: 'Committed',
+        passed: 'Passed',
+      };
+      await leadHistoryService.addActivity(
+        id,
+        lead.userId,
+        'stage_changed',
+        `Stage cambiado de ${stageNames[oldStage]} a ${stageNames[newStage]}${stageChangeNotes ? `: ${stageChangeNotes}` : ''}`,
+        {
+          fromStage: oldStage,
+          toStage: newStage,
+        }
+      );
+    } catch (error) {
+      console.warn('[leadServiceFirebase] Error recording activity:', error);
+    }
     
     // Actualizar notas si se proporcionan
     const updatedNotes = stageChangeNotes 

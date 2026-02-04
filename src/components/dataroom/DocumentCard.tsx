@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { FileText, Settings, Trash2, Download, BarChart3 } from 'lucide-react';
+import React, { useState, useEffect, memo } from 'react';
+import { FileText, Settings, Trash2, Download, BarChart3, Eye } from 'lucide-react';
 import { Document } from '../../types/document';
 import { formatFileSize } from '../../utils/formatters';
 import { formatDate } from '../../utils/formatters';
 import { DocumentTracking } from './DocumentTracking';
 import { Modal } from '../shared/Modal';
+import { useDocuments } from '../../contexts/DocumentsContext';
 
 interface DocumentCardProps {
   document: Document;
@@ -36,12 +37,31 @@ const getFileIcon = (fileType: string) => {
   return '📎';
 };
 
-export const DocumentCard: React.FC<DocumentCardProps> = ({
+export const DocumentCard: React.FC<DocumentCardProps> = memo(({
   document,
   onConfigurePermissions,
   onDelete,
 }) => {
   const [showTracking, setShowTracking] = useState(false);
+  const { getDocumentShares } = useDocuments();
+  const [stats, setStats] = useState({ total: 0, viewed: 0, downloaded: 0 });
+
+  useEffect(() => {
+    loadStats();
+  }, [document.id]);
+
+  const loadStats = async () => {
+    try {
+      const shares = await getDocumentShares(document.id);
+      setStats({
+        total: shares.length,
+        viewed: shares.filter(s => s.viewedAt).length,
+        downloaded: shares.filter(s => s.downloadedAt).length,
+      });
+    } catch (error) {
+      console.error('Error loading document stats:', error);
+    }
+  };
 
   return (
     <>
@@ -66,17 +86,40 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
         )}
 
         <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-          <span className="text-xs text-gray-500">
-            Uploaded {formatDate(document.uploadedAt)}
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-gray-500">
+              Uploaded {formatDate(document.uploadedAt)}
+            </span>
+            {stats.total > 0 && (
+              <div className="flex items-center gap-2 text-xs">
+                <div className="flex items-center gap-1 text-gray-600">
+                  <Eye size={12} />
+                  <span>{stats.viewed}/{stats.total}</span>
+                </div>
+                <div className="flex items-center gap-1 text-gray-600">
+                  <Download size={12} />
+                  <span>{stats.downloaded}/{stats.total}</span>
+                </div>
+              </div>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowTracking(true)}
-              className="p-1.5 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded transition-colors"
-              title="View Tracking"
+              className={`p-1.5 rounded transition-colors relative ${
+                stats.total > 0
+                  ? 'text-primary-600 hover:bg-primary-50'
+                  : 'text-gray-600 hover:text-primary-600 hover:bg-gray-100'
+              }`}
+              title={`View Tracking (${stats.viewed} viewed, ${stats.downloaded} downloaded)`}
               aria-label="View Tracking"
             >
               <BarChart3 size={16} />
+              {stats.total > 0 && (
+                <span className="absolute -top-1 -right-1 bg-primary-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                  {stats.total}
+                </span>
+              )}
             </button>
             <button
               onClick={onConfigurePermissions}
@@ -119,4 +162,6 @@ export const DocumentCard: React.FC<DocumentCardProps> = ({
       </Modal>
     </>
   );
-};
+}, (prevProps, nextProps) => {
+  return prevProps.document.id === nextProps.document.id;
+});
