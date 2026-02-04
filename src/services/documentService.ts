@@ -1,5 +1,8 @@
 import { Document, DocumentPermission, SharedDocument, DocumentCategory } from '../types/document';
 
+// Check if Firebase is configured
+const USE_FIREBASE = !!import.meta.env.VITE_FIREBASE_API_KEY;
+
 // Mock data
 let documentsDB: Document[] = [
   {
@@ -99,7 +102,7 @@ let permissionsDB: DocumentPermission[] = [
 
 let sharedDB: SharedDocument[] = [];
 
-export const documentService = {
+const documentServiceMock = {
   async getDocuments(userId: string): Promise<Document[]> {
     return documentsDB.filter(doc => doc.userId === userId);
   },
@@ -201,5 +204,88 @@ export const documentService = {
         shared.viewedAt = new Date();
       }
     }
+  },
+};
+
+// Lazy load Firebase service
+let firebaseService: any = null;
+const getFirebaseService = async () => {
+  if (!USE_FIREBASE) return null;
+  if (firebaseService) return firebaseService;
+  
+  try {
+    const module = await import('./documentService.firebase');
+    firebaseService = module.documentServiceFirebase;
+    return firebaseService;
+  } catch (error) {
+    console.warn('Firebase service not available, using mock:', error);
+    return null;
+  }
+};
+
+// Export service that uses Firebase if available, otherwise mock
+export const documentService = {
+  async getDocuments(userId: string): Promise<Document[]> {
+    const service = await getFirebaseService();
+    return service ? service.getDocuments(userId) : documentServiceMock.getDocuments(userId);
+  },
+
+  async uploadDocument(userId: string, file: File, category: DocumentCategory, description?: string): Promise<Document> {
+    const service = await getFirebaseService();
+    return service 
+      ? service.uploadDocument(userId, file, category, description)
+      : documentServiceMock.uploadDocument(userId, file, category, description);
+  },
+
+  async deleteDocument(id: string): Promise<void> {
+    const service = await getFirebaseService();
+    return service ? service.deleteDocument(id) : documentServiceMock.deleteDocument(id);
+  },
+
+  async getPermissions(documentId: string): Promise<DocumentPermission[]> {
+    const service = await getFirebaseService();
+    return service ? service.getPermissions(documentId) : documentServiceMock.getPermissions(documentId);
+  },
+
+  async setPermissions(documentId: string, permissions: Omit<DocumentPermission, 'id'>[]): Promise<void> {
+    const service = await getFirebaseService();
+    return service 
+      ? service.setPermissions(documentId, permissions)
+      : documentServiceMock.setPermissions(documentId, permissions);
+  },
+
+  async getSharedDocuments(leadId: string): Promise<SharedDocument[]> {
+    const service = await getFirebaseService();
+    return service 
+      ? service.getSharedDocuments(leadId)
+      : documentServiceMock.getSharedDocuments(leadId);
+  },
+
+  async getDocumentShares(documentId: string): Promise<SharedDocument[]> {
+    const service = await getFirebaseService();
+    return service 
+      ? service.getDocumentShares(documentId)
+      : documentServiceMock.getDocumentShares(documentId);
+  },
+
+  async shareDocumentWithLead(leadId: string, documentId: string): Promise<SharedDocument> {
+    const service = await getFirebaseService();
+    return service 
+      ? service.shareDocumentWithLead(leadId, documentId)
+      : documentServiceMock.shareDocumentWithLead(leadId, documentId);
+  },
+
+  async markDocumentAsViewed(leadId: string, documentId: string): Promise<void> {
+    const service = await getFirebaseService();
+    return service 
+      ? service.markDocumentAsViewed(leadId, documentId)
+      : documentServiceMock.markDocumentAsViewed(leadId, documentId);
+  },
+
+  async markDocumentAsDownloaded(leadId: string, documentId: string): Promise<void> {
+    const service = await getFirebaseService();
+    return service 
+      ? service.markDocumentAsDownloaded(leadId, documentId)
+      : documentServiceMock.markDocumentAsDownloaded(leadId, documentId);
   },
 };

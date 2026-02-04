@@ -38,9 +38,12 @@ export const LeadsProvider: React.FC<LeadsProviderProps> = ({ children, userId }
     try {
       setLoading(true);
       setError(null);
+      console.log('[LeadsContext] Refreshing leads for userId:', userId);
       const fetchedLeads = await leadService.getLeads(userId);
+      console.log('[LeadsContext] Fetched leads:', fetchedLeads.length);
       setLeads(fetchedLeads);
     } catch (err) {
+      console.error('[LeadsContext] Error fetching leads:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch leads');
     } finally {
       setLoading(false);

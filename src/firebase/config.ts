@@ -77,5 +77,6 @@ export const auth = () => authInstance;
 export const db = () => dbInstance;
 export const storage = () => storageInstance;
 export const isFirebaseReady = () => !!(app && authInstance && dbInstance);
+export const getFirebaseApp = () => app;
 
 export default app;

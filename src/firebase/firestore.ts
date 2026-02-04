@@ -95,6 +95,11 @@ export const firestoreService = {
       throw new Error('Firestore not available');
     }
     
+    // Ensure where is loaded if constraints are provided
+    if (constraints.length > 0 && !where) {
+      await loadFirestore();
+    }
+    
     const collectionRef = collection(dbInstance, collectionName);
     const q = constraints.length > 0 
       ? query(collectionRef, ...constraints)

@@ -2,12 +2,30 @@ import React from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
-import { AuthProvider, useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { LeadsProvider } from '../../contexts/LeadsContext';
 import { DocumentsProvider } from '../../contexts/DocumentsContext';
 import { AutomationProvider } from '../../contexts/AutomationContext';
+import { useScheduledTasks } from '../../hooks/useScheduledTasks';
 
+// Inner component that uses the providers
 const LayoutContent: React.FC = () => {
+  useScheduledTasks();
+  
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      <Sidebar />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header />
+        <main className="flex-1 overflow-y-auto p-6">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  );
+};
+
+const Layout: React.FC = () => {
   const { user, isAuthenticated, loading } = useAuth();
 
   if (loading) {
@@ -26,26 +44,10 @@ const LayoutContent: React.FC = () => {
     <LeadsProvider userId={user.id}>
       <DocumentsProvider userId={user.id}>
         <AutomationProvider userId={user.id}>
-          <div className="flex min-h-screen bg-gray-50">
-            <Sidebar />
-            <div className="flex-1 flex flex-col overflow-hidden">
-              <Header />
-              <main className="flex-1 overflow-y-auto p-6">
-                <Outlet />
-              </main>
-            </div>
-          </div>
+          <LayoutContent />
         </AutomationProvider>
       </DocumentsProvider>
     </LeadsProvider>
-  );
-};
-
-const Layout: React.FC = () => {
-  return (
-    <AuthProvider>
-      <LayoutContent />
-    </AuthProvider>
   );
 };
 

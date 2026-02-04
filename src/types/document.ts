@@ -12,6 +12,7 @@ export interface Document {
   fileSize: number;
   fileType: string;
   description?: string;
+  downloadUrl?: string; // URL de descarga desde Firebase Storage
 }
 
 export interface DocumentPermission {

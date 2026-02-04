@@ -58,49 +58,26 @@ VITE_FIREBASE_APP_ID=tu-app-id
 
 ### 7. Configurar Reglas de Seguridad de Firestore
 
-Ve a **Firestore Database** > **Rules** y configura:
+Ve a **Firestore Database** > **Rules** y copia el contenido del archivo `firestore.rules` (en la raíz del proyecto).
 
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // Users can only access their own data
-    match /leads/{leadId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-    }
-    
-    match /documents/{documentId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-    }
-    
-    match /automationRules/{ruleId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-    }
-    
-    match /sharedDocuments/{sharedId} {
-      allow read, write: if request.auth != null;
-    }
-  }
-}
-```
+Las reglas incluyen:
+- ✅ Solo usuarios autenticados pueden acceder
+- ✅ Los usuarios solo pueden leer/escribir sus propios datos (leads, documents, rules)
+- ✅ Validación de ownership por `userId`
+- ✅ Protección de collections: `leads`, `documents`, `documentPermissions`, `sharedDocuments`, `automationRules`
+
+**📝 Nota**: El archivo `firestore.rules` está en la raíz del proyecto para referencia.
 
 ### 8. Configurar Reglas de Seguridad de Storage
 
-Ve a **Storage** > **Rules** y configura:
+Ve a **Storage** > **Rules** y copia el contenido del archivo `storage.rules` (en la raíz del proyecto).
 
-```javascript
-rules_version = '2';
-service firebase.storage {
-  match /b/{bucket}/o {
-    match /users/{userId}/{allPaths=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-  }
-}
-```
+Las reglas incluyen:
+- ✅ Solo usuarios autenticados pueden subir/descargar documentos
+- ✅ Los usuarios solo pueden acceder a sus propios documentos (`documents/{userId}/...`)
+- ✅ Protección contra acceso no autorizado
+
+**📝 Nota**: El archivo `storage.rules` está en la raíz del proyecto para referencia.
 
 ## 🚀 Migración Gradual
 
@@ -117,7 +94,20 @@ La aplicación está preparada para funcionar con **mock data** o **Firebase** s
 
 ## 🔄 Próximos Pasos
 
-1. Configura las credenciales en `.env.local`
-2. Prueba el login con Firebase Auth
-3. Los servicios se migrarán gradualmente a Firestore
-4. Storage se configurará para documentos reales
+1. ✅ Configura las credenciales en `.env.local`
+2. ✅ Prueba el login con Firebase Auth
+3. ✅ Los servicios están migrados a Firestore (leads, documents, automationRules)
+4. ✅ Storage configurado para documentos reales
+5. ⏳ Configura las reglas de seguridad en Firebase Console
+6. ⏳ Prueba subir un documento y verificar que se guarda en Storage
+7. ⏳ Verifica que los datos se persisten correctamente en Firestore
+
+## ✅ Estado de Migración
+
+- ✅ **Firebase Auth**: Implementado (Email/Password + Google)
+- ✅ **leadService**: Migrado a Firestore
+- ✅ **documentService**: Migrado a Firestore + Storage
+- ✅ **automationService**: Migrado a Firestore
+- ✅ **Reglas de Seguridad**: Archivos creados (`firestore.rules`, `storage.rules`)
+
+**🎉 La aplicación está lista para usar Firebase!**

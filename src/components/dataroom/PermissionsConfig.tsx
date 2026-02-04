@@ -99,14 +99,20 @@ export const PermissionsConfig: React.FC<PermissionsConfigProps> = ({
       // Build permissions array from enabled stages
       const permissionsToSave: Omit<DocumentPermission, 'id'>[] = stagePermissions
         .filter((perm) => perm.enabled)
-        .map((perm) => ({
-          documentId: document.id,
-          requiredStage: perm.stageId,
-          delayDays: perm.delayDays,
-          emailTemplate: perm.sendEmail
-            ? `Hi {{name}},\n\nWe've shared "${document.name}" with you. You can access it in your Data Room.\n\nBest regards,\nInvestiaFlow Team`
-            : undefined,
-        }));
+        .map((perm) => {
+          const permission: Omit<DocumentPermission, 'id'> = {
+            documentId: document.id,
+            requiredStage: perm.stageId,
+            delayDays: perm.delayDays,
+          };
+          
+          // Only add emailTemplate if sendEmail is enabled
+          if (perm.sendEmail) {
+            permission.emailTemplate = `Hi {{name}},\n\nWe've shared "${document.name}" with you. You can access it in your Data Room.\n\nBest regards,\nInvestiaFlow Team`;
+          }
+          
+          return permission;
+        });
 
       await setPermissions(document.id, permissionsToSave);
       onClose();

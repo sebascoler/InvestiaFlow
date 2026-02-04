@@ -1,7 +1,8 @@
 // Firebase implementation of leadService
 import { Lead, LeadFormData } from '../types/lead';
 import { StageId } from '../types/stage';
-import { firestoreService, where, dateToTimestamp, timestampToDate } from '../firebase/firestore';
+import { firestoreService, dateToTimestamp, timestampToDate } from '../firebase/firestore';
+import { ensureFirebase, isFirebaseReady } from '../firebase/config';
 import { automationService } from './automationService';
 
 const COLLECTION_NAME = 'leads';
@@ -21,6 +22,14 @@ const firestoreToLead = (data: any): Lead => {
 const leadToFirestore = (lead: Partial<Lead>): any => {
   const data: any = { ...lead };
   
+  // Remove undefined fields (Firestore doesn't allow undefined)
+  Object.keys(data).forEach(key => {
+    if (data[key] === undefined) {
+      delete data[key];
+    }
+  });
+  
+  // Convert dates to timestamps
   if (data.createdAt) data.createdAt = dateToTimestamp(data.createdAt);
   if (data.updatedAt) data.updatedAt = dateToTimestamp(data.updatedAt);
   if (data.lastContactDate) data.lastContactDate = dateToTimestamp(data.lastContactDate);
@@ -32,11 +41,43 @@ const leadToFirestore = (lead: Partial<Lead>): any => {
 export const leadServiceFirebase = {
   // Obtener todos los leads del usuario
   async getLeads(userId: string): Promise<Lead[]> {
-    const leads = await firestoreService.getDocs<Lead>(
-      COLLECTION_NAME,
-      [where('userId', '==', userId)]
-    );
-    return leads.map(firestoreToLead);
+    await ensureFirebase();
+    
+    if (!isFirebaseReady()) {
+      throw new Error('Firestore not available');
+    }
+    
+    console.log('[leadServiceFirebase] Getting leads for userId:', userId);
+    
+    // Load where function directly from firebase/firestore
+    const firebaseFirestore = await import('firebase/firestore');
+    const where = firebaseFirestore.where;
+    
+    if (!where) {
+      throw new Error('where function not available');
+    }
+    
+    // Also ensure our firestore service has loaded
+    const { firestoreService } = await import('../firebase/firestore');
+    
+    try {
+      const leads = await firestoreService.getDocs<Lead>(
+        COLLECTION_NAME,
+        [where('userId', '==', userId)]
+      );
+      
+      console.log('[leadServiceFirebase] Found leads:', leads.length);
+      const mappedLeads = leads.map(firestoreToLead);
+      console.log('[leadServiceFirebase] Mapped leads:', mappedLeads);
+      
+      return mappedLeads;
+    } catch (error: any) {
+      console.error('[leadServiceFirebase] Error getting leads:', error);
+      if (error.message?.includes('permission') || error.code === 'permission-denied') {
+        console.error('[leadServiceFirebase] Permission denied - check Firestore rules');
+      }
+      throw error;
+    }
   },
 
   // Obtener lead por ID
@@ -47,9 +88,15 @@ export const leadServiceFirebase = {
 
   // Crear nuevo lead
   async createLead(userId: string, data: LeadFormData): Promise<Lead> {
+    await ensureFirebase();
+    
+    if (!isFirebaseReady()) {
+      throw new Error('Firestore not available');
+    }
+    
     const now = new Date();
     const newLead: Lead = {
-      id: `lead-${Date.now()}`,
+      id: `lead-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       userId,
       ...data,
       stage: 'target',
@@ -60,8 +107,13 @@ export const leadServiceFirebase = {
       notes: data.notes || '',
     };
 
+    console.log('[leadServiceFirebase] Creating lead with userId:', userId);
+    console.log('[leadServiceFirebase] Lead data:', newLead);
+
     const firestoreData = leadToFirestore(newLead);
     await firestoreService.setDoc(COLLECTION_NAME, newLead.id, firestoreData);
+    
+    console.log('[leadServiceFirebase] Lead created successfully:', newLead.id);
     
     return newLead;
   },

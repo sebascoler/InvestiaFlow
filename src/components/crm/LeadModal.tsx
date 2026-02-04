@@ -87,6 +87,11 @@ export const LeadModal: React.FC<LeadModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Prevent double submission
+    if (isSubmitting) {
+      return;
+    }
+    
     if (!validate()) return;
 
     setIsSubmitting(true);
@@ -95,7 +100,7 @@ export const LeadModal: React.FC<LeadModalProps> = ({
         ...formData,
         stage: lead ? stage : undefined, // Only include stage when editing
       });
-      onClose();
+      // Don't close here - let parent handle it to prevent double submission
     } catch (error) {
       console.error('Error submitting lead:', error);
     } finally {

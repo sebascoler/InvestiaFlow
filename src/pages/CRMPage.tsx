@@ -77,10 +77,10 @@ const CRMPage: React.FC = () => {
         // Create mode
         await createLead(data);
         addToast('Lead created successfully', 'success');
+        setIsModalOpen(false);
+        setSelectedLead(null);
+        setInitialStage(undefined);
       }
-      setIsModalOpen(false);
-      setSelectedLead(null);
-      setInitialStage(undefined);
     } catch (error) {
       addToast('Failed to save lead', 'error');
     }

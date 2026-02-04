@@ -2,8 +2,11 @@ import { AutomationRule } from '../types/automation';
 import { Lead } from '../types/lead';
 import { StageId } from '../types/stage';
 import { documentService } from './documentService';
-import { DocumentPermission } from '../types/document';
 import { emailService } from './emailService';
+import { scheduledTaskService } from './scheduledTaskService';
+
+// Check if Firebase is configured
+const USE_FIREBASE = !!import.meta.env.VITE_FIREBASE_API_KEY;
 
 // Mock data storage
 let rulesDB: AutomationRule[] = [
@@ -33,8 +36,7 @@ let rulesDB: AutomationRule[] = [
   },
 ];
 
-// TODO: Migrate to Firebase
-export const automationService = {
+const automationServiceMock = {
   // Obtener todas las reglas del usuario
   async getRules(userId: string): Promise<AutomationRule[]> {
     return rulesDB.filter(rule => rule.userId === userId);
@@ -109,7 +111,19 @@ export const automationService = {
 
     if (rule.delayDays > 0) {
       console.log(`[Automation] Rule will execute in ${rule.delayDays} days`);
-      // TODO: Implementar scheduled task para delays
+      
+      // Create scheduled task
+      const scheduledAt = new Date();
+      scheduledAt.setDate(scheduledAt.getDate() + rule.delayDays);
+      
+      await scheduledTaskService.createTask(
+        lead.userId,
+        lead.id,
+        rule.id,
+        scheduledAt
+      );
+      
+      console.log(`[Automation] Scheduled task created for ${scheduledAt.toISOString()}`);
       return;
     }
 
@@ -132,14 +146,20 @@ export const automationService = {
       const emailBody = this.replaceTemplateVariables(rule.emailBody, lead);
       const emailSubject = this.replaceTemplateVariables(rule.emailSubject, lead);
       
-      // Crear links de documentos (mock)
+      // Crear links de documentos
       const documentLinks = documentsToShare.map(doc => doc.name);
+      
+      // Generate data room URL (if you have a public data room page)
+      const dataRoomUrl = `${window.location.origin}/dataroom`;
       
       await emailService.sendDocumentEmail(
         lead.email,
         emailSubject,
         emailBody,
-        documentLinks
+        documentLinks,
+        lead,
+        documentsToShare,
+        dataRoomUrl
       );
     }
   },
@@ -153,6 +173,87 @@ export const automationService = {
   },
 
   // Reemplazar variables en templates
+  replaceTemplateVariables(template: string, lead: Lead): string {
+    return template
+      .replace(/\{\{name\}\}/g, lead.name)
+      .replace(/\{\{firm\}\}/g, lead.firm)
+      .replace(/\{\{email\}\}/g, lead.email);
+  },
+};
+
+// Lazy load Firebase service
+let firebaseService: any = null;
+const getFirebaseService = async () => {
+  if (!USE_FIREBASE) return null;
+  if (firebaseService) return firebaseService;
+  
+  try {
+    const module = await import('./automationService.firebase');
+    firebaseService = module.automationServiceFirebase;
+    return firebaseService;
+  } catch (error) {
+    console.warn('Firebase service not available, using mock:', error);
+    return null;
+  }
+};
+
+// Export service that uses Firebase if available, otherwise mock
+export const automationService = {
+  async getRules(userId: string): Promise<AutomationRule[]> {
+    const service = await getFirebaseService();
+    return service ? service.getRules(userId) : automationServiceMock.getRules(userId);
+  },
+
+  async getRule(id: string): Promise<AutomationRule | null> {
+    const service = await getFirebaseService();
+    return service ? service.getRule(id) : automationServiceMock.getRule(id);
+  },
+
+  async createRule(userId: string, rule: Omit<AutomationRule, 'id' | 'userId' | 'createdAt'>): Promise<AutomationRule> {
+    const service = await getFirebaseService();
+    return service 
+      ? service.createRule(userId, rule)
+      : automationServiceMock.createRule(userId, rule);
+  },
+
+  async updateRule(id: string, updates: Partial<AutomationRule>): Promise<AutomationRule> {
+    const service = await getFirebaseService();
+    return service 
+      ? service.updateRule(id, updates)
+      : automationServiceMock.updateRule(id, updates);
+  },
+
+  async deleteRule(id: string): Promise<void> {
+    const service = await getFirebaseService();
+    return service ? service.deleteRule(id) : automationServiceMock.deleteRule(id);
+  },
+
+  async toggleRule(id: string): Promise<AutomationRule> {
+    const service = await getFirebaseService();
+    return service ? service.toggleRule(id) : automationServiceMock.toggleRule(id);
+  },
+
+  async onStageChange(lead: Lead, oldStage: StageId, newStage: StageId): Promise<void> {
+    const service = await getFirebaseService();
+    return service 
+      ? service.onStageChange(lead, oldStage, newStage)
+      : automationServiceMock.onStageChange(lead, oldStage, newStage);
+  },
+
+  async executeRule(lead: Lead, rule: AutomationRule): Promise<void> {
+    const service = await getFirebaseService();
+    return service 
+      ? service.executeRule(lead, rule)
+      : automationServiceMock.executeRule(lead, rule);
+  },
+
+  async shareDocument(lead: Lead, documentId: string, rule: AutomationRule): Promise<void> {
+    const service = await getFirebaseService();
+    return service 
+      ? service.shareDocument(lead, documentId, rule)
+      : automationServiceMock.shareDocument(lead, documentId, rule);
+  },
+
   replaceTemplateVariables(template: string, lead: Lead): string {
     return template
       .replace(/\{\{name\}\}/g, lead.name)
