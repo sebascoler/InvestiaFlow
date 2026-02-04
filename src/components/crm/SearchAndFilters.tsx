@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Filter, X, Calendar, Building2 } from 'lucide-react';
+import { Search, Filter, X } from 'lucide-react';
 import { StageId, STAGES } from '../../types/stage';
 import { Input } from '../shared/Input';
 import { Button } from '../shared/Button';

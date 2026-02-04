@@ -175,6 +175,8 @@ export const documentServiceFirebase = {
 
   // Permissions
   async getPermissions(documentId: string): Promise<DocumentPermission[]> {
+    const firebaseFirestore = await import('firebase/firestore');
+    const where = firebaseFirestore.where;
     const permissions = await firestoreService.getDocs<DocumentPermission>(
       PERMISSIONS_COLLECTION,
       [where('documentId', '==', documentId)]

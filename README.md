@@ -108,8 +108,37 @@ src/
 - ✅ Cloud Functions implementadas para envío de emails reales
 - 📝 Ver `CLOUD_FUNCTIONS_SETUP.md` para deploy
 
-**Fase 4: Analytics & Polish**
-- Dashboard con métricas
+### ✅ Fase 4 - Analytics & Polish (Completado)
+- ✅ Dashboard con métricas y gráficos
+- ✅ Tracking avanzado de documentos (views/downloads)
+- ✅ Notificaciones in-app con contador
+- ✅ Exportación a CSV (leads y métricas)
+- ✅ Sistema de historial y comentarios por lead
+- ✅ Búsqueda y filtros avanzados
+- ✅ Sistema de tags completo
+
+### ✅ Opción 1 - Funcionalidades Adicionales (Completado)
+- ✅ Búsqueda y filtros avanzados (texto, stages, tags)
+- ✅ Sistema de tags con filtrado y búsqueda
+- ✅ Historial completo de cambios y timeline
+- ✅ Sistema de comentarios por lead
+- ✅ Ordenamiento personalizable
+- ✅ Mobile menu mejorado
+
+---
+
+## 🚀 Deploy a Producción
+
+Para desplegar InvestiaFlow en producción, consulta la guía completa en [DEPLOY.md](./DEPLOY.md).
+
+**Resumen rápido**:
+1. Conecta tu repositorio a [Vercel](https://vercel.com)
+2. Configura las variables de entorno desde `.env.local`
+3. Deploy automático en cada push a `main`
+
+---
+
+## 📚 Documentación Adicional
 - Tracking avanzado de visualizaciones y descargas
 - Notificaciones in-app
 - Export a CSV

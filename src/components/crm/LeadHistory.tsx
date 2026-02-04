@@ -140,7 +140,7 @@ export const LeadHistory: React.FC<LeadHistoryProps> = ({ leadId }) => {
         </div>
       ) : (
         <div className="space-y-4">
-          {allItems.map((item, index) => {
+          {allItems.map((item) => {
             if (item.type === 'activity') {
               const activity = item.data as LeadActivity;
               return (

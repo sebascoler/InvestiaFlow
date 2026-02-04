@@ -158,11 +158,14 @@ const leadHistoryServiceFirebase = {
         [where('leadId', '==', leadId)]
       );
 
-      return comments.map(comment => ({
-        ...comment,
-        createdAt: timestampToDate(comment.createdAt) || new Date(),
-        updatedAt: comment.updatedAt ? timestampToDate(comment.updatedAt) : undefined,
-      })).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      return comments.map(comment => {
+        const updatedAt = comment.updatedAt ? timestampToDate(comment.updatedAt) : undefined;
+        return {
+          ...comment,
+          createdAt: timestampToDate(comment.createdAt) || new Date(),
+          updatedAt: updatedAt || undefined,
+        };
+      }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     } catch (error: any) {
       console.error('[LeadHistory] Error getting comments:', error);
       // Si es error de permisos, retornar array vacío en lugar de fallar
