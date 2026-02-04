@@ -78,10 +78,12 @@ vercel --prod
 ### Paso 5: Configurar Dominio Personalizado (Opcional)
 
 1. En el dashboard de Vercel, ve a **Settings** → **Domains**
-2. Agrega tu dominio (ej: `app.investia.capital`)
+2. Agrega tu dominio (ej: `flow.investia.capital`)
 3. Sigue las instrucciones para configurar DNS:
    - Agrega un registro CNAME apuntando a `cname.vercel-dns.com`
    - O un registro A apuntando a la IP de Vercel
+
+📝 **Ver guía completa**: [DOMAIN_SETUP.md](./DOMAIN_SETUP.md) - Incluye instrucciones detalladas para Hostinger y otros proveedores DNS
 
 ---
 
