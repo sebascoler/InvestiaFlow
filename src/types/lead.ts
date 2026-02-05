@@ -2,7 +2,8 @@ import { StageId } from './stage';
 
 export interface Lead {
   id: string;
-  userId: string; // Owner (founder)
+  userId: string; // Owner (founder) - kept for backward compatibility
+  teamId?: string; // Team that owns this lead (new field)
   name: string;
   email: string;
   firm: string;

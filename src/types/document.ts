@@ -4,7 +4,8 @@ export type DocumentCategory = 'pitch' | 'financials' | 'legal' | 'metrics' | 'o
 
 export interface Document {
   id: string;
-  userId: string;
+  userId: string; // Owner - kept for backward compatibility
+  teamId?: string; // Team that owns this document (new field)
   name: string;
   category: DocumentCategory;
   storagePath: string; // Para Firebase Storage

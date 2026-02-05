@@ -43,10 +43,23 @@ export const SharedDocumentsList: React.FC<SharedDocumentsListProps> = ({ lead }
   };
 
   const handleDownload = async (shared: SharedDocument) => {
-    await markDocumentAsDownloaded(lead.id, shared.documentId);
-    await loadSharedDocuments();
-    // TODO: En Fase 2, aquí se descargaría el archivo real desde Firebase Storage
-    console.log('Downloading:', getDocumentName(shared.documentId));
+    try {
+      await markDocumentAsDownloaded(lead.id, shared.documentId);
+      await loadSharedDocuments();
+      
+      // Get document download URL and trigger download
+      const doc = documents.find(d => d.id === shared.documentId);
+      if (doc && doc.downloadUrl) {
+        window.open(doc.downloadUrl, '_blank');
+      } else if (doc && doc.storagePath) {
+        // Get download URL from storage
+        const { storageService } = await import('../../firebase/storage');
+        const url = await storageService.getDownloadURL(doc.storagePath);
+        window.open(url, '_blank');
+      }
+    } catch (error) {
+      console.error('Error downloading document:', error);
+    }
   };
 
   if (loading) {

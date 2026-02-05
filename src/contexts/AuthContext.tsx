@@ -14,6 +14,7 @@ interface AuthContextType {
   loginWithGoogle: () => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
+  updateProfile: (updates: { name?: string; email?: string; photoURL?: string; company?: string; phone?: string }) => Promise<void>;
   isAuthenticated: boolean;
   loading: boolean;
 }
@@ -56,11 +57,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               setFirebaseUser(fbUser);
               
               if (fbUser) {
-                setUser({
-                  id: fbUser.uid,
-                  email: fbUser.email || '',
-                  name: fbUser.displayName || fbUser.email?.split('@')[0] || 'User',
-                });
+                // Try to load profile from Firestore
+                try {
+                  const { userProfileService } = await import('../services/userProfileService');
+                  const profile = await userProfileService.getProfile(fbUser.uid);
+                  
+                  if (profile) {
+                    setUser({
+                      id: profile.id,
+                      email: profile.email,
+                      name: profile.name,
+                    });
+                  } else {
+                    // Create profile if doesn't exist
+                    const newProfile = await userProfileService.createProfile(fbUser.uid, {
+                      name: fbUser.displayName || fbUser.email?.split('@')[0] || 'User',
+                      email: fbUser.email || '',
+                      photoURL: fbUser.photoURL,
+                    });
+                    setUser({
+                      id: newProfile.id,
+                      email: newProfile.email,
+                      name: newProfile.name,
+                    });
+                  }
+                } catch (error) {
+                  console.warn('Error loading profile, using Firebase user data:', error);
+                  setUser({
+                    id: fbUser.uid,
+                    email: fbUser.email || '',
+                    name: fbUser.displayName || fbUser.email?.split('@')[0] || 'User',
+                  });
+                }
               } else {
                 setUser(null);
               }
@@ -196,6 +224,58 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null);
   };
 
+  const updateProfile = async (updates: { name?: string; email?: string; photoURL?: string; company?: string; phone?: string }): Promise<void> => {
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
+    await ensureFirebase();
+    const useFirebase = isFirebaseReady();
+
+    try {
+      const { userProfileService } = await import('../services/userProfileService');
+      
+      // If using Firebase Auth, don't update email in profile (it's managed by Firebase Auth)
+      const profileUpdates = { ...updates };
+      if (useFirebase && firebaseUser && 'email' in profileUpdates) {
+        delete profileUpdates.email;
+      }
+      
+      const updatedProfile = await userProfileService.updateProfile(user.id, profileUpdates);
+      
+      // Update local user state
+      setUser({
+        id: updatedProfile.id,
+        email: updatedProfile.email,
+        name: updatedProfile.name,
+      });
+
+      // If Firebase Auth is available, update display name and photo URL
+      if (useFirebase && firebaseUser) {
+        try {
+          const firebaseAuth = await import('firebase/auth');
+          const { auth } = await import('../firebase/config');
+          const authInstance = auth();
+          
+          if (authInstance && firebaseAuth.updateProfile) {
+            const authUpdates: any = {};
+            if (updates.name) authUpdates.displayName = updates.name;
+            if (updates.photoURL) authUpdates.photoURL = updates.photoURL;
+            
+            if (Object.keys(authUpdates).length > 0) {
+              await firebaseAuth.updateProfile(firebaseUser, authUpdates);
+            }
+          }
+        } catch (error) {
+          console.warn('Failed to update Firebase Auth profile:', error);
+          // Don't throw - profile was updated in Firestore
+        }
+      }
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to update profile');
+    }
+  };
+
   // Show loading state while checking auth
   if (loading) {
     return (
@@ -214,6 +294,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         loginWithGoogle,
         signup,
         logout,
+        updateProfile,
         isAuthenticated: !!user,
         loading: false,
       }}

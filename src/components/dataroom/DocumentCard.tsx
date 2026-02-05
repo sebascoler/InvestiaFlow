@@ -1,9 +1,10 @@
 import React, { useState, useEffect, memo } from 'react';
-import { FileText, Settings, Trash2, Download, BarChart3, Eye } from 'lucide-react';
+import { FileText, Settings, Trash2, Download, BarChart3, Eye, EyeOff } from 'lucide-react';
 import { Document } from '../../types/document';
 import { formatFileSize } from '../../utils/formatters';
 import { formatDate } from '../../utils/formatters';
 import { DocumentTracking } from './DocumentTracking';
+import { DocumentPreview } from '../shared/DocumentPreview';
 import { Modal } from '../shared/Modal';
 import { useDocuments } from '../../contexts/DocumentsContext';
 
@@ -43,7 +44,10 @@ export const DocumentCard: React.FC<DocumentCardProps> = memo(({
   onDelete,
 }) => {
   const [showTracking, setShowTracking] = useState(false);
-  const { getDocumentShares } = useDocuments();
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [loadingPreview, setLoadingPreview] = useState(false);
+  const { getDocumentShares, getDocumentDownloadUrl } = useDocuments();
   const [stats, setStats] = useState({ total: 0, viewed: 0, downloaded: 0 });
 
   useEffect(() => {
@@ -60,6 +64,19 @@ export const DocumentCard: React.FC<DocumentCardProps> = memo(({
       });
     } catch (error) {
       console.error('Error loading document stats:', error);
+    }
+  };
+
+  const handlePreview = async () => {
+    try {
+      setLoadingPreview(true);
+      const url = await getDocumentDownloadUrl(document);
+      setPreviewUrl(url);
+      setShowPreview(true);
+    } catch (error) {
+      console.error('Error loading preview:', error);
+    } finally {
+      setLoadingPreview(false);
     }
   };
 
@@ -105,6 +122,19 @@ export const DocumentCard: React.FC<DocumentCardProps> = memo(({
           </div>
           <div className="flex items-center gap-2">
             <button
+              onClick={handlePreview}
+              disabled={loadingPreview}
+              className="p-1.5 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Preview"
+              aria-label="Preview"
+            >
+              {loadingPreview ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600"></div>
+              ) : (
+                <Eye size={16} />
+              )}
+            </button>
+            <button
               onClick={() => setShowTracking(true)}
               className={`p-1.5 rounded transition-colors relative ${
                 stats.total > 0
@@ -130,9 +160,13 @@ export const DocumentCard: React.FC<DocumentCardProps> = memo(({
               <Settings size={16} />
             </button>
             <button
-              onClick={() => {
-                // TODO: Implement download in Fase 2 with Firebase Storage
-                console.log('Download:', document.name);
+              onClick={async () => {
+                try {
+                  const url = await getDocumentDownloadUrl(document);
+                  window.open(url, '_blank');
+                } catch (error) {
+                  console.error('Error downloading:', error);
+                }
               }}
               className="p-1.5 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded transition-colors"
               title="Download"
@@ -160,6 +194,19 @@ export const DocumentCard: React.FC<DocumentCardProps> = memo(({
       >
         <DocumentTracking documentId={document.id} />
       </Modal>
+
+      {previewUrl && (
+        <DocumentPreview
+          isOpen={showPreview}
+          onClose={() => {
+            setShowPreview(false);
+            setPreviewUrl(null);
+          }}
+          documentUrl={previewUrl}
+          documentName={document.name}
+          documentType={document.fileType}
+        />
+      )}
     </>
   );
 }, (prevProps, nextProps) => {

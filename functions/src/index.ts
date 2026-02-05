@@ -622,6 +622,36 @@ export const markInvestorDocumentViewed = functions.https.onCall(async (data, co
       await sharedDoc.ref.update({
         viewedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
+
+      // Create notification for the document owner
+      try {
+        // Get lead and document info
+        const leadDoc = await db.collection('leads').doc(session.leadId).get();
+        const docDoc = await db.collection('documents').doc(documentId).get();
+        
+        if (leadDoc.exists && docDoc.exists) {
+          const leadData = leadDoc.data()!;
+          const docData = docDoc.data()!;
+          
+          // Create notification
+          await db.collection('notifications').add({
+            userId: docData.userId,
+            type: 'investor_viewed',
+            title: 'Document Viewed',
+            message: `${leadData.name || leadData.email} viewed "${docData.name}"`,
+            leadId: session.leadId,
+            leadName: leadData.name || leadData.email,
+            documentId: documentId,
+            documentName: docData.name,
+            read: false,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            actionUrl: `/crm?leadId=${session.leadId}`,
+          });
+        }
+      } catch (notifError) {
+        console.error('Error creating notification:', notifError);
+        // Don't fail the main operation if notification fails
+      }
     }
 
     return { success: true };
@@ -680,6 +710,36 @@ export const markInvestorDocumentDownloaded = functions.https.onCall(async (data
 
     await sharedDoc.ref.update(updates);
 
+    // Create notification for the document owner
+    try {
+      // Get lead and document info
+      const leadDoc = await db.collection('leads').doc(session.leadId).get();
+      const docDoc = await db.collection('documents').doc(documentId).get();
+      
+      if (leadDoc.exists && docDoc.exists) {
+        const leadData = leadDoc.data()!;
+        const docData = docDoc.data()!;
+        
+        // Create notification
+        await db.collection('notifications').add({
+          userId: docData.userId,
+          type: 'investor_downloaded',
+          title: 'Document Downloaded',
+          message: `${leadData.name || leadData.email} downloaded "${docData.name}"`,
+          leadId: session.leadId,
+          leadName: leadData.name || leadData.email,
+          documentId: documentId,
+          documentName: docData.name,
+          read: false,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          actionUrl: `/crm?leadId=${session.leadId}`,
+        });
+      }
+    } catch (notifError) {
+      console.error('Error creating notification:', notifError);
+      // Don't fail the main operation if notification fails
+    }
+
     return { success: true };
   } catch (error: any) {
     console.error('Error marking document as downloaded:', error);
@@ -689,6 +749,122 @@ export const markInvestorDocumentDownloaded = functions.https.onCall(async (data
     throw new functions.https.HttpsError(
       'internal',
       error.message || 'Failed to mark document as downloaded'
+    );
+  }
+});
+
+// Send team invitation email
+export const sendTeamInvitationEmail = functions.https.onCall(async (data, context) => {
+  // Verify authentication
+  if (!context.auth) {
+    throw new functions.https.HttpsError(
+      'unauthenticated',
+      'User must be authenticated to send invitation emails'
+    );
+  }
+
+  const { invitationId, teamName, inviterName } = data;
+
+  if (!invitationId || !teamName || !inviterName) {
+    throw new functions.https.HttpsError(
+      'invalid-argument',
+      'Missing required fields: invitationId, teamName, inviterName'
+    );
+  }
+
+  if (!resend) {
+    throw new functions.https.HttpsError(
+      'failed-precondition',
+      'Resend API key not configured'
+    );
+  }
+
+  try {
+    const db = admin.firestore();
+    const invitationDoc = await db.collection('teamInvitations').doc(invitationId).get();
+    
+    if (!invitationDoc.exists) {
+      throw new functions.https.HttpsError('not-found', 'Invitation not found');
+    }
+
+    const invitation = invitationDoc.data()!;
+    const appUrl = process.env.APP_URL || 'https://investiaflow.com';
+    const inviteUrl = `${appUrl}/invite/${invitation.token}`;
+
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
+                     line-height: 1.6; color: #1f2937; background-color: #f9fafb; margin: 0; padding: 0;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px;">
+            <!-- Header -->
+            <div style="border-bottom: 2px solid #0284c7; padding-bottom: 20px; margin-bottom: 30px;">
+              <h1 style="color: #0284c7; margin: 0; font-size: 28px;">InvestiaFlow</h1>
+              <p style="color: #6b7280; margin: 5px 0 0 0; font-size: 14px;">Team Invitation</p>
+            </div>
+
+            <!-- Greeting -->
+            <h2 style="color: #1f2937; margin-top: 0;">You've been invited!</h2>
+
+            <!-- Body -->
+            <div style="color: #374151; font-size: 16px; margin: 20px 0;">
+              <p>
+                <strong>${inviterName}</strong> has invited you to join the team <strong>${teamName}</strong> on InvestiaFlow.
+              </p>
+              <p>
+                Click the button below to accept the invitation and start collaborating:
+              </p>
+            </div>
+
+            <!-- CTA Button -->
+            <div style="margin: 30px 0; text-align: center;">
+              <a href="${inviteUrl}" 
+                 style="background-color: #0284c7; color: white; padding: 12px 24px; 
+                        text-decoration: none; border-radius: 6px; display: inline-block; 
+                        font-weight: 600;">
+                Accept Invitation
+              </a>
+            </div>
+
+            <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">
+              Or copy and paste this link into your browser:<br>
+              <a href="${inviteUrl}" style="color: #0284c7; word-break: break-all;">${inviteUrl}</a>
+            </p>
+
+            <p style="color: #9ca3af; font-size: 12px; margin-top: 30px;">
+              This invitation will expire in 7 days. If you didn't expect this invitation, you can safely ignore this email.
+            </p>
+
+            <!-- Footer -->
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; 
+                        color: #6b7280; font-size: 14px;">
+              <p style="margin: 0;">Best regards,<br><strong>InvestiaFlow Team</strong></p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    await resend.emails.send({
+      from: 'InvestiaFlow <noreply@investia.capital>',
+      to: invitation.email,
+      subject: `You've been invited to join ${teamName} on InvestiaFlow`,
+      html: emailHtml,
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error sending invitation email:', error);
+    if (error instanceof functions.https.HttpsError) {
+      throw error;
+    }
+    throw new functions.https.HttpsError(
+      'internal',
+      error.message || 'Failed to send invitation email'
     );
   }
 });

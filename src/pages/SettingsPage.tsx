@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Bell, Shield, Info, Save, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotifications } from '../contexts/NotificationsContext';
 import { Button } from '../components/shared/Button';
 import { Input } from '../components/shared/Input';
 import { ToastContainer, ToastType } from '../components/shared/Toast';
+import { userProfileService } from '../services/userProfileService';
 
 interface Toast {
   id: string;
@@ -13,7 +14,7 @@ interface Toast {
 }
 
 const SettingsPage: React.FC = () => {
-  const { user, firebaseUser } = useAuth();
+  const { user, firebaseUser, updateProfile } = useAuth();
   const { unreadCount } = useNotifications();
   const [activeTab, setActiveTab] = useState<'profile' | 'preferences' | 'account'>('profile');
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -21,7 +22,44 @@ const SettingsPage: React.FC = () => {
   // Profile state
   const [profileName, setProfileName] = useState(user?.name || '');
   const [profileEmail, setProfileEmail] = useState(user?.email || '');
+  const [profileCompany, setProfileCompany] = useState('');
+  const [profilePhone, setProfilePhone] = useState('');
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
+  
+  // Load profile data when component mounts or user changes
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!user) {
+        setProfileLoading(false);
+        return;
+      }
+
+      try {
+        const profile = await userProfileService.getProfile(user.id);
+        if (profile) {
+          setProfileName(profile.name);
+          setProfileEmail(profile.email);
+          setProfileCompany(profile.company || '');
+          setProfilePhone(profile.phone || '');
+        } else {
+          // Use user data from auth context
+          setProfileName(user.name);
+          setProfileEmail(user.email);
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+        // Fallback to user data from auth context
+        setProfileName(user.name);
+        setProfileEmail(user.email);
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, [user]);
   
   // Preferences state
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -41,13 +79,44 @@ const SettingsPage: React.FC = () => {
   };
 
   const handleSaveProfile = async () => {
+    if (!user) {
+      addToast('Usuario no autenticado', 'error');
+      return;
+    }
+
+    // Validate fields
+    if (!profileName.trim()) {
+      addToast('El nombre es requerido', 'error');
+      return;
+    }
+
+    if (!profileEmail.trim() || !profileEmail.includes('@')) {
+      addToast('El email debe ser válido', 'error');
+      return;
+    }
+
+    setIsSavingProfile(true);
     try {
-      // TODO: Implement actual profile update in Firebase
-      // For now, just show success message
+      const updates: any = {
+        name: profileName.trim(),
+        company: profileCompany.trim() || undefined,
+        phone: profilePhone.trim() || undefined,
+      };
+      
+      // Only update email if not using Firebase Auth
+      if (!firebaseUser) {
+        updates.email = profileEmail.trim();
+      }
+      
+      await updateProfile(updates);
+      
       addToast('Perfil actualizado correctamente', 'success');
       setIsEditingProfile(false);
-    } catch (error) {
-      addToast('Error al actualizar el perfil', 'error');
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      addToast(error.message || 'Error al actualizar el perfil', 'error');
+    } finally {
+      setIsSavingProfile(false);
     }
   };
 
@@ -104,6 +173,11 @@ const SettingsPage: React.FC = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Información del Perfil</h2>
           
+          {profileLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+            </div>
+          ) : (
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -132,6 +206,8 @@ const SettingsPage: React.FC = () => {
                   value={profileEmail}
                   onChange={(e) => setProfileEmail(e.target.value)}
                   placeholder="tu@email.com"
+                  disabled={!!firebaseUser}
+                  className={firebaseUser ? 'bg-gray-100 cursor-not-allowed' : ''}
                 />
               ) : (
                 <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-900">
@@ -140,23 +216,64 @@ const SettingsPage: React.FC = () => {
               )}
               {firebaseUser && (
                 <p className="text-xs text-gray-500 mt-1">
-                  El email está vinculado a tu cuenta de Firebase
+                  El email está vinculado a tu cuenta de Firebase y no puede cambiarse desde aquí. Para cambiar tu email, actualízalo en la configuración de Firebase Auth.
                 </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Empresa (opcional)
+              </label>
+              {isEditingProfile ? (
+                <Input
+                  value={profileCompany}
+                  onChange={(e) => setProfileCompany(e.target.value)}
+                  placeholder="Nombre de tu empresa"
+                />
+              ) : (
+                <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-900">
+                  {profileCompany || 'No especificada'}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Teléfono (opcional)
+              </label>
+              {isEditingProfile ? (
+                <Input
+                  type="tel"
+                  value={profilePhone}
+                  onChange={(e) => setProfilePhone(e.target.value)}
+                  placeholder="+1 234 567 8900"
+                />
+              ) : (
+                <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-900">
+                  {profilePhone || 'No especificado'}
+                </div>
               )}
             </div>
 
             <div className="flex items-center gap-3 pt-4">
               {isEditingProfile ? (
                 <>
-                  <Button variant="primary" onClick={handleSaveProfile}>
+                  <Button variant="primary" onClick={handleSaveProfile} isLoading={isSavingProfile} disabled={isSavingProfile}>
                     <Save size={16} className="mr-2" />
                     Guardar Cambios
                   </Button>
-                  <Button variant="secondary" onClick={() => {
-                    setIsEditingProfile(false);
-                    setProfileName(user?.name || '');
-                    setProfileEmail(user?.email || '');
-                  }}>
+                  <Button 
+                    variant="secondary" 
+                    onClick={() => {
+                      setIsEditingProfile(false);
+                      setProfileName(user?.name || '');
+                      setProfileEmail(user?.email || '');
+                      setProfileCompany('');
+                      setProfilePhone('');
+                    }}
+                    disabled={isSavingProfile}
+                  >
                     <X size={16} className="mr-2" />
                     Cancelar
                   </Button>
@@ -168,6 +285,7 @@ const SettingsPage: React.FC = () => {
               )}
             </div>
           </div>
+          )}
         </div>
       )}
 

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FileText, Download, Eye, Loader as LoaderIcon } from 'lucide-react';
 import { InvestorLayout } from '../components/investor/InvestorLayout';
 import { InvestorDocumentCard } from '../components/investor/InvestorDocumentCard';
+import { DocumentPreview } from '../components/shared/DocumentPreview';
 import { Loader } from '../components/shared/Loader';
 import { investorDocumentService } from '../services/investorDocumentService';
 import { investorAuthService } from '../services/investorAuthService';
@@ -15,6 +16,8 @@ const InvestorDataRoomPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [viewingId, setViewingId] = useState<string | null>(null);
+  const [previewDocument, setPreviewDocument] = useState<{ doc: InvestorDocument; url: string } | null>(null);
+  const [loadingPreview, setLoadingPreview] = useState(false);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -46,30 +49,30 @@ const InvestorDataRoomPage: React.FC = () => {
   };
 
   const handleView = async (document: InvestorDocument) => {
-    if (!document.downloadUrl) {
-      try {
-        setViewingId(document.id);
-        const url = await investorDocumentService.getDocumentDownloadUrl(document.documentId);
-        
-        // Mark as viewed
-        await investorDocumentService.markDocumentAsViewed(document.documentId);
-        
-        // Open in new tab
-        window.open(url, '_blank');
-        
-        // Reload documents to update viewed status
-        await loadDocuments();
-      } catch (err: any) {
-        console.error('Error viewing document:', err);
-        setError(err.message || 'Failed to view document');
-      } finally {
-        setViewingId(null);
+    try {
+      setViewingId(document.id);
+      setLoadingPreview(true);
+      
+      // Get download URL if not available
+      let downloadUrl = document.downloadUrl;
+      if (!downloadUrl) {
+        downloadUrl = await investorDocumentService.getDocumentDownloadUrl(document.documentId);
       }
-    } else {
+      
       // Mark as viewed
       await investorDocumentService.markDocumentAsViewed(document.documentId);
-      window.open(document.downloadUrl, '_blank');
+      
+      // Open preview
+      setPreviewDocument({ doc: document, url: downloadUrl });
+      
+      // Reload documents to update viewed status
       await loadDocuments();
+    } catch (err: any) {
+      console.error('Error opening preview:', err);
+      setError(err.message || 'Failed to open preview');
+    } finally {
+      setViewingId(null);
+      setLoadingPreview(false);
     }
   };
 
@@ -163,6 +166,21 @@ const InvestorDataRoomPage: React.FC = () => {
             />
           ))}
         </div>
+      )}
+
+      {previewDocument && (
+        <DocumentPreview
+          isOpen={!!previewDocument}
+          onClose={() => {
+            setPreviewDocument(null);
+          }}
+          documentUrl={previewDocument.url}
+          documentName={previewDocument.doc.name}
+          documentType={previewDocument.doc.fileType}
+          onViewed={() => {
+            // Already marked as viewed in handleView
+          }}
+        />
       )}
     </InvestorLayout>
   );

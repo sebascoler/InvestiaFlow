@@ -15,6 +15,7 @@ interface DocumentsContextType {
   getDocumentShares: (documentId: string) => Promise<SharedDocument[]>;
   markDocumentAsViewed: (leadId: string, documentId: string) => Promise<void>;
   markDocumentAsDownloaded: (leadId: string, documentId: string) => Promise<void>;
+  getDocumentDownloadUrl: (document: Document) => Promise<string>;
 }
 
 const DocumentsContext = createContext<DocumentsContextType | undefined>(undefined);
@@ -147,6 +148,27 @@ export const DocumentsProvider: React.FC<DocumentsProviderProps> = ({ children, 
     }
   };
 
+  const getDocumentDownloadUrl = async (document: Document): Promise<string> => {
+    try {
+      // If downloadUrl is already available, use it
+      if (document.downloadUrl) {
+        return document.downloadUrl;
+      }
+
+      // Otherwise, get it from Storage
+      if (document.storagePath) {
+        const { storageService } = await import('../firebase/storage');
+        return await storageService.getDownloadURL(document.storagePath);
+      }
+
+      throw new Error('Document has no download URL or storage path');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to get download URL';
+      setError(errorMessage);
+      throw err;
+    }
+  };
+
   return (
     <DocumentsContext.Provider
       value={{
@@ -162,6 +184,7 @@ export const DocumentsProvider: React.FC<DocumentsProviderProps> = ({ children, 
         getDocumentShares,
         markDocumentAsViewed,
         markDocumentAsDownloaded,
+        getDocumentDownloadUrl,
       }}
     >
       {children}

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ErrorBoundary } from './components/shared/ErrorBoundary'
 import { AuthProvider } from './contexts/AuthContext'
+import { TeamProvider } from './contexts/TeamContext'
 import Layout from './components/layout/Layout'
 import DashboardPage from './pages/DashboardPage'
 import CRMPage from './pages/CRMPage'
@@ -16,24 +17,26 @@ function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            {/* Investor public routes */}
-            <Route path="/investor/login" element={<InvestorLoginPage />} />
-            <Route path="/investor/dataroom" element={<InvestorDataRoomPage />} />
-            {/* Protected routes */}
-            <Route path="/" element={<Layout />}>
-              <Route index element={<DashboardPage />} />
-              <Route path="dashboard" element={<DashboardPage />} />
-              <Route path="crm" element={<CRMPage />} />
-              <Route path="dataroom" element={<DataRoomPage />} />
-              <Route path="automation" element={<AutomationPage />} />
-              <Route path="settings" element={<SettingsPage />} />
-              <Route path="help" element={<HelpPage />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
+        <TeamProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              {/* Investor public routes */}
+              <Route path="/investor/login" element={<InvestorLoginPage />} />
+              <Route path="/investor/dataroom" element={<InvestorDataRoomPage />} />
+              {/* Protected routes */}
+              <Route path="/" element={<Layout />}>
+                <Route index element={<DashboardPage />} />
+                <Route path="dashboard" element={<DashboardPage />} />
+                <Route path="crm" element={<CRMPage />} />
+                <Route path="dataroom" element={<DataRoomPage />} />
+                <Route path="automation" element={<AutomationPage />} />
+                <Route path="settings" element={<SettingsPage />} />
+                <Route path="help" element={<HelpPage />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </TeamProvider>
       </AuthProvider>
     </ErrorBoundary>
   )
