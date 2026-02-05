@@ -68,20 +68,75 @@ const sharedToFirestore = (shared: Partial<SharedDocument>): any => {
 };
 
 export const documentServiceFirebase = {
-  // Obtener todos los documentos del usuario
-  async getDocuments(userId: string): Promise<Document[]> {
+  // Obtener todos los documentos del usuario/team
+  async getDocuments(userId: string, teamId?: string | null, ownerId?: string | null): Promise<Document[]> {
     const firebaseFirestore = await import('firebase/firestore');
     const whereFunc = firebaseFirestore.where;
+    const orFunc = firebaseFirestore.or;
     
     if (!whereFunc) {
       throw new Error('where function not available');
     }
     
-    const docs = await firestoreService.getDocs<Document>(
-      DOCUMENTS_COLLECTION,
-      [whereFunc('userId', '==', userId)]
-    );
-    return docs.map(firestoreToDocument);
+    // Build queries: if teamId is provided, get documents with teamId AND documents from owner (for migration)
+    // Firestore rules don't handle complex OR queries well, so we do two separate queries
+    let allDocs: any[] = [];
+    
+    if (teamId && ownerId) {
+      // For team members, get all documents that belong to the team AND documents uploaded by the owner
+      // This allows all team members to see team documents, including legacy ones without teamId
+      try {
+        // Query 1: Get documents with teamId
+        const teamDocs = await firestoreService.getDocs<Document>(
+          DOCUMENTS_COLLECTION,
+          [whereFunc('teamId', '==', teamId)]
+        );
+        console.log('[documentServiceFirebase] Found team documents:', teamDocs.length);
+        allDocs.push(...teamDocs);
+      } catch (error: any) {
+        console.warn('[documentServiceFirebase] Error fetching team documents:', error);
+      }
+      
+      try {
+        // Query 2: Get documents from owner (legacy documents without teamId)
+        const ownerDocs = await firestoreService.getDocs<Document>(
+          DOCUMENTS_COLLECTION,
+          [whereFunc('userId', '==', ownerId)]
+        );
+        console.log('[documentServiceFirebase] Found owner documents:', ownerDocs.length);
+        allDocs.push(...ownerDocs);
+      } catch (error: any) {
+        console.warn('[documentServiceFirebase] Error fetching owner documents:', error);
+      }
+      
+      // Remove duplicates (in case a document has both teamId and userId matching)
+      const uniqueDocs = Array.from(
+        new Map(allDocs.map(doc => [doc.id, doc])).values()
+      );
+      allDocs = uniqueDocs;
+    } else if (teamId) {
+      // If teamId but no ownerId, just filter by teamId
+      allDocs = await firestoreService.getDocs<Document>(
+        DOCUMENTS_COLLECTION,
+        [whereFunc('teamId', '==', teamId)]
+      );
+    } else {
+      // Fallback to userId only (for users without teams)
+      allDocs = await firestoreService.getDocs<Document>(
+        DOCUMENTS_COLLECTION,
+        [whereFunc('userId', '==', userId)]
+      );
+    }
+    
+    console.log('[documentServiceFirebase] Total unique documents:', allDocs.length, 'for teamId:', teamId, 'ownerId:', ownerId);
+    if (allDocs.length > 0) {
+      console.log('[documentServiceFirebase] Sample document:', {
+        id: allDocs[0].id,
+        userId: allDocs[0].userId,
+        teamId: allDocs[0].teamId,
+      });
+    }
+    return allDocs.map(firestoreToDocument);
   },
 
   // Subir documento (usa Firebase Storage)
@@ -89,7 +144,8 @@ export const documentServiceFirebase = {
     userId: string, 
     file: File, 
     category: DocumentCategory, 
-    description?: string
+    description?: string,
+    teamId?: string | null
   ): Promise<Document> {
     // Generar ID único
     const docId = `doc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -105,6 +161,7 @@ export const documentServiceFirebase = {
       const newDoc: Document = {
         id: docId,
         userId,
+        teamId: teamId || undefined,
         name: file.name,
         category,
         storagePath,
@@ -234,7 +291,7 @@ export const documentServiceFirebase = {
       
       // Share document with leads that are already in this stage or higher
       try {
-        await this.shareDocumentWithLeadsInStage(doc.userId, documentId, perm.requiredStage);
+        await this.shareDocumentWithLeadsInStage(doc.userId, documentId, perm.requiredStage, doc.teamId);
       } catch (error) {
         console.error(`[DocumentService] Error sharing document with leads in stage ${perm.requiredStage}:`, error);
         // Don't throw - permissions are saved, sharing can be retried later
@@ -366,13 +423,14 @@ export const documentServiceFirebase = {
   async shareDocumentWithLeadsInStage(
     userId: string,
     documentId: string,
-    requiredStage: StageId
+    requiredStage: StageId,
+    teamId?: string | null
   ): Promise<void> {
     const { leadService } = await import('./leadService');
     const { STAGES } = await import('../types/stage');
     
     // Get leads in this stage or higher
-    const eligibleLeads = await leadService.getLeadsByStageOrHigher(userId, requiredStage);
+    const eligibleLeads = await leadService.getLeadsByStageOrHigher(userId, requiredStage, teamId);
     
     // Share document with each eligible lead
     for (const lead of eligibleLeads) {
@@ -387,13 +445,13 @@ export const documentServiceFirebase = {
 
   // Obtener documentos que deben compartirse para un stage específico
   // (documentos con requiredStage <= currentStage)
-  async getDocumentsForStage(userId: string, stageId: StageId): Promise<Document[]> {
+  async getDocumentsForStage(userId: string, stageId: StageId, teamId?: string | null, ownerId?: string | null): Promise<Document[]> {
     const { STAGES } = await import('../types/stage');
     
     const currentStageOrder = STAGES.find(s => s.id === stageId)?.order ?? -1;
     
-    // Get all documents for this user
-    const allDocuments = await this.getDocuments(userId);
+    // Get all documents for this user/team
+    const allDocuments = await this.getDocuments(userId, teamId, ownerId);
     
     // Get permissions for each document
     const documentsWithPermissions = await Promise.all(

@@ -92,6 +92,7 @@ const emailServiceCloudFunctions = {
           documents: documentsData,
           dataRoomUrl,
           fromEmail: FROM_EMAIL,
+          teamId: lead.teamId || null, // Pass teamId for branding
         });
 
         console.log('[Email Service] Email sent successfully via Cloud Functions:', result.data);

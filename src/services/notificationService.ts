@@ -8,9 +8,9 @@ const NOTIFICATIONS_COLLECTION = 'notifications';
 const notificationsDB: Notification[] = [];
 
 export const notificationServiceMock = {
-  async getNotifications(userId: string): Promise<Notification[]> {
+  async getNotifications(userId: string, teamId?: string | null): Promise<Notification[]> {
     return notificationsDB
-      .filter(n => n.userId === userId)
+      .filter(n => n.userId === userId || (teamId && n.teamId === teamId))
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   },
 
@@ -50,18 +50,33 @@ const firestoreToNotification = (data: any): Notification => {
 };
 
 export const notificationServiceFirebase = {
-  async getNotifications(userId: string): Promise<Notification[]> {
+  async getNotifications(userId: string, teamId?: string | null): Promise<Notification[]> {
     try {
       const firebaseFirestore = await import('firebase/firestore');
       const whereFunc = firebaseFirestore.where;
       const orderByFunc = firebaseFirestore.orderBy;
+      const orFunc = firebaseFirestore.or;
+      
+      // Build query: filter by userId OR teamId (for migration period)
+      let queryConstraints;
+      if (teamId) {
+        queryConstraints = [
+          orFunc(
+            whereFunc('userId', '==', userId),
+            whereFunc('teamId', '==', teamId)
+          ),
+          orderByFunc('createdAt', 'desc'),
+        ];
+      } else {
+        queryConstraints = [
+          whereFunc('userId', '==', userId),
+          orderByFunc('createdAt', 'desc'),
+        ];
+      }
       
       const notifications = await firestoreService.getDocs<Notification>(
         NOTIFICATIONS_COLLECTION,
-        [
-          whereFunc('userId', '==', userId),
-          orderByFunc('createdAt', 'desc'),
-        ]
+        queryConstraints
       );
       
       return notifications.map(firestoreToNotification);
@@ -160,11 +175,11 @@ const getFirebaseService = async () => {
 
 // Export service that uses Firebase if available, otherwise mock
 export const notificationService = {
-  async getNotifications(userId: string): Promise<Notification[]> {
+  async getNotifications(userId: string, teamId?: string | null): Promise<Notification[]> {
     const service = await getFirebaseService();
     return service 
-      ? service.getNotifications(userId) 
-      : notificationServiceMock.getNotifications(userId);
+      ? service.getNotifications(userId, teamId) 
+      : notificationServiceMock.getNotifications(userId, teamId);
   },
 
   async markAsRead(userId: string, notificationId: string): Promise<void> {

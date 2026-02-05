@@ -266,9 +266,11 @@ const getFirebaseService = async () => {
 
 // Export service that uses Firebase if available, otherwise mock
 export const leadService = {
-  async getLeads(userId: string): Promise<Lead[]> {
+  async getLeads(userId: string, teamId?: string | null, ownerId?: string | null): Promise<Lead[]> {
     const service = await getFirebaseService();
-    return service ? service.getLeads(userId) : leadServiceMock.getLeads(userId);
+    return service 
+      ? service.getLeads(userId, teamId, ownerId) 
+      : leadServiceMock.getLeads(userId);
   },
 
   async getLead(id: string): Promise<Lead | null> {
@@ -276,9 +278,11 @@ export const leadService = {
     return service ? service.getLead(id) : leadServiceMock.getLead(id);
   },
 
-  async createLead(userId: string, data: LeadFormData): Promise<Lead> {
+  async createLead(userId: string, data: LeadFormData, teamId?: string | null): Promise<Lead> {
     const service = await getFirebaseService();
-    return service ? service.createLead(userId, data) : leadServiceMock.createLead(userId, data);
+    return service 
+      ? service.createLead(userId, data, teamId) 
+      : leadServiceMock.createLead(userId, data);
   },
 
   async updateLead(id: string, updates: Partial<Lead>): Promise<Lead> {
@@ -298,10 +302,10 @@ export const leadService = {
     return service ? service.deleteLead(id) : leadServiceMock.deleteLead(id);
   },
 
-  async getLeadsByStageOrHigher(userId: string, minStage: StageId): Promise<Lead[]> {
+  async getLeadsByStageOrHigher(userId: string, minStage: StageId, teamId?: string | null, ownerId?: string | null): Promise<Lead[]> {
     const service = await getFirebaseService();
     return service 
-      ? service.getLeadsByStageOrHigher(userId, minStage) 
+      ? service.getLeadsByStageOrHigher(userId, minStage, teamId, ownerId) 
       : leadServiceMock.getLeadsByStageOrHigher(userId, minStage);
   },
 };

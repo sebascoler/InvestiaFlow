@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Document, DocumentPermission, DocumentCategory, SharedDocument } from '../types/document';
 import { documentService } from '../services/documentService';
+import { useTeam } from './TeamContext';
 
 interface DocumentsContextType {
   documents: Document[];
@@ -34,6 +35,7 @@ interface DocumentsProviderProps {
 }
 
 export const DocumentsProvider: React.FC<DocumentsProviderProps> = ({ children, userId }) => {
+  const { currentTeam } = useTeam();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +44,11 @@ export const DocumentsProvider: React.FC<DocumentsProviderProps> = ({ children, 
     try {
       setLoading(true);
       setError(null);
-      const fetchedDocuments = await documentService.getDocuments(userId);
+      const teamId = currentTeam?.id || null;
+      const ownerId = currentTeam?.ownerId || null;
+      console.log('[DocumentsContext] Refreshing documents for userId:', userId, 'teamId:', teamId, 'ownerId:', ownerId);
+      const fetchedDocuments = await documentService.getDocuments(userId, teamId, ownerId);
+      console.log('[DocumentsContext] Fetched documents:', fetchedDocuments.length);
       setDocuments(fetchedDocuments);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch documents');
@@ -53,7 +59,7 @@ export const DocumentsProvider: React.FC<DocumentsProviderProps> = ({ children, 
 
   useEffect(() => {
     refreshDocuments();
-  }, [userId]);
+  }, [userId, currentTeam?.id]);
 
   const uploadDocument = async (
     file: File,
@@ -62,7 +68,8 @@ export const DocumentsProvider: React.FC<DocumentsProviderProps> = ({ children, 
   ): Promise<Document> => {
     try {
       setError(null);
-      const newDocument = await documentService.uploadDocument(userId, file, category, description);
+      const teamId = currentTeam?.id || null;
+      const newDocument = await documentService.uploadDocument(userId, file, category, description, teamId);
       await refreshDocuments();
       return newDocument;
     } catch (err) {

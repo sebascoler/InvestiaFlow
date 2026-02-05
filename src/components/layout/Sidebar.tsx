@@ -1,14 +1,16 @@
 import React, { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FolderOpen, Zap, Settings, LogOut, HelpCircle, BarChart3, X } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, Zap, Settings, LogOut, HelpCircle, BarChart3, X, Users } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMobileMenu } from '../../contexts/MobileMenuContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
   { name: 'CRM Pipeline', href: '/crm', icon: LayoutDashboard },
   { name: 'Data Room', href: '/dataroom', icon: FolderOpen },
   { name: 'Automation', href: '/automation', icon: Zap },
+  { name: 'Team', href: '/team', icon: Users },
   { name: 'Settings', href: '/settings', icon: Settings },
   { name: 'Help', href: '/help', icon: HelpCircle },
 ];
@@ -17,6 +19,7 @@ export const Sidebar: React.FC = () => {
   const location = useLocation();
   const { logout } = useAuth();
   const { isOpen, closeMenu } = useMobileMenu();
+  const { logoUrl, companyName } = useTheme();
 
   // Close menu when route changes (only if menu is open)
   useEffect(() => {
@@ -52,16 +55,31 @@ export const Sidebar: React.FC = () => {
       {/* Sidebar */}
       <div
         className={`
-          w-64 bg-gray-900 text-white h-screen flex flex-col fixed left-0 top-0 z-50
-          lg:relative lg:z-auto
+          w-64 bg-gray-900 text-white h-full flex flex-col fixed left-0 top-0 z-50
+          lg:relative lg:z-auto lg:h-full
           transform transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
       <div className="p-4 lg:p-6 border-b border-gray-800 flex-shrink-0 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl lg:text-2xl font-bold">InvestiaFlow</h1>
-          <p className="text-xs lg:text-sm text-gray-400 mt-1">Fundraising CRM</p>
+        <div className="flex items-center gap-3 min-w-0">
+          {logoUrl ? (
+            <img 
+              src={logoUrl} 
+              alt={`${companyName} logo`}
+              className="h-8 w-8 lg:h-10 lg:w-10 object-contain flex-shrink-0"
+            />
+          ) : (
+            <div className="h-8 w-8 lg:h-10 lg:w-10 bg-primary-600 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-bold text-sm lg:text-base">
+                {companyName.charAt(0).toUpperCase()}
+              </span>
+            </div>
+          )}
+          <div className="min-w-0">
+            <h1 className="text-xl lg:text-2xl font-bold truncate">{companyName}</h1>
+            <p className="text-xs lg:text-sm text-gray-400 mt-1">Fundraising CRM</p>
+          </div>
         </div>
         {/* Close button - visible only on mobile */}
         <button

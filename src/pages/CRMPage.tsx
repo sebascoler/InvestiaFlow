@@ -6,6 +6,7 @@ import { LeadDetailPanel } from '../components/crm/LeadDetailPanel';
 import { StageChangeModal } from '../components/crm/StageChangeModal';
 import { SearchAndFilters, FilterOptions } from '../components/crm/SearchAndFilters';
 import { Button } from '../components/shared/Button';
+import { PermissionGate } from '../components/shared/PermissionGate';
 import { ToastContainer, ToastType } from '../components/shared/Toast';
 import { useLeads } from '../contexts/LeadsContext';
 import { Lead, LeadFormData } from '../types/lead';
@@ -168,13 +169,15 @@ const CRMPage: React.FC = () => {
     <div className={`relative ${isDetailPanelOpen ? 'mr-96' : ''} transition-all duration-300`}>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Pipeline</h1>
-        <Button
-          variant="primary"
-          onClick={() => handleAddLead()}
-        >
-          <Plus size={20} className="mr-2" />
-          Add Lead
-        </Button>
+        <PermissionGate action="create" resource="leads">
+          <Button
+            variant="primary"
+            onClick={() => handleAddLead()}
+          >
+            <Plus size={20} className="mr-2" />
+            Add Lead
+          </Button>
+        </PermissionGate>
       </div>
 
       <SearchAndFilters

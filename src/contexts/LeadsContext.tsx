@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { Lead, LeadFormData } from '../types/lead';
 import { StageId } from '../types/stage';
 import { leadService } from '../services/leadService';
+import { useTeam } from './TeamContext';
 
 interface LeadsContextType {
   leads: Lead[];
@@ -30,6 +31,7 @@ interface LeadsProviderProps {
 }
 
 export const LeadsProvider: React.FC<LeadsProviderProps> = ({ children, userId }) => {
+  const { currentTeam } = useTeam();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,8 +40,10 @@ export const LeadsProvider: React.FC<LeadsProviderProps> = ({ children, userId }
     try {
       setLoading(true);
       setError(null);
-      console.log('[LeadsContext] Refreshing leads for userId:', userId);
-      const fetchedLeads = await leadService.getLeads(userId);
+      const teamId = currentTeam?.id || null;
+      const ownerId = currentTeam?.ownerId || null;
+      console.log('[LeadsContext] Refreshing leads for userId:', userId, 'teamId:', teamId, 'ownerId:', ownerId);
+      const fetchedLeads = await leadService.getLeads(userId, teamId, ownerId);
       console.log('[LeadsContext] Fetched leads:', fetchedLeads.length);
       setLeads(fetchedLeads);
     } catch (err) {
@@ -52,12 +56,13 @@ export const LeadsProvider: React.FC<LeadsProviderProps> = ({ children, userId }
 
   useEffect(() => {
     refreshLeads();
-  }, [userId]);
+  }, [userId, currentTeam?.id]);
 
   const createLead = async (data: LeadFormData): Promise<Lead> => {
     try {
       setError(null);
-      const newLead = await leadService.createLead(userId, data);
+      const teamId = currentTeam?.id || null;
+      const newLead = await leadService.createLead(userId, data, teamId);
       await refreshLeads();
       return newLead;
     } catch (err) {

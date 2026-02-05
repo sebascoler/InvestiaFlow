@@ -5,6 +5,7 @@ import { formatFileSize } from '../../utils/formatters';
 import { formatDate } from '../../utils/formatters';
 import { DocumentTracking } from './DocumentTracking';
 import { DocumentPreview } from '../shared/DocumentPreview';
+import { PermissionGate } from '../shared/PermissionGate';
 import { Modal } from '../shared/Modal';
 import { useDocuments } from '../../contexts/DocumentsContext';
 
@@ -151,14 +152,16 @@ export const DocumentCard: React.FC<DocumentCardProps> = memo(({
                 </span>
               )}
             </button>
-            <button
-              onClick={onConfigurePermissions}
-              className="p-1.5 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded transition-colors"
-              title="Configure Permissions"
-              aria-label="Configure Permissions"
-            >
-              <Settings size={16} />
-            </button>
+            <PermissionGate action="update" resource="documents">
+              <button
+                onClick={onConfigurePermissions}
+                className="p-1.5 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded transition-colors"
+                title="Configure Permissions"
+                aria-label="Configure Permissions"
+              >
+                <Settings size={16} />
+              </button>
+            </PermissionGate>
             <button
               onClick={async () => {
                 try {
@@ -174,14 +177,16 @@ export const DocumentCard: React.FC<DocumentCardProps> = memo(({
             >
               <Download size={16} />
             </button>
-            <button
-              onClick={onDelete}
-              className="p-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-              title="Delete"
-              aria-label="Delete"
-            >
-              <Trash2 size={16} />
-            </button>
+            <PermissionGate action="delete" resource="documents">
+              <button
+                onClick={onDelete}
+                className="p-1.5 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                title="Delete"
+                aria-label="Delete"
+              >
+                <Trash2 size={16} />
+              </button>
+            </PermissionGate>
           </div>
         </div>
       </div>

@@ -226,15 +226,17 @@ const getFirebaseService = async () => {
 
 // Export service that uses Firebase if available, otherwise mock
 export const documentService = {
-  async getDocuments(userId: string): Promise<Document[]> {
-    const service = await getFirebaseService();
-    return service ? service.getDocuments(userId) : documentServiceMock.getDocuments(userId);
-  },
-
-  async uploadDocument(userId: string, file: File, category: DocumentCategory, description?: string): Promise<Document> {
+  async getDocuments(userId: string, teamId?: string | null, ownerId?: string | null): Promise<Document[]> {
     const service = await getFirebaseService();
     return service 
-      ? service.uploadDocument(userId, file, category, description)
+      ? service.getDocuments(userId, teamId, ownerId) 
+      : documentServiceMock.getDocuments(userId);
+  },
+
+  async uploadDocument(userId: string, file: File, category: DocumentCategory, description?: string, teamId?: string | null): Promise<Document> {
+    const service = await getFirebaseService();
+    return service 
+      ? service.uploadDocument(userId, file, category, description, teamId)
       : documentServiceMock.uploadDocument(userId, file, category, description);
   },
 
@@ -293,18 +295,19 @@ export const documentService = {
   async shareDocumentWithLeadsInStage(
     userId: string,
     documentId: string,
-    requiredStage: StageId
+    requiredStage: StageId,
+    teamId?: string | null
   ): Promise<void> {
     const service = await getFirebaseService();
     return service 
-      ? service.shareDocumentWithLeadsInStage(userId, documentId, requiredStage)
+      ? service.shareDocumentWithLeadsInStage(userId, documentId, requiredStage, teamId)
       : Promise.resolve(); // Mock: no-op
   },
 
-  async getDocumentsForStage(userId: string, stageId: StageId): Promise<Document[]> {
+  async getDocumentsForStage(userId: string, stageId: StageId, teamId?: string | null, ownerId?: string | null): Promise<Document[]> {
     const service = await getFirebaseService();
     return service 
-      ? service.getDocumentsForStage(userId, stageId)
+      ? service.getDocumentsForStage(userId, stageId, teamId, ownerId)
       : Promise.resolve([]); // Mock: return empty array
   },
 };

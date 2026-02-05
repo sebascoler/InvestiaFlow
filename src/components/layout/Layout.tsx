@@ -8,6 +8,7 @@ import { DocumentsProvider } from '../../contexts/DocumentsContext';
 import { AutomationProvider } from '../../contexts/AutomationContext';
 import { NotificationsProvider } from '../../contexts/NotificationsContext';
 import { MobileMenuProvider } from '../../contexts/MobileMenuContext';
+import { ThemeProvider } from '../../contexts/ThemeContext';
 import { useScheduledTasks } from '../../hooks/useScheduledTasks';
 import { useLeadNotifications } from '../../hooks/useLeadNotifications';
 
@@ -17,7 +18,7 @@ const LayoutContent: React.FC = () => {
   useLeadNotifications();
   
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden lg:ml-0">
         <Header />
@@ -45,17 +46,19 @@ const Layout: React.FC = () => {
   }
 
   return (
-    <NotificationsProvider>
-      <MobileMenuProvider>
-        <LeadsProvider userId={user.id}>
-          <DocumentsProvider userId={user.id}>
-            <AutomationProvider userId={user.id}>
-              <LayoutContent />
-            </AutomationProvider>
-          </DocumentsProvider>
-        </LeadsProvider>
-      </MobileMenuProvider>
-    </NotificationsProvider>
+    <ThemeProvider>
+      <NotificationsProvider>
+        <MobileMenuProvider>
+          <LeadsProvider userId={user.id}>
+            <DocumentsProvider userId={user.id}>
+              <AutomationProvider userId={user.id}>
+                <LayoutContent />
+              </AutomationProvider>
+            </DocumentsProvider>
+          </LeadsProvider>
+        </MobileMenuProvider>
+      </NotificationsProvider>
+    </ThemeProvider>
   );
 };
 

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { AutomationRule } from '../types/automation';
 import { automationService } from '../services/automationService';
+import { useTeam } from './TeamContext';
 
 interface AutomationContextType {
   rules: AutomationRule[];
@@ -29,6 +30,7 @@ interface AutomationProviderProps {
 }
 
 export const AutomationProvider: React.FC<AutomationProviderProps> = ({ children, userId }) => {
+  const { currentTeam } = useTeam();
   const [rules, setRules] = useState<AutomationRule[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +39,8 @@ export const AutomationProvider: React.FC<AutomationProviderProps> = ({ children
     try {
       setLoading(true);
       setError(null);
-      const fetchedRules = await automationService.getRules(userId);
+      const teamId = currentTeam?.id || null;
+      const fetchedRules = await automationService.getRules(userId, teamId);
       setRules(fetchedRules);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch rules');
@@ -48,12 +51,13 @@ export const AutomationProvider: React.FC<AutomationProviderProps> = ({ children
 
   useEffect(() => {
     refreshRules();
-  }, [userId]);
+  }, [userId, currentTeam?.id]);
 
   const createRule = async (rule: Omit<AutomationRule, 'id' | 'userId' | 'createdAt'>): Promise<AutomationRule> => {
     try {
       setError(null);
-      const newRule = await automationService.createRule(userId, rule);
+      const teamId = currentTeam?.id || null;
+      const newRule = await automationService.createRule(userId, rule, teamId);
       await refreshRules();
       return newRule;
     } catch (err) {

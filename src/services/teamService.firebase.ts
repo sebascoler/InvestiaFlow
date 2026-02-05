@@ -134,7 +134,17 @@ export const teamServiceFirebase = {
         [whereFunc('teamId', '==', teamId)]
       );
       
-      return members.map(firestoreToTeamMember);
+      // Remove duplicates by userId (keep the most recent one)
+      const membersMap = new Map<string, TeamMember>();
+      members.forEach(member => {
+        const mappedMember = firestoreToTeamMember(member);
+        const existing = membersMap.get(mappedMember.userId);
+        if (!existing || mappedMember.joinedAt > existing.joinedAt) {
+          membersMap.set(mappedMember.userId, mappedMember);
+        }
+      });
+      
+      return Array.from(membersMap.values());
     } catch (error) {
       console.error('[teamServiceFirebase] Error getting team members:', error);
       throw error;
@@ -200,6 +210,102 @@ export const teamServiceFirebase = {
       await firestoreService.deleteDoc(TEAM_MEMBERS_COLLECTION, memberId);
     } catch (error) {
       console.error('[teamServiceFirebase] Error removing member:', error);
+      throw error;
+    }
+  },
+
+  async getPendingInvitations(teamId: string): Promise<TeamInvitation[]> {
+    try {
+      const firebaseFirestore = await import('firebase/firestore');
+      const whereFunc = firebaseFirestore.where;
+      
+      const invitations = await firestoreService.getDocs<TeamInvitation>(
+        TEAM_INVITATIONS_COLLECTION,
+        [
+          whereFunc('teamId', '==', teamId),
+        ]
+      );
+      
+      // Filter out accepted invitations and expired ones
+      const now = new Date();
+      return invitations
+        .map(firestoreToTeamInvitation)
+        .filter(inv => !inv.acceptedAt && inv.expiresAt > now);
+    } catch (error) {
+      console.error('[teamServiceFirebase] Error getting pending invitations:', error);
+      throw error;
+    }
+  },
+
+  async updateBranding(teamId: string, branding: Partial<import('../types/team').TeamBranding>): Promise<Team> {
+    try {
+      const team = await firestoreService.getDoc<Team>(TEAMS_COLLECTION, teamId);
+      
+      if (!team) {
+        throw new Error('Team not found');
+      }
+      
+      // Merge branding, removing undefined values
+      const existingBranding = team.branding || {};
+      const updatedBranding: any = {};
+      
+      // Copy existing branding values
+      if (existingBranding.logoUrl !== undefined) {
+        updatedBranding.logoUrl = existingBranding.logoUrl;
+      }
+      if (existingBranding.primaryColor !== undefined) {
+        updatedBranding.primaryColor = existingBranding.primaryColor;
+      }
+      if (existingBranding.secondaryColor !== undefined) {
+        updatedBranding.secondaryColor = existingBranding.secondaryColor;
+      }
+      if (existingBranding.accentColor !== undefined) {
+        updatedBranding.accentColor = existingBranding.accentColor;
+      }
+      if (existingBranding.companyName !== undefined) {
+        updatedBranding.companyName = existingBranding.companyName;
+      }
+      if (existingBranding.theme !== undefined) {
+        updatedBranding.theme = existingBranding.theme;
+      }
+      
+      // Override with new branding values (only if not undefined)
+      if (branding.logoUrl !== undefined) {
+        updatedBranding.logoUrl = branding.logoUrl;
+      }
+      if (branding.primaryColor !== undefined) {
+        updatedBranding.primaryColor = branding.primaryColor;
+      }
+      if (branding.secondaryColor !== undefined) {
+        updatedBranding.secondaryColor = branding.secondaryColor;
+      }
+      if (branding.accentColor !== undefined) {
+        updatedBranding.accentColor = branding.accentColor;
+      }
+      if (branding.companyName !== undefined) {
+        updatedBranding.companyName = branding.companyName;
+      }
+      if (branding.theme !== undefined) {
+        updatedBranding.theme = branding.theme;
+      }
+      
+      // Update team with branding (only if branding object has values)
+      const updateData: any = {
+        updatedAt: dateToTimestamp(new Date()),
+      };
+      
+      // Only include branding if it has at least one field
+      if (Object.keys(updatedBranding).length > 0) {
+        updateData.branding = updatedBranding;
+      }
+      
+      await firestoreService.updateDoc(TEAMS_COLLECTION, teamId, updateData);
+      
+      // Return updated team
+      const updatedTeam = await firestoreService.getDoc<Team>(TEAMS_COLLECTION, teamId);
+      return updatedTeam ? firestoreToTeam(updatedTeam) : team;
+    } catch (error) {
+      console.error('[teamServiceFirebase] Error updating branding:', error);
       throw error;
     }
   },

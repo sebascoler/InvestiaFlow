@@ -39,19 +39,20 @@ const leadToFirestore = (lead: Partial<Lead>): any => {
 };
 
 export const leadServiceFirebase = {
-  // Obtener todos los leads del usuario
-  async getLeads(userId: string): Promise<Lead[]> {
+  // Obtener todos los leads del usuario/team
+  async getLeads(userId: string, teamId?: string | null, ownerId?: string | null): Promise<Lead[]> {
     await ensureFirebase();
     
     if (!isFirebaseReady()) {
       throw new Error('Firestore not available');
     }
     
-    console.log('[leadServiceFirebase] Getting leads for userId:', userId);
+    console.log('[leadServiceFirebase] Getting leads for userId:', userId, 'teamId:', teamId, 'ownerId:', ownerId);
     
     // Load where function directly from firebase/firestore
     const firebaseFirestore = await import('firebase/firestore');
     const where = firebaseFirestore.where;
+    const or = firebaseFirestore.or;
     
     if (!where) {
       throw new Error('where function not available');
@@ -61,14 +62,66 @@ export const leadServiceFirebase = {
     const { firestoreService } = await import('../firebase/firestore');
     
     try {
-      const leads = await firestoreService.getDocs<Lead>(
-        COLLECTION_NAME,
-        [where('userId', '==', userId)]
-      );
+      // Build queries: if teamId is provided, get leads with teamId AND leads from owner (for migration)
+      // Firestore rules don't handle complex OR queries well, so we do two separate queries
+      let allLeads: any[] = [];
       
-      console.log('[leadServiceFirebase] Found leads:', leads.length);
-      const mappedLeads = leads.map(firestoreToLead);
-      console.log('[leadServiceFirebase] Mapped leads:', mappedLeads);
+      if (teamId && ownerId) {
+        // For team members, get all leads that belong to the team AND leads created by the owner
+        // This allows all team members to see team leads, including legacy ones without teamId
+        try {
+          // Query 1: Get leads with teamId
+          const teamLeads = await firestoreService.getDocs<Lead>(
+            COLLECTION_NAME,
+            [where('teamId', '==', teamId)]
+          );
+          console.log('[leadServiceFirebase] Found team leads:', teamLeads.length);
+          allLeads.push(...teamLeads);
+        } catch (error: any) {
+          console.warn('[leadServiceFirebase] Error fetching team leads:', error);
+        }
+        
+        try {
+          // Query 2: Get leads from owner (legacy leads without teamId)
+          const ownerLeads = await firestoreService.getDocs<Lead>(
+            COLLECTION_NAME,
+            [where('userId', '==', ownerId)]
+          );
+          console.log('[leadServiceFirebase] Found owner leads:', ownerLeads.length);
+          allLeads.push(...ownerLeads);
+        } catch (error: any) {
+          console.warn('[leadServiceFirebase] Error fetching owner leads:', error);
+        }
+        
+        // Remove duplicates (in case a lead has both teamId and userId matching)
+        const uniqueLeads = Array.from(
+          new Map(allLeads.map(lead => [lead.id, lead])).values()
+        );
+        allLeads = uniqueLeads;
+      } else if (teamId) {
+        // If teamId but no ownerId, just filter by teamId
+        allLeads = await firestoreService.getDocs<Lead>(
+          COLLECTION_NAME,
+          [where('teamId', '==', teamId)]
+        );
+      } else {
+        // Fallback to userId only (for users without teams)
+        allLeads = await firestoreService.getDocs<Lead>(
+          COLLECTION_NAME,
+          [where('userId', '==', userId)]
+        );
+      }
+      
+      console.log('[leadServiceFirebase] Total unique leads:', allLeads.length);
+      if (allLeads.length > 0) {
+        console.log('[leadServiceFirebase] Sample lead:', {
+          id: allLeads[0].id,
+          userId: allLeads[0].userId,
+          teamId: allLeads[0].teamId,
+        });
+      }
+      const mappedLeads = allLeads.map(firestoreToLead);
+      console.log('[leadServiceFirebase] Mapped leads count:', mappedLeads.length);
       
       return mappedLeads;
     } catch (error: any) {
@@ -87,7 +140,7 @@ export const leadServiceFirebase = {
   },
 
   // Crear nuevo lead
-  async createLead(userId: string, data: LeadFormData): Promise<Lead> {
+  async createLead(userId: string, data: LeadFormData, teamId?: string | null): Promise<Lead> {
     await ensureFirebase();
     
     if (!isFirebaseReady()) {
@@ -98,6 +151,7 @@ export const leadServiceFirebase = {
     const newLead: Lead = {
       id: `lead-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       userId,
+      teamId: teamId || undefined,
       ...data,
       stage: 'target',
       stageEnteredAt: now,
@@ -255,19 +309,37 @@ export const leadServiceFirebase = {
   },
 
   // Obtener leads por stage o stages superiores (para compartir documentos)
-  async getLeadsByStageOrHigher(userId: string, minStage: StageId): Promise<Lead[]> {
+  async getLeadsByStageOrHigher(userId: string, minStage: StageId, teamId?: string | null, ownerId?: string | null): Promise<Lead[]> {
     const firebaseFirestore = await import('firebase/firestore');
     const where = firebaseFirestore.where;
+    const or = firebaseFirestore.or;
     const { STAGES } = await import('../types/stage');
     
     if (!where) {
       throw new Error('where function not available');
     }
     
-    // Get all leads for this user
+    // Build query: if teamId is provided, get leads with teamId OR leads from owner (for migration)
+    // Otherwise, filter by userId (for users without teams)
+    let queryConstraints;
+    if (teamId && ownerId) {
+      queryConstraints = [
+        or(
+          where('teamId', '==', teamId),
+          where('userId', '==', ownerId)
+        )
+      ];
+    } else if (teamId) {
+      queryConstraints = [where('teamId', '==', teamId)];
+    } else {
+      // Fallback to userId only (for users without teams)
+      queryConstraints = [where('userId', '==', userId)];
+    }
+    
+    // Get all leads for this user/team
     const allLeads = await firestoreService.getDocs<Lead>(
       COLLECTION_NAME,
-      [where('userId', '==', userId)]
+      queryConstraints
     );
     
     const mappedLeads = allLeads.map(firestoreToLead);

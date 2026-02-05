@@ -29,8 +29,17 @@ const createEmailTemplate = (
   subject: string,
   body: string,
   documents: Array<{ name: string; description?: string }>,
-  dataRoomUrl?: string
+  dataRoomUrl?: string,
+  branding?: {
+    primaryColor?: string;
+    logoUrl?: string;
+    companyName?: string;
+  }
 ): string => {
+  // Use branding or defaults
+  const primaryColor = branding?.primaryColor || '#0284c7';
+  const logoUrl = branding?.logoUrl || null;
+  const companyName = branding?.companyName || 'InvestiaFlow';
   const documentList = documents.length > 0
     ? `
       <div style="margin: 20px 0;">
@@ -51,7 +60,7 @@ const createEmailTemplate = (
     ? `
       <div style="margin: 30px 0; text-align: center;">
         <a href="${dataRoomUrl}" 
-           style="background-color: #0284c7; color: white; padding: 12px 24px; 
+           style="background-color: ${primaryColor}; color: white; padding: 12px 24px; 
                   text-decoration: none; border-radius: 6px; display: inline-block; 
                   font-weight: 600;">
           Access Data Room
@@ -78,8 +87,12 @@ const createEmailTemplate = (
                    line-height: 1.6; color: #1f2937; background-color: #f9fafb; margin: 0; padding: 0;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px;">
           <!-- Header -->
-          <div style="border-bottom: 2px solid #0284c7; padding-bottom: 20px; margin-bottom: 30px;">
-            <h1 style="color: #0284c7; margin: 0; font-size: 28px;">InvestiaFlow</h1>
+          <div style="border-bottom: 2px solid ${primaryColor}; padding-bottom: 20px; margin-bottom: 30px;">
+            ${logoUrl ? `
+              <img src="${logoUrl}" alt="${companyName}" style="max-height: 40px; margin-bottom: 10px;" />
+            ` : `
+              <h1 style="color: ${primaryColor}; margin: 0; font-size: 28px;">${companyName}</h1>
+            `}
             <p style="color: #6b7280; margin: 5px 0 0 0; font-size: 14px;">Fundraising CRM</p>
           </div>
 
@@ -100,7 +113,7 @@ const createEmailTemplate = (
           <!-- Footer -->
           <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; 
                       color: #6b7280; font-size: 14px;">
-            <p style="margin: 0;">Best regards,<br><strong>InvestiaFlow Team</strong></p>
+            <p style="margin: 0;">Best regards,<br><strong>${companyName} Team</strong></p>
             <p style="margin: 10px 0 0 0; font-size: 12px;">
               This email was sent to ${leadEmail} regarding ${leadFirm}
             </p>
@@ -131,6 +144,7 @@ export const sendDocumentEmail = functions.https.onCall(async (data, context) =>
     documents,
     dataRoomUrl,
     fromEmail,
+    teamId,
   } = data;
 
   // Validate required fields
@@ -149,7 +163,24 @@ export const sendDocumentEmail = functions.https.onCall(async (data, context) =>
   }
 
   try {
-    // Create HTML email template
+    const db = admin.firestore();
+    
+    // Get team branding if teamId is provided
+    let branding: any = null;
+    if (teamId) {
+      try {
+        const teamDoc = await db.collection('teams').doc(teamId).get();
+        if (teamDoc.exists) {
+          const teamData = teamDoc.data();
+          branding = teamData?.branding || null;
+        }
+      } catch (error) {
+        console.warn('Failed to fetch team branding:', error);
+        // Continue without branding if fetch fails
+      }
+    }
+    
+    // Create HTML email template with branding
     const html = createEmailTemplate(
       leadName,
       leadEmail,
@@ -157,7 +188,8 @@ export const sendDocumentEmail = functions.https.onCall(async (data, context) =>
       subject,
       body,
       documents || [],
-      dataRoomUrl
+      dataRoomUrl,
+      branding
     );
 
     // Send email via Resend
@@ -636,6 +668,7 @@ export const markInvestorDocumentViewed = functions.https.onCall(async (data, co
           // Create notification
           await db.collection('notifications').add({
             userId: docData.userId,
+            teamId: docData.teamId || null, // Include teamId if available
             type: 'investor_viewed',
             title: 'Document Viewed',
             message: `${leadData.name || leadData.email} viewed "${docData.name}"`,
@@ -723,6 +756,7 @@ export const markInvestorDocumentDownloaded = functions.https.onCall(async (data
         // Create notification
         await db.collection('notifications').add({
           userId: docData.userId,
+          teamId: docData.teamId || null, // Include teamId if available
           type: 'investor_downloaded',
           title: 'Document Downloaded',
           message: `${leadData.name || leadData.email} downloaded "${docData.name}"`,
@@ -763,7 +797,7 @@ export const sendTeamInvitationEmail = functions.https.onCall(async (data, conte
     );
   }
 
-  const { invitationId, teamName, inviterName } = data;
+  const { invitationId, teamName, inviterName, appUrl } = data;
 
   if (!invitationId || !teamName || !inviterName) {
     throw new functions.https.HttpsError(
@@ -788,8 +822,21 @@ export const sendTeamInvitationEmail = functions.https.onCall(async (data, conte
     }
 
     const invitation = invitationDoc.data()!;
-    const appUrl = process.env.APP_URL || 'https://investiaflow.com';
-    const inviteUrl = `${appUrl}/invite/${invitation.token}`;
+    
+    // Get team branding
+    const teamDoc = await db.collection('teams').doc(invitation.teamId).get();
+    const teamData = teamDoc.exists ? teamDoc.data() : null;
+    const branding = teamData?.branding || {};
+    
+    // Use branding values or defaults
+    const primaryColor = branding.primaryColor || '#0284c7';
+    const logoUrl = branding.logoUrl || null;
+    const companyName = branding.companyName || teamName || 'InvestiaFlow';
+    
+    // Use appUrl from request data (passed from frontend), or fallback to environment/config
+    // This ensures the correct URL is used in both development and production
+    const baseUrl = appUrl || process.env.APP_URL || functions.config().app?.url || 'https://investiaflow.com';
+    const inviteUrl = `${baseUrl}/invite/${invitation.token}`;
 
     const emailHtml = `
       <!DOCTYPE html>
@@ -802,8 +849,12 @@ export const sendTeamInvitationEmail = functions.https.onCall(async (data, conte
                      line-height: 1.6; color: #1f2937; background-color: #f9fafb; margin: 0; padding: 0;">
           <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px;">
             <!-- Header -->
-            <div style="border-bottom: 2px solid #0284c7; padding-bottom: 20px; margin-bottom: 30px;">
-              <h1 style="color: #0284c7; margin: 0; font-size: 28px;">InvestiaFlow</h1>
+            <div style="border-bottom: 2px solid ${primaryColor}; padding-bottom: 20px; margin-bottom: 30px;">
+              ${logoUrl ? `
+                <img src="${logoUrl}" alt="${companyName}" style="max-height: 40px; margin-bottom: 10px;" />
+              ` : `
+                <h1 style="color: ${primaryColor}; margin: 0; font-size: 28px;">${companyName}</h1>
+              `}
               <p style="color: #6b7280; margin: 5px 0 0 0; font-size: 14px;">Team Invitation</p>
             </div>
 
@@ -823,7 +874,7 @@ export const sendTeamInvitationEmail = functions.https.onCall(async (data, conte
             <!-- CTA Button -->
             <div style="margin: 30px 0; text-align: center;">
               <a href="${inviteUrl}" 
-                 style="background-color: #0284c7; color: white; padding: 12px 24px; 
+                 style="background-color: ${primaryColor}; color: white; padding: 12px 24px; 
                         text-decoration: none; border-radius: 6px; display: inline-block; 
                         font-weight: 600;">
                 Accept Invitation
@@ -832,7 +883,7 @@ export const sendTeamInvitationEmail = functions.https.onCall(async (data, conte
 
             <p style="color: #6b7280; font-size: 14px; margin-top: 20px;">
               Or copy and paste this link into your browser:<br>
-              <a href="${inviteUrl}" style="color: #0284c7; word-break: break-all;">${inviteUrl}</a>
+              <a href="${inviteUrl}" style="color: ${primaryColor}; word-break: break-all;">${inviteUrl}</a>
             </p>
 
             <p style="color: #9ca3af; font-size: 12px; margin-top: 30px;">
@@ -842,7 +893,7 @@ export const sendTeamInvitationEmail = functions.https.onCall(async (data, conte
             <!-- Footer -->
             <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; 
                         color: #6b7280; font-size: 14px;">
-              <p style="margin: 0;">Best regards,<br><strong>InvestiaFlow Team</strong></p>
+              <p style="margin: 0;">Best regards,<br><strong>${companyName} Team</strong></p>
             </div>
           </div>
         </body>

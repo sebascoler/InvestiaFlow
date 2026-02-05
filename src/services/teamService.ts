@@ -51,9 +51,20 @@ export const teamServiceMock = {
   },
 
   async getTeamMembers(teamId: string): Promise<TeamMember[]> {
-    return teamMembersDB
+    const members = teamMembersDB
       .filter(m => m.teamId === teamId)
       .map(m => ({ ...m }));
+    
+    // Remove duplicates by userId (keep the most recent one)
+    const membersMap = new Map<string, TeamMember>();
+    members.forEach(member => {
+      const existing = membersMap.get(member.userId);
+      if (!existing || member.joinedAt > existing.joinedAt) {
+        membersMap.set(member.userId, member);
+      }
+    });
+    
+    return Array.from(membersMap.values());
   },
 
   async inviteMember(teamId: string, email: string, role: TeamMemberRole, invitedBy: string): Promise<TeamInvitation> {
@@ -92,6 +103,27 @@ export const teamServiceMock = {
     }
     
     teamMembersDB.splice(index, 1);
+  },
+
+  async getPendingInvitations(teamId: string): Promise<TeamInvitation[]> {
+    const now = new Date();
+    return teamInvitationsDB
+      .filter(inv => inv.teamId === teamId && !inv.acceptedAt && inv.expiresAt > now)
+      .map(inv => ({ ...inv }));
+  },
+
+  async updateBranding(teamId: string, branding: Partial<import('../types/team').TeamBranding>): Promise<Team> {
+    const team = teamsDB.find(t => t.id === teamId);
+    if (!team) {
+      throw new Error('Team not found');
+    }
+    
+    team.branding = {
+      ...team.branding,
+      ...branding,
+    };
+    
+    return { ...team };
   },
 };
 
@@ -159,5 +191,19 @@ export const teamService = {
     return service 
       ? service.removeMember(teamId, memberId) 
       : teamServiceMock.removeMember(teamId, memberId);
+  },
+
+  async getPendingInvitations(teamId: string): Promise<TeamInvitation[]> {
+    const service = await getFirebaseService();
+    return service 
+      ? service.getPendingInvitations(teamId) 
+      : teamServiceMock.getPendingInvitations(teamId);
+  },
+
+  async updateBranding(teamId: string, branding: Partial<import('../types/team').TeamBranding>): Promise<Team> {
+    const service = await getFirebaseService();
+    return service 
+      ? service.updateBranding(teamId, branding) 
+      : teamServiceMock.updateBranding(teamId, branding);
   },
 };

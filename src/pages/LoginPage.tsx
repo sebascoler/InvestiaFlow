@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { Button } from '../components/shared/Button';
 import { Input } from '../components/shared/Input';
 import { Mail, Lock, Chrome } from 'lucide-react';
@@ -14,6 +15,22 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { login, signup, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  
+  // Get theme (may not be available if user not logged in, but ThemeProvider wraps App)
+  const { logoUrl, companyName } = useTheme();
+  
+  // Get redirect URL and email hint from query params
+  const redirectTo = searchParams.get('redirect') || '/';
+  const emailHint = searchParams.get('email');
+  
+  // Pre-fill email if provided in URL (e.g., from invitation)
+  useEffect(() => {
+    if (emailHint && !email) {
+      setEmail(emailHint);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [emailHint]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +48,8 @@ const LoginPage: React.FC = () => {
         }
         await signup(email, password, name);
       }
-      navigate('/');
+      // Navigate to redirect URL or default to dashboard
+      navigate(redirectTo);
     } catch (err: any) {
       setError(err.message || 'Authentication failed');
     } finally {
@@ -44,7 +62,8 @@ const LoginPage: React.FC = () => {
     setError(null);
     try {
       await loginWithGoogle();
-      navigate('/');
+      // Navigate to redirect URL or default to dashboard
+      navigate(redirectTo);
     } catch (err: any) {
       setError(err.message || 'Google login failed');
     } finally {
@@ -56,8 +75,31 @@ const LoginPage: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">InvestiaFlow</h1>
+          {logoUrl ? (
+            <img 
+              src={logoUrl} 
+              alt={`${companyName} logo`}
+              className="h-16 w-16 mx-auto mb-4 object-contain"
+            />
+          ) : (
+            <div className="h-16 w-16 mx-auto mb-4 bg-primary-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-2xl">
+                {companyName.charAt(0).toUpperCase()}
+              </span>
+            </div>
+          )}
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{companyName}</h1>
           <p className="text-gray-600">Fundraising CRM</p>
+          {redirectTo.includes('/invite/') && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                {emailHint 
+                  ? `You've been invited to join a team. Please ${isLogin ? 'login' : 'sign up'} with ${emailHint}`
+                  : "You've been invited to join a team. Please login or sign up to accept the invitation."
+                }
+              </p>
+            </div>
+          )}
         </div>
         
         {error && (

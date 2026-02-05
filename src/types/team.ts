@@ -8,11 +8,21 @@ export interface Team {
   createdAt: Date;
   updatedAt: Date;
   settings?: TeamSettings;
+  branding?: TeamBranding;
 }
 
 export interface TeamSettings {
   allowMemberInvites?: boolean;
   defaultRole?: TeamMemberRole;
+}
+
+export interface TeamBranding {
+  logoUrl?: string; // URL del logo (almacenado en Firebase Storage)
+  primaryColor?: string; // Color primario (hex, ej: #0284c7)
+  secondaryColor?: string; // Color secundario (hex)
+  accentColor?: string; // Color de acento (hex)
+  theme?: 'light' | 'dark' | 'auto'; // Tema de la aplicación
+  companyName?: string; // Nombre de la empresa (para emails y branding)
 }
 
 export interface TeamMember {

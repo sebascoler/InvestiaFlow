@@ -209,9 +209,11 @@ const getFirebaseService = async () => {
 
 // Export service that uses Firebase if available, otherwise mock
 export const automationService = {
-  async getRules(userId: string): Promise<AutomationRule[]> {
+  async getRules(userId: string, teamId?: string | null): Promise<AutomationRule[]> {
     const service = await getFirebaseService();
-    return service ? service.getRules(userId) : automationServiceMock.getRules(userId);
+    return service 
+      ? service.getRules(userId, teamId) 
+      : automationServiceMock.getRules(userId);
   },
 
   async getRule(id: string): Promise<AutomationRule | null> {
@@ -219,10 +221,10 @@ export const automationService = {
     return service ? service.getRule(id) : automationServiceMock.getRule(id);
   },
 
-  async createRule(userId: string, rule: Omit<AutomationRule, 'id' | 'userId' | 'createdAt'>): Promise<AutomationRule> {
+  async createRule(userId: string, rule: Omit<AutomationRule, 'id' | 'userId' | 'createdAt'>, teamId?: string | null): Promise<AutomationRule> {
     const service = await getFirebaseService();
     return service 
-      ? service.createRule(userId, rule)
+      ? service.createRule(userId, rule, teamId)
       : automationServiceMock.createRule(userId, rule);
   },
 

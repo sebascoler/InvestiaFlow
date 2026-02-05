@@ -3,6 +3,7 @@ import { X, Mail, Building, Calendar, FileText, Linkedin, Phone, Trash2, Edit, T
 import { Lead } from '../../types/lead';
 import { formatDate } from '../../utils/formatters';
 import { Button } from '../shared/Button';
+import { PermissionGate } from '../shared/PermissionGate';
 import { SharedDocumentsList } from './SharedDocumentsList';
 import { LeadHistory } from './LeadHistory';
 
@@ -173,22 +174,26 @@ export const LeadDetailPanel: React.FC<LeadDetailPanelProps> = ({
       </div>
 
       <div className="p-6 border-t border-gray-200 space-y-3">
-        <Button
-          variant="primary"
-          className="w-full"
-          onClick={onEdit}
-        >
-          <Edit size={18} className="mr-2" />
-          Edit Lead
-        </Button>
-        <Button
-          variant="danger"
-          className="w-full"
-          onClick={handleDelete}
-        >
-          <Trash2 size={18} className="mr-2" />
-          Delete Lead
-        </Button>
+        <PermissionGate action="update" resource="leads">
+          <Button
+            variant="primary"
+            className="w-full"
+            onClick={onEdit}
+          >
+            <Edit size={18} className="mr-2" />
+            Edit Lead
+          </Button>
+        </PermissionGate>
+        <PermissionGate action="delete" resource="leads">
+          <Button
+            variant="danger"
+            className="w-full"
+            onClick={handleDelete}
+          >
+            <Trash2 size={18} className="mr-2" />
+            Delete Lead
+          </Button>
+        </PermissionGate>
       </div>
     </div>
   );

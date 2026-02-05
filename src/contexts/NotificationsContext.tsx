@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Notification, NotificationType } from '../types/notification';
 import { useAuth } from './AuthContext';
+import { useTeam } from './TeamContext';
 import { notificationService } from '../services/notificationService';
 import { ensureFirebase, isFirebaseReady } from '../firebase/config';
 
@@ -30,6 +31,7 @@ interface NotificationsProviderProps {
 
 export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ children }) => {
   const { user } = useAuth();
+  const { currentTeam } = useTeam();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [usingFirestore, setUsingFirestore] = useState(false);
 
@@ -52,13 +54,27 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
           const dbInstance = db();
           
           if (dbInstance) {
-            const { collection, query, where, orderBy, onSnapshot } = firebaseFirestore;
+            const { collection, query, where, orderBy, onSnapshot, or } = firebaseFirestore;
             const notificationsRef = collection(dbInstance, 'notifications');
-            const q = query(
-              notificationsRef,
-              where('userId', '==', user.id),
-              orderBy('createdAt', 'desc')
-            );
+            
+            // Build query: filter by userId OR teamId (for migration period)
+            let q;
+            if (currentTeam?.id) {
+              q = query(
+                notificationsRef,
+                or(
+                  where('userId', '==', user.id),
+                  where('teamId', '==', currentTeam.id)
+                ),
+                orderBy('createdAt', 'desc')
+              );
+            } else {
+              q = query(
+                notificationsRef,
+                where('userId', '==', user.id),
+                orderBy('createdAt', 'desc')
+              );
+            }
 
             const unsubscribe = onSnapshot(
               q,
@@ -95,7 +111,8 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
 
     const loadNotificationsOnce = async () => {
       try {
-        const notifs = await notificationService.getNotifications(user.id);
+        const teamId = currentTeam?.id || null;
+        const notifs = await notificationService.getNotifications(user.id, teamId);
         setNotifications(notifs);
       } catch (error) {
         console.error('Error loading notifications:', error);
@@ -121,7 +138,7 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
     };
 
     setupNotifications();
-  }, [user]);
+  }, [user, currentTeam?.id]);
 
   // Save to localStorage only in mock mode
   useEffect(() => {
@@ -204,7 +221,8 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
       } catch (error) {
         console.error('Error deleting notification:', error);
         // Reload notifications to revert
-        const notifs = await notificationService.getNotifications(user.id);
+        const teamId = currentTeam?.id || null;
+        const notifs = await notificationService.getNotifications(user.id, teamId);
         setNotifications(notifs);
       }
     }

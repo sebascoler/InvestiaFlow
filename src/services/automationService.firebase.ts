@@ -35,18 +35,32 @@ const ruleToFirestore = (rule: Partial<AutomationRule>): any => {
 };
 
 export const automationServiceFirebase = {
-  // Obtener todas las reglas del usuario
-  async getRules(userId: string): Promise<AutomationRule[]> {
+  // Obtener todas las reglas del usuario/team
+  async getRules(userId: string, teamId?: string | null): Promise<AutomationRule[]> {
     const firebaseFirestore = await import('firebase/firestore');
     const whereFunc = firebaseFirestore.where;
+    const orFunc = firebaseFirestore.or;
     
     if (!whereFunc) {
       throw new Error('where function not available');
     }
     
+    // Build query: filter by teamId OR userId (for migration period)
+    let queryConstraints;
+    if (teamId) {
+      queryConstraints = [
+        orFunc(
+          whereFunc('teamId', '==', teamId),
+          whereFunc('userId', '==', userId)
+        )
+      ];
+    } else {
+      queryConstraints = [whereFunc('userId', '==', userId)];
+    }
+    
     const rules = await firestoreService.getDocs<AutomationRule>(
       COLLECTION_NAME,
-      [whereFunc('userId', '==', userId)]
+      queryConstraints
     );
     return rules.map(firestoreToRule);
   },
@@ -60,12 +74,14 @@ export const automationServiceFirebase = {
   // Crear nueva regla
   async createRule(
     userId: string, 
-    rule: Omit<AutomationRule, 'id' | 'userId' | 'createdAt'>
+    rule: Omit<AutomationRule, 'id' | 'userId' | 'createdAt'>,
+    teamId?: string | null
   ): Promise<AutomationRule> {
     const ruleId = `rule-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const newRule: AutomationRule = {
       id: ruleId,
       userId,
+      teamId: teamId || undefined,
       ...rule,
       createdAt: new Date(),
     };
@@ -110,7 +126,8 @@ export const automationServiceFirebase = {
     
     // 1. Compartir documentos basados en permisos (para stages siguientes)
     try {
-      const documentsToShare = await documentService.getDocumentsForStage(lead.userId, newStage);
+      const teamId = lead.teamId || null;
+      const documentsToShare = await documentService.getDocumentsForStage(lead.userId, newStage, teamId);
       console.log(`[Automation] Found ${documentsToShare.length} documents eligible for stage ${newStage}`);
       
       for (const doc of documentsToShare) {

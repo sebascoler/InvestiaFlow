@@ -10,6 +10,7 @@ export interface Notification {
   actionUrl?: string; // URL opcional para navegar cuando se hace click
   // Campos adicionales para notificaciones de actividad de inversores
   userId?: string;
+  teamId?: string; // Team that owns this notification
   leadId?: string;
   leadName?: string;
   documentId?: string;

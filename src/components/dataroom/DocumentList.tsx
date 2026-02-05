@@ -3,6 +3,7 @@ import { Search, Upload, Filter } from 'lucide-react';
 import { Document, DocumentCategory } from '../../types/document';
 import { DocumentCard } from './DocumentCard';
 import { Button } from '../shared/Button';
+import { PermissionGate } from '../shared/PermissionGate';
 import { Input } from '../shared/Input';
 import { Select } from '../shared/Select';
 import { Loader } from '../shared/Loader';
@@ -71,10 +72,12 @@ export const DocumentList: React.FC<DocumentListProps> = ({
             options={categoryOptions}
           />
         </div>
-        <Button variant="primary" onClick={onUpload}>
-          <Upload size={18} className="mr-2" />
-          Upload Document
-        </Button>
+        <PermissionGate action="create" resource="documents">
+          <Button variant="primary" onClick={onUpload}>
+            <Upload size={18} className="mr-2" />
+            Upload Document
+          </Button>
+        </PermissionGate>
       </div>
 
       {filteredDocuments.length === 0 ? (
@@ -88,10 +91,12 @@ export const DocumentList: React.FC<DocumentListProps> = ({
               : 'Try adjusting your search or filter'}
           </p>
           {documents.length === 0 && (
-            <Button variant="primary" onClick={onUpload}>
-              <Upload size={18} className="mr-2" />
-              Upload Document
-            </Button>
+            <PermissionGate action="create" resource="documents">
+              <Button variant="primary" onClick={onUpload}>
+                <Upload size={18} className="mr-2" />
+                Upload Document
+              </Button>
+            </PermissionGate>
           )}
         </div>
       ) : (
