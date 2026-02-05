@@ -253,4 +253,31 @@ export const leadServiceFirebase = {
   async deleteLead(id: string): Promise<void> {
     await firestoreService.deleteDoc(COLLECTION_NAME, id);
   },
+
+  // Obtener leads por stage o stages superiores (para compartir documentos)
+  async getLeadsByStageOrHigher(userId: string, minStage: StageId): Promise<Lead[]> {
+    const firebaseFirestore = await import('firebase/firestore');
+    const where = firebaseFirestore.where;
+    const { STAGES } = await import('../types/stage');
+    
+    if (!where) {
+      throw new Error('where function not available');
+    }
+    
+    // Get all leads for this user
+    const allLeads = await firestoreService.getDocs<Lead>(
+      COLLECTION_NAME,
+      [where('userId', '==', userId)]
+    );
+    
+    const mappedLeads = allLeads.map(firestoreToLead);
+    
+    // Filter leads that are in minStage or higher stages
+    const minStageOrder = STAGES.find(s => s.id === minStage)?.order ?? -1;
+    
+    return mappedLeads.filter(lead => {
+      const leadStageOrder = STAGES.find(s => s.id === lead.stage)?.order ?? -1;
+      return leadStageOrder >= minStageOrder;
+    });
+  },
 };

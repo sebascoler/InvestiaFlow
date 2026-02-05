@@ -88,6 +88,20 @@ service cloud.firestore {
       allow update, delete: if isAuthenticated() && isOwner(resource.data.userId);
     }
     
+    // Investor Verification Codes collection
+    // Note: Cloud Functions use Admin SDK and bypass these rules
+    // These rules are for direct client access (which should not happen)
+    match /investorVerificationCodes/{codeId} {
+      allow read, write: if false; // Only accessible via Cloud Functions
+    }
+    
+    // Investor Sessions collection
+    // Note: Cloud Functions use Admin SDK and bypass these rules
+    // These rules are for direct client access (which should not happen)
+    match /investorSessions/{sessionId} {
+      allow read, write: if false; // Only accessible via Cloud Functions
+    }
+    
     // Deny all other access
     match /{document=**} {
       allow read, write: if false;

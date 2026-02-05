@@ -206,6 +206,12 @@ export const documentServiceFirebase = {
       await firestoreService.deleteDoc(PERMISSIONS_COLLECTION, perm.id);
     }
     
+    // Get document to get userId
+    const doc = await firestoreService.getDoc<Document>(DOCUMENTS_COLLECTION, documentId);
+    if (!doc) {
+      throw new Error('Document not found');
+    }
+
     // Agregar nuevos permisos
     for (const perm of permissions) {
       const permId = `perm-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -224,6 +230,14 @@ export const documentServiceFirebase = {
       }
       
       await firestoreService.setDoc(PERMISSIONS_COLLECTION, permId, permissionData);
+      
+      // Share document with leads that are already in this stage or higher
+      try {
+        await this.shareDocumentWithLeadsInStage(doc.userId, documentId, perm.requiredStage);
+      } catch (error) {
+        console.error(`[DocumentService] Error sharing document with leads in stage ${perm.requiredStage}:`, error);
+        // Don't throw - permissions are saved, sharing can be retried later
+      }
     }
   },
 
@@ -345,5 +359,60 @@ export const documentServiceFirebase = {
       const firestoreData = sharedToFirestore(updated);
       await firestoreService.updateDoc(SHARED_COLLECTION, shared.id, firestoreData);
     }
+  },
+
+  // Compartir documento con leads que están en un stage específico o superior
+  async shareDocumentWithLeadsInStage(
+    userId: string,
+    documentId: string,
+    requiredStage: StageId
+  ): Promise<void> {
+    const { leadService } = await import('./leadService');
+    const { STAGES } = await import('../types/stage');
+    
+    // Get leads in this stage or higher
+    const eligibleLeads = await leadService.getLeadsByStageOrHigher(userId, requiredStage);
+    
+    // Share document with each eligible lead
+    for (const lead of eligibleLeads) {
+      try {
+        await this.shareDocumentWithLead(lead.id, documentId);
+        console.log(`[DocumentService] Shared document ${documentId} with lead ${lead.name} (${lead.email})`);
+      } catch (error) {
+        console.error(`[DocumentService] Error sharing document with lead ${lead.id}:`, error);
+      }
+    }
+  },
+
+  // Obtener documentos que deben compartirse para un stage específico
+  // (documentos con requiredStage <= currentStage)
+  async getDocumentsForStage(userId: string, stageId: StageId): Promise<Document[]> {
+    const { STAGES } = await import('../types/stage');
+    
+    const currentStageOrder = STAGES.find(s => s.id === stageId)?.order ?? -1;
+    
+    // Get all documents for this user
+    const allDocuments = await this.getDocuments(userId);
+    
+    // Get permissions for each document
+    const documentsWithPermissions = await Promise.all(
+      allDocuments.map(async (doc) => {
+        const permissions = await this.getPermissions(doc.id);
+        return { doc, permissions };
+      })
+    );
+    
+    // Filter documents that should be shared for this stage
+    const eligibleDocuments = documentsWithPermissions
+      .filter(({ permissions }) => {
+        // Document is eligible if it has at least one permission with requiredStage <= currentStage
+        return permissions.some(perm => {
+          const permStageOrder = STAGES.find(s => s.id === perm.requiredStage)?.order ?? -1;
+          return permStageOrder <= currentStageOrder;
+        });
+      })
+      .map(({ doc }) => doc);
+    
+    return eligibleDocuments;
   },
 };

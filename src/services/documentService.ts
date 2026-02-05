@@ -1,4 +1,5 @@
 import { Document, DocumentPermission, SharedDocument, DocumentCategory } from '../types/document';
+import { StageId } from '../types/stage';
 
 // Check if Firebase is configured
 const USE_FIREBASE = !!import.meta.env.VITE_FIREBASE_API_KEY;
@@ -287,5 +288,23 @@ export const documentService = {
     return service 
       ? service.markDocumentAsDownloaded(leadId, documentId)
       : documentServiceMock.markDocumentAsDownloaded(leadId, documentId);
+  },
+
+  async shareDocumentWithLeadsInStage(
+    userId: string,
+    documentId: string,
+    requiredStage: StageId
+  ): Promise<void> {
+    const service = await getFirebaseService();
+    return service 
+      ? service.shareDocumentWithLeadsInStage(userId, documentId, requiredStage)
+      : Promise.resolve(); // Mock: no-op
+  },
+
+  async getDocumentsForStage(userId: string, stageId: StageId): Promise<Document[]> {
+    const service = await getFirebaseService();
+    return service 
+      ? service.getDocumentsForStage(userId, stageId)
+      : Promise.resolve([]); // Mock: return empty array
   },
 };

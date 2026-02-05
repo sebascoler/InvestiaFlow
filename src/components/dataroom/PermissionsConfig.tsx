@@ -16,7 +16,6 @@ interface StagePermission {
   stageId: StageId;
   enabled: boolean;
   delayDays: number;
-  sendEmail: boolean;
 }
 
 export const PermissionsConfig: React.FC<PermissionsConfigProps> = ({
@@ -49,7 +48,6 @@ export const PermissionsConfig: React.FC<PermissionsConfigProps> = ({
           stageId: stage.id,
           enabled: !!existing,
           delayDays: existing?.delayDays || 0,
-          sendEmail: !!existing?.emailTemplate,
         };
       });
 
@@ -81,16 +79,6 @@ export const PermissionsConfig: React.FC<PermissionsConfigProps> = ({
     );
   };
 
-  const handleEmailToggle = (stageId: StageId) => {
-    setStagePermissions((prev) =>
-      prev.map((perm) =>
-        perm.stageId === stageId
-          ? { ...perm, sendEmail: !perm.sendEmail }
-          : perm
-      )
-    );
-  };
-
   const handleSave = async () => {
     if (!document) return;
 
@@ -99,20 +87,11 @@ export const PermissionsConfig: React.FC<PermissionsConfigProps> = ({
       // Build permissions array from enabled stages
       const permissionsToSave: Omit<DocumentPermission, 'id'>[] = stagePermissions
         .filter((perm) => perm.enabled)
-        .map((perm) => {
-          const permission: Omit<DocumentPermission, 'id'> = {
-            documentId: document.id,
-            requiredStage: perm.stageId,
-            delayDays: perm.delayDays,
-          };
-          
-          // Only add emailTemplate if sendEmail is enabled
-          if (perm.sendEmail) {
-            permission.emailTemplate = `Hi {{name}},\n\nWe've shared "${document.name}" with you. You can access it in your Data Room.\n\nBest regards,\nInvestiaFlow Team`;
-          }
-          
-          return permission;
-        });
+        .map((perm) => ({
+          documentId: document.id,
+          requiredStage: perm.stageId,
+          delayDays: perm.delayDays,
+        }));
 
       await setPermissions(document.id, permissionsToSave);
       onClose();
@@ -140,6 +119,7 @@ export const PermissionsConfig: React.FC<PermissionsConfigProps> = ({
         <div className="space-y-4">
           <p className="text-sm text-gray-600 mb-4">
             Share this document automatically when a lead reaches the selected stage.
+            To send email notifications, create an Automation Rule.
           </p>
 
           <div className="space-y-3">
@@ -187,18 +167,6 @@ export const PermissionsConfig: React.FC<PermissionsConfigProps> = ({
                             ? 'Share immediately when lead reaches this stage'
                             : `Share ${permission.delayDays} day(s) after lead reaches this stage`}
                         </p>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={permission.sendEmail}
-                          onChange={() => handleEmailToggle(stage.id)}
-                          className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                        />
-                        <label className="text-sm text-gray-700 cursor-pointer">
-                          Send email notification
-                        </label>
                       </div>
                     </div>
                   )}

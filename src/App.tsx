@@ -9,6 +9,8 @@ import AutomationPage from './pages/AutomationPage'
 import SettingsPage from './pages/SettingsPage'
 import HelpPage from './pages/HelpPage'
 import LoginPage from './pages/LoginPage'
+import InvestorLoginPage from './pages/InvestorLoginPage'
+import InvestorDataRoomPage from './pages/InvestorDataRoomPage'
 
 function App() {
   return (
@@ -17,6 +19,10 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            {/* Investor public routes */}
+            <Route path="/investor/login" element={<InvestorLoginPage />} />
+            <Route path="/investor/dataroom" element={<InvestorDataRoomPage />} />
+            {/* Protected routes */}
             <Route path="/" element={<Layout />}>
               <Route index element={<DashboardPage />} />
               <Route path="dashboard" element={<DashboardPage />} />

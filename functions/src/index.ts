@@ -190,3 +190,505 @@ export const sendDocumentEmail = functions.https.onCall(async (data, context) =>
     );
   }
 });
+
+// Helper function to generate 6-digit verification code
+const generateVerificationCode = (): string => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+// Helper function to generate session token
+const generateSessionToken = (): string => {
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+};
+
+// Helper function to get lead by email
+const getLeadByEmail = async (email: string): Promise<any | null> => {
+  const db = admin.firestore();
+  const leadsSnapshot = await db.collection('leads')
+    .where('email', '==', email.toLowerCase())
+    .limit(1)
+    .get();
+  
+  if (leadsSnapshot.empty) {
+    return null;
+  }
+  
+  return { id: leadsSnapshot.docs[0].id, ...leadsSnapshot.docs[0].data() };
+};
+
+// Helper function to check if lead has shared documents
+const leadHasSharedDocuments = async (leadId: string): Promise<boolean> => {
+  const db = admin.firestore();
+  const sharedSnapshot = await db.collection('sharedDocuments')
+    .where('leadId', '==', leadId)
+    .limit(1)
+    .get();
+  
+  return !sharedSnapshot.empty;
+};
+
+// Send verification code to investor email
+export const sendInvestorVerificationCode = functions.https.onCall(async (data, context) => {
+  const { email } = data;
+
+  if (!email || typeof email !== 'string') {
+    throw new functions.https.HttpsError(
+      'invalid-argument',
+      'Email is required'
+    );
+  }
+
+  try {
+    // Find lead by email
+    const lead = await getLeadByEmail(email);
+    if (!lead) {
+      throw new functions.https.HttpsError(
+        'not-found',
+        'No account found with this email address'
+      );
+    }
+
+    // Check if lead has shared documents
+    const hasDocuments = await leadHasSharedDocuments(lead.id);
+    if (!hasDocuments) {
+      throw new functions.https.HttpsError(
+        'failed-precondition',
+        'No documents have been shared with this email address yet'
+      );
+    }
+
+    // Generate verification code
+    const code = generateVerificationCode();
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 15); // 15 minutes expiration
+
+    // Delete any existing codes for this email
+    const db = admin.firestore();
+    const existingCodesSnapshot = await db.collection('investorVerificationCodes')
+      .where('email', '==', email.toLowerCase())
+      .get();
+    
+    const deletePromises = existingCodesSnapshot.docs.map(doc => doc.ref.delete());
+    await Promise.all(deletePromises);
+
+    // Create new verification code
+    const codeId = `code-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    await db.collection('investorVerificationCodes').doc(codeId).set({
+      email: email.toLowerCase(),
+      code,
+      leadId: lead.id,
+      expiresAt: admin.firestore.Timestamp.fromDate(expiresAt),
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    // Send email with verification code
+    if (!resend) {
+      console.warn('Resend not configured, verification code:', code);
+      return { success: true, code: code }; // For development
+    }
+
+    const emailHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
+                     line-height: 1.6; color: #1f2937; background-color: #f9fafb; margin: 0; padding: 0;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px;">
+            <div style="border-bottom: 2px solid #0284c7; padding-bottom: 20px; margin-bottom: 30px;">
+              <h1 style="color: #0284c7; margin: 0; font-size: 28px;">InvestiaFlow</h1>
+              <p style="color: #6b7280; margin: 5px 0 0 0; font-size: 14px;">Investor Data Room</p>
+            </div>
+            
+            <h2 style="color: #1f2937; margin-top: 0;">Hi ${lead.name},</h2>
+            
+            <p style="color: #374151; font-size: 16px; margin: 20px 0;">
+              Your verification code to access the Data Room is:
+            </p>
+            
+            <div style="background-color: #f3f4f6; border: 2px dashed #0284c7; border-radius: 8px; padding: 20px; text-align: center; margin: 30px 0;">
+              <div style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #0284c7; font-family: monospace;">
+                ${code}
+              </div>
+            </div>
+            
+            <p style="color: #6b7280; font-size: 14px; margin: 20px 0;">
+              This code will expire in 15 minutes. If you didn't request this code, please ignore this email.
+            </p>
+            
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; 
+                        color: #6b7280; font-size: 14px;">
+              <p style="margin: 0;">Best regards,<br><strong>InvestiaFlow Team</strong></p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    await resend.emails.send({
+      from: 'sebas@investia.capital',
+      to: email,
+      subject: 'Your InvestiaFlow Data Room Access Code',
+      html: emailHtml,
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error sending verification code:', error);
+    if (error instanceof functions.https.HttpsError) {
+      throw error;
+    }
+    throw new functions.https.HttpsError(
+      'internal',
+      error.message || 'Failed to send verification code'
+    );
+  }
+});
+
+// Verify investor code and create session
+export const verifyInvestorCode = functions.https.onCall(async (data, context) => {
+  const { email, code } = data;
+
+  if (!email || !code || typeof email !== 'string' || typeof code !== 'string') {
+    throw new functions.https.HttpsError(
+      'invalid-argument',
+      'Email and code are required'
+    );
+  }
+
+  try {
+    const db = admin.firestore();
+    
+    // Find verification code
+    const codesSnapshot = await db.collection('investorVerificationCodes')
+      .where('email', '==', email.toLowerCase())
+      .where('code', '==', code)
+      .limit(1)
+      .get();
+
+    if (codesSnapshot.empty) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'Invalid verification code'
+      );
+    }
+
+    const codeDoc = codesSnapshot.docs[0];
+    const codeData = codeDoc.data();
+
+    // Check expiration
+    const expiresAt = codeData.expiresAt.toDate();
+    if (expiresAt < new Date()) {
+      await codeDoc.ref.delete();
+      throw new functions.https.HttpsError(
+        'deadline-exceeded',
+        'Verification code has expired'
+      );
+    }
+
+    // Delete used code
+    await codeDoc.ref.delete();
+
+    // Create session
+    const sessionToken = generateSessionToken();
+    const expiresAtSession = new Date();
+    expiresAtSession.setDate(expiresAtSession.getDate() + 7); // 7 days expiration
+
+    await db.collection('investorSessions').doc(sessionToken).set({
+      leadId: codeData.leadId,
+      email: email.toLowerCase(),
+      expiresAt: admin.firestore.Timestamp.fromDate(expiresAtSession),
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    return {
+      sessionToken,
+      leadId: codeData.leadId,
+      email: email.toLowerCase(),
+      expiresAt: expiresAtSession.toISOString(),
+    };
+  } catch (error: any) {
+    console.error('Error verifying code:', error);
+    if (error instanceof functions.https.HttpsError) {
+      throw error;
+    }
+    throw new functions.https.HttpsError(
+      'internal',
+      error.message || 'Failed to verify code'
+    );
+  }
+});
+
+// Helper function to validate session
+const validateSession = async (sessionToken: string): Promise<any> => {
+  const db = admin.firestore();
+  const sessionDoc = await db.collection('investorSessions').doc(sessionToken).get();
+
+  if (!sessionDoc.exists) {
+    throw new functions.https.HttpsError(
+      'unauthenticated',
+      'Invalid session'
+    );
+  }
+
+  const sessionData = sessionDoc.data()!;
+  const expiresAt = sessionData.expiresAt.toDate();
+
+  if (expiresAt < new Date()) {
+    await sessionDoc.ref.delete();
+    throw new functions.https.HttpsError(
+      'unauthenticated',
+      'Session expired'
+    );
+  }
+
+  return sessionData;
+};
+
+// Get investor documents
+export const getInvestorDocuments = functions.https.onCall(async (data, context) => {
+  const { sessionToken } = data;
+
+  if (!sessionToken) {
+    throw new functions.https.HttpsError(
+      'invalid-argument',
+      'Session token is required'
+    );
+  }
+
+  try {
+    const session = await validateSession(sessionToken);
+    const db = admin.firestore();
+
+    // Get shared documents for this lead
+    const sharedDocsSnapshot = await db.collection('sharedDocuments')
+      .where('leadId', '==', session.leadId)
+      .get();
+
+    if (sharedDocsSnapshot.empty) {
+      return [];
+    }
+
+    // Get document details
+    const documentPromises = sharedDocsSnapshot.docs.map(async (sharedDoc) => {
+      const sharedData = sharedDoc.data();
+      const docSnapshot = await db.collection('documents').doc(sharedData.documentId).get();
+      
+      if (!docSnapshot.exists) {
+        return null;
+      }
+
+      const docData = docSnapshot.data()!;
+      return {
+        id: sharedDoc.id,
+        documentId: sharedData.documentId,
+        name: docData.name,
+        category: docData.category,
+        description: docData.description,
+        fileSize: docData.fileSize,
+        fileType: docData.fileType,
+        uploadedAt: docData.uploadedAt?.toDate().toISOString(),
+        sharedAt: sharedData.sharedAt?.toDate().toISOString(),
+        viewedAt: sharedData.viewedAt?.toDate().toISOString() || null,
+        downloadedAt: sharedData.downloadedAt?.toDate().toISOString() || null,
+        downloadUrl: docData.downloadUrl || null,
+      };
+    });
+
+    const documents = await Promise.all(documentPromises);
+    return documents.filter(doc => doc !== null);
+  } catch (error: any) {
+    console.error('Error getting investor documents:', error);
+    if (error instanceof functions.https.HttpsError) {
+      throw error;
+    }
+    throw new functions.https.HttpsError(
+      'internal',
+      error.message || 'Failed to get documents'
+    );
+  }
+});
+
+// Get document download URL
+export const getInvestorDocumentDownloadUrl = functions.https.onCall(async (data, context) => {
+  const { sessionToken, documentId } = data;
+
+  if (!sessionToken || !documentId) {
+    throw new functions.https.HttpsError(
+      'invalid-argument',
+      'Session token and document ID are required'
+    );
+  }
+
+  try {
+    const session = await validateSession(sessionToken);
+    const db = admin.firestore();
+
+    // Verify document is shared with this lead
+    const sharedDocSnapshot = await db.collection('sharedDocuments')
+      .where('leadId', '==', session.leadId)
+      .where('documentId', '==', documentId)
+      .limit(1)
+      .get();
+
+    if (sharedDocSnapshot.empty) {
+      throw new functions.https.HttpsError(
+        'permission-denied',
+        'Document not shared with this lead'
+      );
+    }
+
+    // Get document
+    const docSnapshot = await db.collection('documents').doc(documentId).get();
+    if (!docSnapshot.exists) {
+      throw new functions.https.HttpsError(
+        'not-found',
+        'Document not found'
+      );
+    }
+
+    const docData = docSnapshot.data()!;
+    
+    // If downloadUrl exists, return it
+    if (docData.downloadUrl) {
+      return { downloadUrl: docData.downloadUrl };
+    }
+
+    // Otherwise, generate signed URL from storage path
+    if (docData.storagePath) {
+      const bucket = admin.storage().bucket();
+      const file = bucket.file(docData.storagePath);
+      
+      const [url] = await file.getSignedUrl({
+        action: 'read',
+        expires: Date.now() + 3600000, // 1 hour
+      });
+
+      return { downloadUrl: url };
+    }
+
+    throw new functions.https.HttpsError(
+      'failed-precondition',
+      'Document download URL not available'
+    );
+  } catch (error: any) {
+    console.error('Error getting download URL:', error);
+    if (error instanceof functions.https.HttpsError) {
+      throw error;
+    }
+    throw new functions.https.HttpsError(
+      'internal',
+      error.message || 'Failed to get download URL'
+    );
+  }
+});
+
+// Mark document as viewed
+export const markInvestorDocumentViewed = functions.https.onCall(async (data, context) => {
+  const { sessionToken, documentId } = data;
+
+  if (!sessionToken || !documentId) {
+    throw new functions.https.HttpsError(
+      'invalid-argument',
+      'Session token and document ID are required'
+    );
+  }
+
+  try {
+    const session = await validateSession(sessionToken);
+    const db = admin.firestore();
+
+    // Find shared document
+    const sharedDocSnapshot = await db.collection('sharedDocuments')
+      .where('leadId', '==', session.leadId)
+      .where('documentId', '==', documentId)
+      .limit(1)
+      .get();
+
+    if (sharedDocSnapshot.empty) {
+      throw new functions.https.HttpsError(
+        'not-found',
+        'Document not shared with this lead'
+      );
+    }
+
+    const sharedDoc = sharedDocSnapshot.docs[0];
+    const sharedData = sharedDoc.data();
+
+    // Update viewedAt if not already set
+    if (!sharedData.viewedAt) {
+      await sharedDoc.ref.update({
+        viewedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error marking document as viewed:', error);
+    if (error instanceof functions.https.HttpsError) {
+      throw error;
+    }
+    throw new functions.https.HttpsError(
+      'internal',
+      error.message || 'Failed to mark document as viewed'
+    );
+  }
+});
+
+// Mark document as downloaded
+export const markInvestorDocumentDownloaded = functions.https.onCall(async (data, context) => {
+  const { sessionToken, documentId } = data;
+
+  if (!sessionToken || !documentId) {
+    throw new functions.https.HttpsError(
+      'invalid-argument',
+      'Session token and document ID are required'
+    );
+  }
+
+  try {
+    const session = await validateSession(sessionToken);
+    const db = admin.firestore();
+
+    // Find shared document
+    const sharedDocSnapshot = await db.collection('sharedDocuments')
+      .where('leadId', '==', session.leadId)
+      .where('documentId', '==', documentId)
+      .limit(1)
+      .get();
+
+    if (sharedDocSnapshot.empty) {
+      throw new functions.https.HttpsError(
+        'not-found',
+        'Document not shared with this lead'
+      );
+    }
+
+    const sharedDoc = sharedDocSnapshot.docs[0];
+    const sharedData = sharedDoc.data();
+
+    // Update downloadedAt and viewedAt if not set
+    const updates: any = {
+      downloadedAt: admin.firestore.FieldValue.serverTimestamp(),
+    };
+
+    if (!sharedData.viewedAt) {
+      updates.viewedAt = admin.firestore.FieldValue.serverTimestamp();
+    }
+
+    await sharedDoc.ref.update(updates);
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error marking document as downloaded:', error);
+    if (error instanceof functions.https.HttpsError) {
+      throw error;
+    }
+    throw new functions.https.HttpsError(
+      'internal',
+      error.message || 'Failed to mark document as downloaded'
+    );
+  }
+});

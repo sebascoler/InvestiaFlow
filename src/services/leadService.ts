@@ -234,6 +234,18 @@ const leadServiceMock = {
   async deleteLead(id: string): Promise<void> {
     leadsDB = leadsDB.filter(lead => lead.id !== id);
   },
+
+  // Obtener leads por stage o stages superiores
+  async getLeadsByStageOrHigher(userId: string, minStage: StageId): Promise<Lead[]> {
+    const { STAGES } = await import('../types/stage');
+    const userLeads = leadsDB.filter(lead => lead.userId === userId);
+    const minStageOrder = STAGES.find(s => s.id === minStage)?.order ?? -1;
+    
+    return userLeads.filter(lead => {
+      const leadStageOrder = STAGES.find(s => s.id === lead.stage)?.order ?? -1;
+      return leadStageOrder >= minStageOrder;
+    });
+  },
 };
 
 // Lazy load Firebase service
@@ -284,5 +296,12 @@ export const leadService = {
   async deleteLead(id: string): Promise<void> {
     const service = await getFirebaseService();
     return service ? service.deleteLead(id) : leadServiceMock.deleteLead(id);
+  },
+
+  async getLeadsByStageOrHigher(userId: string, minStage: StageId): Promise<Lead[]> {
+    const service = await getFirebaseService();
+    return service 
+      ? service.getLeadsByStageOrHigher(userId, minStage) 
+      : leadServiceMock.getLeadsByStageOrHigher(userId, minStage);
   },
 };

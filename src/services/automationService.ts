@@ -149,8 +149,18 @@ const automationServiceMock = {
       // Crear links de documentos
       const documentLinks = documentsToShare.map(doc => doc.name);
       
-      // Generate data room URL (if you have a public data room page)
-      const dataRoomUrl = `${window.location.origin}/dataroom`;
+      // Generate data room URL for investor access
+      // Use VITE_APP_URL env var if available, otherwise try window.location.origin
+      let appOrigin: string | undefined;
+      if (typeof window !== 'undefined' && window.location) {
+        appOrigin = window.location.origin;
+      } else if (import.meta.env.VITE_APP_URL) {
+        appOrigin = import.meta.env.VITE_APP_URL;
+      }
+      
+      const dataRoomUrl = appOrigin 
+        ? `${appOrigin}/investor/login?email=${encodeURIComponent(lead.email)}`
+        : undefined;
       
       await emailService.sendDocumentEmail(
         lead.email,

@@ -108,20 +108,44 @@ export const automationServiceFirebase = {
   async onStageChange(lead: Lead, oldStage: StageId, newStage: StageId): Promise<void> {
     console.log(`[Automation] Lead ${lead.name} moved from ${oldStage} to ${newStage}`);
     
-    // Obtener reglas activas para este stage
+    // 1. Compartir documentos basados en permisos (para stages siguientes)
+    try {
+      const documentsToShare = await documentService.getDocumentsForStage(lead.userId, newStage);
+      console.log(`[Automation] Found ${documentsToShare.length} documents eligible for stage ${newStage}`);
+      
+      for (const doc of documentsToShare) {
+        // Check if document should be shared (based on permissions)
+        const permissions = await documentService.getPermissions(doc.id);
+        const { STAGES } = await import('../types/stage');
+        const currentStageOrder = STAGES.find(s => s.id === newStage)?.order ?? -1;
+        
+        const shouldShare = permissions.some(perm => {
+          const permStageOrder = STAGES.find(s => s.id === perm.requiredStage)?.order ?? -1;
+          return permStageOrder <= currentStageOrder;
+        });
+        
+        if (shouldShare) {
+          await documentService.shareDocumentWithLead(lead.id, doc.id);
+          console.log(`[Automation] Shared document ${doc.name} with lead ${lead.name} based on permissions`);
+        }
+      }
+    } catch (error) {
+      console.error('[Automation] Error sharing documents based on permissions:', error);
+    }
+    
+    // 2. Ejecutar reglas de automatización activas para este stage
     const allRules = await this.getRules(lead.userId);
     const activeRules = allRules.filter(
       rule => rule.triggerStage === newStage && rule.isActive
     );
 
-    if (activeRules.length === 0) {
-      console.log(`[Automation] No active rules for stage ${newStage}`);
-      return;
-    }
-
-    // Ejecutar cada regla activa
-    for (const rule of activeRules) {
-      await this.executeRule(lead, rule);
+    if (activeRules.length > 0) {
+      // Ejecutar cada regla activa
+      for (const rule of activeRules) {
+        await this.executeRule(lead, rule);
+      }
+    } else {
+      console.log(`[Automation] No active automation rules for stage ${newStage}`);
     }
   },
 
@@ -169,9 +193,17 @@ export const automationServiceFirebase = {
       // Crear links de documentos
       const documentLinks = documentsToShare.map(doc => doc.name);
       
-      // Generate data room URL (if you have a public data room page)
-      const dataRoomUrl = typeof window !== 'undefined' 
-        ? `${window.location.origin}/dataroom`
+      // Generate data room URL for investor access
+      // Use VITE_APP_URL env var if available, otherwise try window.location.origin
+      let appOrigin: string | undefined;
+      if (typeof window !== 'undefined' && window.location) {
+        appOrigin = window.location.origin;
+      } else if (import.meta.env.VITE_APP_URL) {
+        appOrigin = import.meta.env.VITE_APP_URL;
+      }
+      
+      const dataRoomUrl = appOrigin 
+        ? `${appOrigin}/investor/login?email=${encodeURIComponent(lead.email)}`
         : undefined;
       
       await emailService.sendDocumentEmail(
