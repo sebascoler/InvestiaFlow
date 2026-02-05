@@ -1,5 +1,6 @@
 // Firebase implementation of documentService
 import { Document, DocumentPermission, SharedDocument, DocumentCategory } from '../types/document';
+import { StageId } from '../types/stage';
 import { firestoreService, dateToTimestamp, timestampToDate } from '../firebase/firestore';
 import { storageService } from '../firebase/storage';
 

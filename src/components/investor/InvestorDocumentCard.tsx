@@ -51,7 +51,9 @@ export const InvestorDocumentCard: React.FC<InvestorDocumentCardProps> = ({
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-semibold text-gray-900 text-lg">{document.name}</h3>
             {isViewed && (
-              <CheckCircle2 size={20} className="text-green-500 flex-shrink-0" title="Viewed" />
+              <div title="Viewed">
+                <CheckCircle2 size={20} className="text-green-500 flex-shrink-0" />
+              </div>
             )}
           </div>
           <div className="flex items-center gap-2 mt-2">
