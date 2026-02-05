@@ -52,7 +52,7 @@ const HelpPage: React.FC = () => {
     },
     {
       question: '¿Cómo funcionan las automatizaciones?',
-      answer: 'Las automatizaciones comparten documentos automáticamente cuando un lead alcanza un stage específico. Puedes configurar qué documentos compartir, si hay un delay, y si se envía un email de notificación. Ve a la página Automation para crear y gestionar reglas.',
+      answer: 'Las automatizaciones comparten documentos automáticamente cuando un lead alcanza un stage específico. Puedes configurar qué documentos compartir, si hay un delay, y opcionalmente enviar un email de notificación personalizado. Ve a la página Automation para crear y gestionar reglas.',
     },
     {
       question: '¿Puedo configurar permisos diferentes para cada documento?',
@@ -64,7 +64,11 @@ const HelpPage: React.FC = () => {
     },
     {
       question: '¿Cómo veo qué documentos se han compartido con un lead?',
-      answer: 'Actualmente, los documentos compartidos se registran en la consola del navegador cuando se ejecuta una automatización. En futuras versiones, esto estará disponible en el panel de detalles del lead.',
+      answer: 'Los documentos compartidos con cada lead están disponibles en su Data Room personalizado. Cuando un inversor accede con su email y código de verificación, puede ver todos los documentos que le has compartido, junto con el tracking de visualizaciones y descargas.',
+    },
+    {
+      question: '¿Cómo acceden los inversores al Data Room?',
+      answer: 'Los inversores reciben un email con un código de verificación de 6 dígitos cuando les compartes documentos. Deben ingresar a /investor/login, ingresar su email, recibir el código por email, y luego accederán a su Data Room personalizado donde solo verán los documentos compartidos con ellos.',
     },
     {
       question: '¿Puedo editar un lead después de crearlo?',
@@ -88,6 +92,14 @@ const HelpPage: React.FC = () => {
     {
       icon: <Lightbulb className="text-yellow-500" size={20} />,
       text: 'Crea reglas de automatización para stages comunes como "Pitch Shared" o "Due Diligence"',
+    },
+    {
+      icon: <Lightbulb className="text-yellow-500" size={20} />,
+      text: 'Los inversores acceden al Data Room con su email y un código de verificación que reciben por correo',
+    },
+    {
+      icon: <Lightbulb className="text-yellow-500" size={20} />,
+      text: 'Usa Automation Rules para enviar emails personalizados, los permisos de documentos solo comparten archivos',
     },
     {
       icon: <Lightbulb className="text-yellow-500" size={20} />,
@@ -211,9 +223,11 @@ const HelpPage: React.FC = () => {
               <li>Haz clic en el ícono de configuración (⚙️) en cualquier documento</li>
               <li>Marca los stages en los que quieres compartir el documento automáticamente</li>
               <li>Configura un delay opcional (días después del stage)</li>
-              <li>Activa el envío de email si deseas notificar al inversor</li>
               <li>Guarda los cambios</li>
             </ol>
+            <p className="text-sm text-gray-500 mt-2">
+              <strong>Nota:</strong> Para enviar emails de notificación a los inversores, debes crear una Regla de Automatización en la página Automation. Los permisos de documentos solo controlan cuándo se comparten los archivos, no el envío de emails.
+            </p>
           </div>
           <div>
             <h3 className="font-semibold text-gray-900 mb-2">Búsqueda y Filtros</h3>
@@ -226,6 +240,54 @@ const HelpPage: React.FC = () => {
         </div>
       ),
     },
+    {
+      id: 'investor-access',
+        title: 'Acceso de Inversores al Data Room',
+        icon: <MessageSquare size={20} />,
+        content: (
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2">¿Cómo funciona el acceso de inversores?</h3>
+              <p className="text-gray-600 mb-3">
+                Cuando compartes documentos con un lead mediante permisos o automatizaciones, el inversor puede acceder 
+                a su Data Room personalizado usando su email y un código de verificación de 6 dígitos.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2">Proceso de Acceso</h3>
+              <ol className="list-decimal list-inside space-y-2 text-gray-600">
+                <li>El inversor recibe un email con un código de verificación cuando se le comparten documentos</li>
+                <li>El inversor ingresa a la URL del Data Room (normalmente compartida en el email)</li>
+                <li>Ingresa su email y solicita el código de verificación</li>
+                <li>Recibe un código de 6 dígitos por email</li>
+                <li>Ingresa el código para acceder a su Data Room personalizado</li>
+              </ol>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2">¿Qué ve el inversor?</h3>
+              <ul className="list-disc list-inside space-y-2 text-gray-600">
+                <li>Solo los documentos que le has compartido específicamente</li>
+                <li>Información de cuándo fue compartido cada documento</li>
+                <li>Tracking de qué documentos ha visto y descargado</li>
+                <li>Puede ver y descargar los documentos compartidos</li>
+              </ul>
+            </div>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm text-blue-800">
+                <strong>🔒 Seguridad:</strong> Cada inversor solo ve sus propios documentos. El sistema valida 
+                que el email corresponda a un lead en tu CRM antes de permitir el acceso.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-2">Tracking de Actividad</h3>
+              <p className="text-gray-600">
+                Puedes ver qué documentos han sido vistos y descargados por cada inversor. Esta información 
+                te ayuda a entender el nivel de interés y engagement de cada lead en tu pipeline.
+              </p>
+            </div>
+          </div>
+        ),
+      },
       {
         id: 'automation',
         title: 'Configurando Automatizaciones',
@@ -301,6 +363,7 @@ const HelpPage: React.FC = () => {
                     <li>Se configuran por documento individual</li>
                     <li>Son más simples: solo marcas stages y delays</li>
                     <li>Útiles para documentos que siempre se comparten en los mismos stages</li>
+                    <li><strong>No envían emails</strong> - solo comparten documentos automáticamente</li>
                   </ul>
                   <p className="text-xs text-gray-600 italic">
                     Ejemplo: "El pitch deck siempre se comparte cuando un lead llega a 'Pitch Shared'"
