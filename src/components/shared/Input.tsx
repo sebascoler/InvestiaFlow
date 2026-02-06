@@ -3,11 +3,13 @@ import React from 'react';
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  helpText?: string;
 }
 
 export const Input: React.FC<InputProps> = ({
   label,
   error,
+  helpText,
   className = '',
   id,
   ...props
@@ -34,6 +36,9 @@ export const Input: React.FC<InputProps> = ({
       />
       {error && (
         <p className="mt-1 text-sm text-red-600">{error}</p>
+      )}
+      {helpText && !error && (
+        <p className="mt-1 text-sm text-gray-500">{helpText}</p>
       )}
     </div>
   );
