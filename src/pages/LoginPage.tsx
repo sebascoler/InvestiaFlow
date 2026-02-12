@@ -13,7 +13,8 @@ const LoginPage: React.FC = () => {
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { login, signup, loginWithGoogle } = useAuth();
+  const [justSignedUp, setJustSignedUp] = useState(false);
+  const { login, signup, loginWithGoogle, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   
@@ -32,14 +33,27 @@ const LoginPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [emailHint]);
 
+  // Navigate after successful signup when user becomes authenticated
+  useEffect(() => {
+    if (justSignedUp && isAuthenticated) {
+      setJustSignedUp(false);
+      setIsLoading(false);
+      navigate(redirectTo);
+    }
+  }, [justSignedUp, isAuthenticated, navigate, redirectTo]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setJustSignedUp(false);
     
     try {
       if (isLogin) {
         await login(email, password);
+        // Navigate immediately after login
+        navigate(redirectTo);
+        setIsLoading(false);
       } else {
         if (!name.trim()) {
           setError('Name is required');
@@ -47,13 +61,27 @@ const LoginPage: React.FC = () => {
           return;
         }
         await signup(email, password, name);
+        // After signup, Firebase automatically authenticates the user
+        // Set flag to wait for auth state to update, then navigate via useEffect
+        setJustSignedUp(true);
+        // Set a timeout fallback in case auth state doesn't update quickly
+        setTimeout(() => {
+          setJustSignedUp((prev) => {
+            if (prev) {
+              // If still waiting after 2 seconds, navigate anyway
+              // The auth state will catch up
+              setIsLoading(false);
+              navigate(redirectTo);
+              return false;
+            }
+            return prev;
+          });
+        }, 2000);
       }
-      // Navigate to redirect URL or default to dashboard
-      navigate(redirectTo);
     } catch (err: any) {
       setError(err.message || 'Authentication failed');
-    } finally {
       setIsLoading(false);
+      setJustSignedUp(false);
     }
   };
 
@@ -62,11 +90,10 @@ const LoginPage: React.FC = () => {
     setError(null);
     try {
       await loginWithGoogle();
-      // Navigate to redirect URL or default to dashboard
+      // Navigate immediately after Google login (it's already authenticated)
       navigate(redirectTo);
     } catch (err: any) {
       setError(err.message || 'Google login failed');
-    } finally {
       setIsLoading(false);
     }
   };

@@ -8,6 +8,9 @@ import { Modal } from '../components/shared/Modal';
 import { Select } from '../components/shared/Select';
 import { ToastContainer, ToastType } from '../components/shared/Toast';
 import { ColorPicker } from '../components/shared/ColorPicker';
+import { Tour } from '../components/onboarding/Tour';
+import { getTourSteps } from '../utils/onboardingSteps';
+import { useOnboarding } from '../hooks/useOnboarding';
 import { teamService } from '../services/teamService';
 import { invitationService } from '../services/invitationService';
 import { TeamMemberRole, TeamBranding } from '../types/team';
@@ -23,10 +26,34 @@ interface Toast {
 const TeamPage: React.FC = () => {
   const { currentTeam, teams, members, pendingInvitations, loading, error, refreshMembers, refreshInvitations, createTeam, updateBranding } = useTeam();
   const { user } = useAuth();
+  const { shouldShowTutorial, progress } = useOnboarding();
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [isCreateTeamModalOpen, setIsCreateTeamModalOpen] = useState(false);
   const [isBrandingModalOpen, setIsBrandingModalOpen] = useState(false);
+  const [showTour, setShowTour] = useState(false);
+
+  // Show tour if user is owner/admin and should see team tutorial
+  useEffect(() => {
+    const isOwner = currentTeam?.ownerId === user?.id;
+    const canManageTeam = isOwner || (currentTeam?.members?.find(m => m.userId === user?.id)?.role === 'admin');
+    if (shouldShowTutorial('team') && progress && !progress.completed && canManageTeam) {
+      const verifyElements = () => {
+        const invite = document.querySelector('[data-tour="team-invite"]');
+        const members = document.querySelector('[data-tour="team-members"]');
+        return invite !== null && members !== null;
+      };
+      
+      const timer = setTimeout(() => {
+        if (verifyElements()) {
+          setShowTour(true);
+        }
+      }, 800);
+      return () => clearTimeout(timer);
+    } else {
+      setShowTour(false);
+    }
+  }, [shouldShowTutorial, progress, currentTeam, user]);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<TeamMemberRole>('viewer');
   const [newTeamName, setNewTeamName] = useState('');
@@ -391,8 +418,17 @@ const TeamPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="mb-8">
+    <>
+      {showTour && (
+        <Tour
+          steps={getTourSteps('team')}
+          tourId="team"
+          onComplete={() => setShowTour(false)}
+          onSkip={() => setShowTour(false)}
+        />
+      )}
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Team Management</h1>
@@ -405,13 +441,14 @@ const TeamPage: React.FC = () => {
               <Button 
                 variant="secondary" 
                 onClick={() => setIsBrandingModalOpen(true)}
+                data-tour="team-branding"
               >
                 <Palette size={20} className="mr-2" />
                 Branding
               </Button>
             )}
             <PermissionGate action="manage_members" resource="members">
-              <Button variant="primary" onClick={() => setIsInviteModalOpen(true)}>
+              <Button variant="primary" onClick={() => setIsInviteModalOpen(true)} data-tour="team-invite">
                 <UserPlus size={20} className="mr-2" />
                 Invite Member
               </Button>
@@ -427,7 +464,7 @@ const TeamPage: React.FC = () => {
       )}
 
       {currentTeam && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200" data-tour="team-members">
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Team Members</h2>
             <p className="text-sm text-gray-600">
@@ -732,7 +769,8 @@ const TeamPage: React.FC = () => {
       </Modal>
 
       <ToastContainer toasts={toasts} removeToast={removeToast} />
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -1,16 +1,26 @@
 // Firebase implementation of userProfileService
-import { UserProfile, UserProfileUpdate } from '../types/userProfile';
+import { UserProfile, UserProfileUpdate, OnboardingProgress } from '../types/userProfile';
 import { firestoreService, timestampToDate, dateToTimestamp } from '../firebase/firestore';
 
 const USER_PROFILES_COLLECTION = 'userProfiles';
 
 // Helper to convert Firestore data to UserProfile
 const firestoreToProfile = (data: any): UserProfile => {
-  return {
+  const profile: UserProfile = {
     ...data,
     createdAt: timestampToDate(data.createdAt) || new Date(),
     updatedAt: timestampToDate(data.updatedAt) || new Date(),
-  } as UserProfile;
+  };
+  
+  // Convert onboardingProgress dates if present
+  if (data.onboardingProgress?.lastCompletedAt) {
+    profile.onboardingProgress = {
+      ...data.onboardingProgress,
+      lastCompletedAt: timestampToDate(data.onboardingProgress.lastCompletedAt),
+    };
+  }
+  
+  return profile;
 };
 
 // Helper to convert UserProfile to Firestore data
@@ -28,6 +38,23 @@ const profileToFirestore = (profile: Partial<UserProfile>): any => {
   if (data.createdAt) data.createdAt = dateToTimestamp(data.createdAt);
   if (data.updatedAt) data.updatedAt = dateToTimestamp(data.updatedAt);
   
+  // Handle onboardingProgress - remove undefined nested fields
+  if (data.onboardingProgress) {
+    const onboardingData: any = { ...data.onboardingProgress };
+    Object.keys(onboardingData).forEach(key => {
+      if (onboardingData[key] === undefined) {
+        delete onboardingData[key];
+      }
+    });
+    
+    // Convert lastCompletedAt if present
+    if (onboardingData.lastCompletedAt) {
+      onboardingData.lastCompletedAt = dateToTimestamp(onboardingData.lastCompletedAt);
+    }
+    
+    data.onboardingProgress = onboardingData;
+  }
+  
   return data;
 };
 
@@ -43,7 +70,12 @@ export const userProfileServiceFirebase = {
         return null;
       }
       
-      return firestoreToProfile(profile);
+      const converted = firestoreToProfile(profile);
+      // Convert onboardingProgress dates if present
+      if (converted.onboardingProgress?.lastCompletedAt && typeof converted.onboardingProgress.lastCompletedAt !== 'object') {
+        converted.onboardingProgress.lastCompletedAt = timestampToDate(converted.onboardingProgress.lastCompletedAt as any);
+      }
+      return converted;
     } catch (error) {
       console.error('[userProfileServiceFirebase] Error getting profile:', error);
       throw error;

@@ -54,6 +54,7 @@ export const Sidebar: React.FC = () => {
       
       {/* Sidebar */}
       <div
+        data-tour="sidebar"
         className={`
           w-64 bg-gray-900 text-white h-full flex flex-col fixed left-0 top-0 z-50
           lg:relative lg:z-auto lg:h-full

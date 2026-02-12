@@ -1,5 +1,5 @@
 // User Profile Service - Uses Firebase if available, otherwise mock
-import { UserProfile, UserProfileUpdate } from '../types/userProfile';
+import { UserProfile, UserProfileUpdate, OnboardingProgress } from '../types/userProfile';
 
 const USER_PROFILES_COLLECTION = 'userProfiles';
 

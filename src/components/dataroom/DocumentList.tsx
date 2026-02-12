@@ -73,7 +73,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
           />
         </div>
         <PermissionGate action="create" resource="documents">
-          <Button variant="primary" onClick={onUpload}>
+          <Button variant="primary" onClick={onUpload} data-tour="dataroom-upload">
             <Upload size={18} className="mr-2" />
             Upload Document
           </Button>

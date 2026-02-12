@@ -9,6 +9,9 @@ import { LineChart } from '../components/dashboard/LineChart';
 import { Loader } from '../components/shared/Loader';
 import { Button } from '../components/shared/Button';
 import { exportLeadsToCSV, exportMetricsToCSV } from '../utils/csvExport';
+import { Tour } from '../components/onboarding/Tour';
+import { getTourSteps } from '../utils/onboardingSteps';
+import { useOnboarding } from '../hooks/useOnboarding';
 
 const DashboardPage: React.FC = () => {
   const { leads, loading: leadsLoading } = useLeads();
@@ -16,6 +19,38 @@ const DashboardPage: React.FC = () => {
   const [pipelineMetrics, setPipelineMetrics] = useState<PipelineMetrics | null>(null);
   const [documentMetrics, setDocumentMetrics] = useState<DocumentMetrics | null>(null);
   const [loading, setLoading] = useState(true);
+  const { shouldShowTutorial, progress } = useOnboarding();
+  const [showTour, setShowTour] = useState(false);
+
+  // Show tour if user just started onboarding and hasn't completed dashboard tour
+  useEffect(() => {
+    if (shouldShowTutorial('dashboard') && progress && !progress.completed) {
+      // Verify elements exist before starting tour
+      const verifyElements = () => {
+        const sidebar = document.querySelector('[data-tour="sidebar"]');
+        const metrics = document.querySelector('[data-tour="dashboard-metrics"]');
+        return sidebar !== null && metrics !== null;
+      };
+      
+      // Small delay to ensure page is rendered, then verify elements
+      const timer = setTimeout(() => {
+        if (verifyElements()) {
+          setShowTour(true);
+        } else {
+          // Retry once more if elements aren't ready
+          const retryTimer = setTimeout(() => {
+            if (verifyElements()) {
+              setShowTour(true);
+            }
+          }, 500);
+          return () => clearTimeout(retryTimer);
+        }
+      }, 800);
+      return () => clearTimeout(timer);
+    } else {
+      setShowTour(false);
+    }
+  }, [shouldShowTutorial, progress]);
 
   useEffect(() => {
     loadMetrics();
@@ -81,27 +116,36 @@ const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-1">Métricas y análisis del pipeline</p>
+    <>
+      {showTour && (
+        <Tour
+          steps={getTourSteps('dashboard')}
+          tourId="dashboard"
+          onComplete={() => setShowTour(false)}
+          onSkip={() => setShowTour(false)}
+        />
+      )}
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <p className="text-gray-600 mt-1">Métricas y análisis del pipeline</p>
+          </div>
+          <div className="flex gap-3">
+            <Button variant="secondary" onClick={handleExportLeads} data-tour="dashboard-export">
+              <Download size={16} className="mr-2" />
+              Exportar Leads
+            </Button>
+            <Button variant="secondary" onClick={handleExportMetrics}>
+              <Download size={16} className="mr-2" />
+              Exportar Métricas
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-3">
-          <Button variant="secondary" onClick={handleExportLeads}>
-            <Download size={16} className="mr-2" />
-            Exportar Leads
-          </Button>
-          <Button variant="secondary" onClick={handleExportMetrics}>
-            <Download size={16} className="mr-2" />
-            Exportar Métricas
-          </Button>
-        </div>
-      </div>
 
-      {/* Métricas principales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Métricas principales */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-tour="dashboard-metrics">
         <MetricCard
           title="Total Leads"
           value={pipelineMetrics.totalLeads}
@@ -129,7 +173,7 @@ const DashboardPage: React.FC = () => {
       </div>
 
       {/* Gráficos de stages */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" data-tour="dashboard-charts">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Leads por Stage</h2>
           <BarChart
@@ -218,7 +262,8 @@ const DashboardPage: React.FC = () => {
           />
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

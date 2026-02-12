@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { KanbanBoard } from '../components/crm/KanbanBoard';
 import { LeadModal } from '../components/crm/LeadModal';
@@ -8,6 +8,9 @@ import { SearchAndFilters, FilterOptions } from '../components/crm/SearchAndFilt
 import { Button } from '../components/shared/Button';
 import { PermissionGate } from '../components/shared/PermissionGate';
 import { ToastContainer, ToastType } from '../components/shared/Toast';
+import { Tour } from '../components/onboarding/Tour';
+import { getTourSteps } from '../utils/onboardingSteps';
+import { useOnboarding } from '../hooks/useOnboarding';
 import { useLeads } from '../contexts/LeadsContext';
 import { Lead, LeadFormData } from '../types/lead';
 import { StageId } from '../types/stage';
@@ -21,6 +24,7 @@ interface Toast {
 
 const CRMPage: React.FC = () => {
   const { leads, createLead, updateLead, deleteLead, changeStage } = useLeads();
+  const { shouldShowTutorial, progress } = useOnboarding();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isDetailPanelOpen, setIsDetailPanelOpen] = useState(false);
@@ -33,6 +37,7 @@ const CRMPage: React.FC = () => {
     otherUpdates: Partial<Lead>;
   } | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [showTour, setShowTour] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     searchQuery: '',
     stages: [],
@@ -41,6 +46,26 @@ const CRMPage: React.FC = () => {
     sortBy: 'name',
     sortOrder: 'asc',
   });
+
+  // Show tour if user should see CRM tutorial
+  useEffect(() => {
+    if (shouldShowTutorial('crm') && progress && !progress.completed) {
+      const verifyElements = () => {
+        const addLead = document.querySelector('[data-tour="crm-add-lead"]');
+        const kanban = document.querySelector('[data-tour="crm-kanban"]');
+        return addLead !== null && kanban !== null;
+      };
+      
+      const timer = setTimeout(() => {
+        if (verifyElements()) {
+          setShowTour(true);
+        }
+      }, 800);
+      return () => clearTimeout(timer);
+    } else {
+      setShowTour(false);
+    }
+  }, [shouldShowTutorial, progress]);
 
   // Obtener todos los tags únicos de los leads
   const availableTags = useMemo(() => {
@@ -166,33 +191,47 @@ const CRMPage: React.FC = () => {
   };
 
   return (
-    <div className={`relative ${isDetailPanelOpen ? 'mr-96' : ''} transition-all duration-300`}>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Pipeline</h1>
-        <PermissionGate action="create" resource="leads">
-          <Button
-            variant="primary"
-            onClick={() => handleAddLead()}
-          >
-            <Plus size={20} className="mr-2" />
-            Add Lead
-          </Button>
-        </PermissionGate>
-      </div>
+    <>
+      {showTour && (
+        <Tour
+          steps={getTourSteps('crm')}
+          tourId="crm"
+          onComplete={() => setShowTour(false)}
+          onSkip={() => setShowTour(false)}
+        />
+      )}
+      <div className={`relative ${isDetailPanelOpen ? 'mr-96' : ''} transition-all duration-300`}>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">Pipeline</h1>
+          <PermissionGate action="create" resource="leads">
+            <Button
+              variant="primary"
+              onClick={() => handleAddLead()}
+              data-tour="crm-add-lead"
+            >
+              <Plus size={20} className="mr-2" />
+              Add Lead
+            </Button>
+          </PermissionGate>
+        </div>
 
-      <SearchAndFilters
-        filters={filters}
-        onFiltersChange={setFilters}
-        onClearFilters={handleClearFilters}
-        availableTags={availableTags}
-      />
+        <div data-tour="crm-filters">
+          <SearchAndFilters
+            filters={filters}
+            onFiltersChange={setFilters}
+            onClearFilters={handleClearFilters}
+            availableTags={availableTags}
+          />
+        </div>
 
-      <KanbanBoard
-        leads={filteredLeads}
-        filteredStages={filters.stages.length > 0 ? filters.stages : undefined}
-        onLeadClick={handleLeadClick}
-        onAddLead={handleAddLead}
-      />
+        <div data-tour="crm-kanban">
+          <KanbanBoard
+            leads={filteredLeads}
+            filteredStages={filters.stages.length > 0 ? filters.stages : undefined}
+            onLeadClick={handleLeadClick}
+            onAddLead={handleAddLead}
+          />
+        </div>
 
       <LeadModal
         isOpen={isModalOpen}
@@ -229,8 +268,9 @@ const CRMPage: React.FC = () => {
         />
       )}
 
-      <ToastContainer toasts={toasts} removeToast={removeToast} />
-    </div>
+        <ToastContainer toasts={toasts} removeToast={removeToast} />
+      </div>
+    </>
   );
 };
 

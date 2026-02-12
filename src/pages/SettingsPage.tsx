@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { User, Bell, Shield, Info, Save, X } from 'lucide-react';
+import { User, Bell, Shield, Info, Save, X, BookOpen } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotifications } from '../contexts/NotificationsContext';
 import { Button } from '../components/shared/Button';
 import { Input } from '../components/shared/Input';
 import { ToastContainer, ToastType } from '../components/shared/Toast';
+import { useOnboarding } from '../hooks/useOnboarding';
 import { userProfileService } from '../services/userProfileService';
 
 interface Toast {
@@ -16,8 +17,10 @@ interface Toast {
 const SettingsPage: React.FC = () => {
   const { user, firebaseUser, updateProfile } = useAuth();
   const { unreadCount } = useNotifications();
+  const { resetOnboarding } = useOnboarding();
   const [activeTab, setActiveTab] = useState<'profile' | 'preferences' | 'account'>('profile');
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [isResettingOnboarding, setIsResettingOnboarding] = useState(false);
   
   // Profile state
   const [profileName, setProfileName] = useState(user?.name || '');
@@ -128,6 +131,22 @@ const SettingsPage: React.FC = () => {
       weeklyReports,
     }));
     addToast('Preferencias guardadas', 'success');
+  };
+
+  const handleResetOnboarding = async () => {
+    if (!window.confirm('¿Estás seguro de que quieres reiniciar los tutoriales? Esto te mostrará los tutoriales de nuevo la próxima vez que entres a cada sección.')) {
+      return;
+    }
+
+    setIsResettingOnboarding(true);
+    try {
+      await resetOnboarding();
+      addToast('Tutoriales reiniciados correctamente', 'success');
+    } catch (error: any) {
+      addToast(error.message || 'Error al reiniciar tutoriales', 'error');
+    } finally {
+      setIsResettingOnboarding(false);
+    }
   };
 
   const tabs = [
@@ -359,6 +378,30 @@ const SettingsPage: React.FC = () => {
                 <Button variant="primary" onClick={handleSavePreferences}>
                   <Save size={16} className="mr-2" />
                   Guardar Preferencias
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Tutoriales</h2>
+            
+            <div className="space-y-4">
+              <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                <div className="flex-1">
+                  <h3 className="font-medium text-gray-900">Reiniciar Tutoriales</h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Vuelve a mostrar los tutoriales interactivos para aprender a usar InvestiaFlow
+                  </p>
+                </div>
+                <Button 
+                  variant="secondary" 
+                  onClick={handleResetOnboarding}
+                  isLoading={isResettingOnboarding}
+                  disabled={isResettingOnboarding}
+                >
+                  <BookOpen size={16} className="mr-2" />
+                  Reiniciar Tutoriales
                 </Button>
               </div>
             </div>

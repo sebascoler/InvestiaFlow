@@ -3,6 +3,7 @@ import { ErrorBoundary } from './components/shared/ErrorBoundary'
 import { AuthProvider } from './contexts/AuthContext'
 import { TeamProvider } from './contexts/TeamContext'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { OnboardingProvider } from './contexts/OnboardingContext'
 import Layout from './components/layout/Layout'
 import DashboardPage from './pages/DashboardPage'
 import CRMPage from './pages/CRMPage'
@@ -22,7 +23,8 @@ function App() {
       <AuthProvider>
         <TeamProvider>
           <ThemeProvider>
-            <BrowserRouter>
+            <OnboardingProvider>
+              <BrowserRouter>
             <Routes>
             <Route path="/login" element={<LoginPage />} />
             {/* Investor public routes */}
@@ -43,6 +45,7 @@ function App() {
               </Route>
             </Routes>
           </BrowserRouter>
+            </OnboardingProvider>
           </ThemeProvider>
         </TeamProvider>
       </AuthProvider>

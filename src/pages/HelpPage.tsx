@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronRight, Book, Zap, FolderOpen, LayoutDashboard, HelpCircle, Lightbulb, MessageSquare } from 'lucide-react';
+import { ChevronDown, ChevronRight, Book, Zap, FolderOpen, LayoutDashboard, HelpCircle, Lightbulb, MessageSquare, BookOpen, PlayCircle } from 'lucide-react';
+import { Button } from '../components/shared/Button';
+import { useOnboarding } from '../hooks/useOnboarding';
+import { useNavigate } from 'react-router-dom';
 
 interface FAQItem {
   question: string;
@@ -16,6 +19,26 @@ interface HelpSection {
 const HelpPage: React.FC = () => {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['getting-started']));
   const [expandedFAQs, setExpandedFAQs] = useState<Set<string>>(new Set());
+  const { resetOnboarding, completeTutorial, startOnboarding } = useOnboarding();
+  const navigate = useNavigate();
+  const [isResettingOnboarding, setIsResettingOnboarding] = useState(false);
+
+  const handleStartTutorials = async () => {
+    setIsResettingOnboarding(true);
+    try {
+      await resetOnboarding();
+      // Mark welcome as completed so tours can appear
+      await startOnboarding();
+      await completeTutorial('welcome');
+      // Small delay to ensure state is updated
+      await new Promise(resolve => setTimeout(resolve, 500));
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error resetting onboarding:', error);
+    } finally {
+      setIsResettingOnboarding(false);
+    }
+  };
 
   const toggleSection = (id: string) => {
     setExpandedSections((prev) => {
@@ -452,9 +475,29 @@ const HelpPage: React.FC = () => {
           <HelpCircle className="text-primary-600" size={32} />
           <h1 className="text-3xl font-bold text-gray-900">Centro de Ayuda</h1>
         </div>
-        <p className="text-gray-600">
+        <p className="text-gray-600 mb-4">
           Aprende a usar InvestiaFlow para gestionar tu proceso de fundraising de manera eficiente
         </p>
+        <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <BookOpen className="text-primary-600" size={24} />
+            <div>
+              <h3 className="font-semibold text-gray-900">Tutoriales Interactivos</h3>
+              <p className="text-sm text-gray-600">
+                Aprende paso a paso con nuestros tours guiados por la aplicación
+              </p>
+            </div>
+          </div>
+          <Button 
+            variant="primary" 
+            onClick={handleStartTutorials}
+            isLoading={isResettingOnboarding}
+            disabled={isResettingOnboarding}
+          >
+            <PlayCircle size={16} className="mr-2" />
+            Iniciar Tutoriales
+          </Button>
+        </div>
       </div>
 
       {/* Secciones principales */}

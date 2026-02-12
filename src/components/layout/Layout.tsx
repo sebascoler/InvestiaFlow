@@ -9,6 +9,7 @@ import { AutomationProvider } from '../../contexts/AutomationContext';
 import { NotificationsProvider } from '../../contexts/NotificationsContext';
 import { MobileMenuProvider } from '../../contexts/MobileMenuContext';
 import { ThemeProvider } from '../../contexts/ThemeContext';
+import { WelcomeModal } from '../onboarding/WelcomeModal';
 import { useScheduledTasks } from '../../hooks/useScheduledTasks';
 import { useLeadNotifications } from '../../hooks/useLeadNotifications';
 
@@ -18,15 +19,18 @@ const LayoutContent: React.FC = () => {
   useLeadNotifications();
   
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden lg:ml-0">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
-          <Outlet />
-        </main>
+    <>
+      <WelcomeModal />
+      <div className="flex h-screen bg-gray-50 overflow-hidden">
+        <Sidebar />
+        <div className="flex-1 flex flex-col overflow-hidden lg:ml-0 min-w-0">
+          <Header />
+          <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 lg:p-6" style={{ minHeight: 0 }}>
+            <Outlet />
+          </main>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
