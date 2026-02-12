@@ -83,18 +83,18 @@ const SettingsPage: React.FC = () => {
 
   const handleSaveProfile = async () => {
     if (!user) {
-      addToast('Usuario no autenticado', 'error');
+      addToast('User not authenticated', 'error');
       return;
     }
 
     // Validate fields
     if (!profileName.trim()) {
-      addToast('El nombre es requerido', 'error');
+      addToast('Name is required', 'error');
       return;
     }
 
     if (!profileEmail.trim() || !profileEmail.includes('@')) {
-      addToast('El email debe ser válido', 'error');
+      addToast('Please enter a valid email', 'error');
       return;
     }
 
@@ -113,11 +113,11 @@ const SettingsPage: React.FC = () => {
       
       await updateProfile(updates);
       
-      addToast('Perfil actualizado correctamente', 'success');
+      addToast('Profile updated successfully', 'success');
       setIsEditingProfile(false);
     } catch (error: any) {
       console.error('Error updating profile:', error);
-      addToast(error.message || 'Error al actualizar el perfil', 'error');
+      addToast(error.message || 'Error updating profile', 'error');
     } finally {
       setIsSavingProfile(false);
     }
@@ -130,36 +130,36 @@ const SettingsPage: React.FC = () => {
       inAppNotifications,
       weeklyReports,
     }));
-    addToast('Preferencias guardadas', 'success');
+    addToast('Preferences saved', 'success');
   };
 
   const handleResetOnboarding = async () => {
-    if (!window.confirm('¿Estás seguro de que quieres reiniciar los tutoriales? Esto te mostrará los tutoriales de nuevo la próxima vez que entres a cada sección.')) {
+    if (!window.confirm('Are you sure you want to reset the tutorials? They will show again the next time you enter each section.')) {
       return;
     }
 
     setIsResettingOnboarding(true);
     try {
       await resetOnboarding();
-      addToast('Tutoriales reiniciados correctamente', 'success');
+      addToast('Tutorials reset successfully', 'success');
     } catch (error: any) {
-      addToast(error.message || 'Error al reiniciar tutoriales', 'error');
+      addToast(error.message || 'Error resetting tutorials', 'error');
     } finally {
       setIsResettingOnboarding(false);
     }
   };
 
   const tabs = [
-    { id: 'profile' as const, label: 'Perfil', icon: User },
-    { id: 'preferences' as const, label: 'Preferencias', icon: Bell },
-    { id: 'account' as const, label: 'Cuenta', icon: Shield },
+    { id: 'profile' as const, label: 'Profile', icon: User },
+    { id: 'preferences' as const, label: 'Preferences', icon: Bell },
+    { id: 'account' as const, label: 'Account', icon: Shield },
   ];
 
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Configuración</h1>
-        <p className="text-gray-600 mt-2">Gestiona tu perfil, preferencias y configuración de cuenta</p>
+        <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+        <p className="text-gray-600 mt-2">Manage your profile, preferences and account settings</p>
       </div>
 
       {/* Tabs */}
@@ -190,7 +190,7 @@ const SettingsPage: React.FC = () => {
       {/* Profile Tab */}
       {activeTab === 'profile' && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Información del Perfil</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">Profile Information</h2>
           
           {profileLoading ? (
             <div className="flex items-center justify-center py-8">
@@ -200,13 +200,13 @@ const SettingsPage: React.FC = () => {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nombre
+                Name
               </label>
               {isEditingProfile ? (
                 <Input
                   value={profileName}
                   onChange={(e) => setProfileName(e.target.value)}
-                  placeholder="Tu nombre"
+                  placeholder="Your name"
                 />
               ) : (
                 <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-900">
@@ -235,31 +235,31 @@ const SettingsPage: React.FC = () => {
               )}
               {firebaseUser && (
                 <p className="text-xs text-gray-500 mt-1">
-                  El email está vinculado a tu cuenta de Firebase y no puede cambiarse desde aquí. Para cambiar tu email, actualízalo en la configuración de Firebase Auth.
+                  Email is linked to your Firebase account and cannot be changed here. To change your email, update it in Firebase Auth settings.
                 </p>
               )}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Empresa (opcional)
+                Company (optional)
               </label>
               {isEditingProfile ? (
                 <Input
                   value={profileCompany}
                   onChange={(e) => setProfileCompany(e.target.value)}
-                  placeholder="Nombre de tu empresa"
+                  placeholder="Your company name"
                 />
               ) : (
                 <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-900">
-                  {profileCompany || 'No especificada'}
+                  {profileCompany || 'Not specified'}
                 </div>
               )}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Teléfono (opcional)
+                Phone (optional)
               </label>
               {isEditingProfile ? (
                 <Input
@@ -270,7 +270,7 @@ const SettingsPage: React.FC = () => {
                 />
               ) : (
                 <div className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-900">
-                  {profilePhone || 'No especificado'}
+                  {profilePhone || 'Not specified'}
                 </div>
               )}
             </div>
@@ -280,7 +280,7 @@ const SettingsPage: React.FC = () => {
                 <>
                   <Button variant="primary" onClick={handleSaveProfile} isLoading={isSavingProfile} disabled={isSavingProfile}>
                     <Save size={16} className="mr-2" />
-                    Guardar Cambios
+                    Save Changes
                   </Button>
                   <Button 
                     variant="secondary" 
@@ -299,7 +299,7 @@ const SettingsPage: React.FC = () => {
                 </>
               ) : (
                 <Button variant="primary" onClick={() => setIsEditingProfile(true)}>
-                  Editar Perfil
+                  Edit Profile
                 </Button>
               )}
             </div>
@@ -312,14 +312,14 @@ const SettingsPage: React.FC = () => {
       {activeTab === 'preferences' && (
         <div className="space-y-6">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Notificaciones</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Notifications</h2>
             
             <div className="space-y-4">
               <div className="flex items-center justify-between py-3 border-b border-gray-100">
                 <div className="flex-1">
-                  <h3 className="font-medium text-gray-900">Notificaciones por Email</h3>
+                  <h3 className="font-medium text-gray-900">Email Notifications</h3>
                   <p className="text-sm text-gray-500 mt-1">
-                    Recibe notificaciones importantes por correo electrónico
+                    Receive important notifications by email
                   </p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -335,13 +335,13 @@ const SettingsPage: React.FC = () => {
 
               <div className="flex items-center justify-between py-3 border-b border-gray-100">
                 <div className="flex-1">
-                  <h3 className="font-medium text-gray-900">Notificaciones In-App</h3>
+                  <h3 className="font-medium text-gray-900">In-App Notifications</h3>
                   <p className="text-sm text-gray-500 mt-1">
-                    Muestra notificaciones dentro de la aplicación
+                    Show notifications within the application
                   </p>
                   {unreadCount > 0 && (
                     <p className="text-xs text-primary-600 mt-1">
-                      Tienes {unreadCount} notificación{unreadCount !== 1 ? 'es' : ''} sin leer
+                      You have {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
                     </p>
                   )}
                 </div>
@@ -358,9 +358,9 @@ const SettingsPage: React.FC = () => {
 
               <div className="flex items-center justify-between py-3">
                 <div className="flex-1">
-                  <h3 className="font-medium text-gray-900">Reportes Semanales</h3>
+                  <h3 className="font-medium text-gray-900">Weekly Reports</h3>
                   <p className="text-sm text-gray-500 mt-1">
-                    Recibe un resumen semanal de métricas y actividad
+                    Receive a weekly summary of metrics and activity
                   </p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -377,21 +377,21 @@ const SettingsPage: React.FC = () => {
               <div className="pt-4 border-t border-gray-200">
                 <Button variant="primary" onClick={handleSavePreferences}>
                   <Save size={16} className="mr-2" />
-                  Guardar Preferencias
+                  Save Preferences
                 </Button>
               </div>
             </div>
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Tutoriales</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Tutorials</h2>
             
             <div className="space-y-4">
               <div className="flex items-center justify-between py-3 border-b border-gray-100">
                 <div className="flex-1">
-                  <h3 className="font-medium text-gray-900">Reiniciar Tutoriales</h3>
+                  <h3 className="font-medium text-gray-900">Reset Tutorials</h3>
                   <p className="text-sm text-gray-500 mt-1">
-                    Vuelve a mostrar los tutoriales interactivos para aprender a usar InvestiaFlow
+                    Show the interactive tutorials again to learn how to use InvestiaFlow
                   </p>
                 </div>
                 <Button 
@@ -401,7 +401,7 @@ const SettingsPage: React.FC = () => {
                   disabled={isResettingOnboarding}
                 >
                   <BookOpen size={16} className="mr-2" />
-                  Reiniciar Tutoriales
+                  Reset Tutorials
                 </Button>
               </div>
             </div>
@@ -413,13 +413,13 @@ const SettingsPage: React.FC = () => {
       {activeTab === 'account' && (
         <div className="space-y-6">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Información de la Cuenta</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Account Information</h2>
             
             <div className="space-y-4">
               <div className="flex items-center justify-between py-3 border-b border-gray-100">
                 <div>
-                  <h3 className="font-medium text-gray-900">ID de Usuario</h3>
-                  <p className="text-sm text-gray-500 mt-1">Identificador único de tu cuenta</p>
+                  <h3 className="font-medium text-gray-900">User ID</h3>
+                  <p className="text-sm text-gray-500 mt-1">Unique identifier for your account</p>
                 </div>
                 <code className="px-3 py-1 bg-gray-100 rounded text-sm font-mono text-gray-700">
                   {user?.id}
@@ -428,8 +428,8 @@ const SettingsPage: React.FC = () => {
 
               <div className="flex items-center justify-between py-3 border-b border-gray-100">
                 <div>
-                  <h3 className="font-medium text-gray-900">Proveedor de Autenticación</h3>
-                  <p className="text-sm text-gray-500 mt-1">Método de inicio de sesión</p>
+                  <h3 className="font-medium text-gray-900">Authentication Provider</h3>
+                  <p className="text-sm text-gray-500 mt-1">Sign-in method</p>
                 </div>
                 <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium">
                   {firebaseUser?.providerData?.[0]?.providerId === 'google.com' ? 'Google' : 'Email/Password'}
@@ -439,11 +439,11 @@ const SettingsPage: React.FC = () => {
               {firebaseUser?.metadata && (
                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                   <div>
-                    <h3 className="font-medium text-gray-900">Cuenta creada</h3>
-                    <p className="text-sm text-gray-500 mt-1">Fecha de creación de la cuenta</p>
+                    <h3 className="font-medium text-gray-900">Account created</h3>
+                    <p className="text-sm text-gray-500 mt-1">Account creation date</p>
                   </div>
                   <span className="text-sm text-gray-700">
-                    {new Date(firebaseUser.metadata.creationTime).toLocaleDateString('es-ES', {
+                    {new Date(firebaseUser.metadata.creationTime).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
@@ -455,16 +455,16 @@ const SettingsPage: React.FC = () => {
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Zona de Peligro</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Danger Zone</h2>
             
             <div className="space-y-4">
               <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <h3 className="font-medium text-red-900 mb-2">Eliminar Cuenta</h3>
+                <h3 className="font-medium text-red-900 mb-2">Delete Account</h3>
                 <p className="text-sm text-red-700 mb-4">
-                  Esta acción no se puede deshacer. Se eliminarán todos tus datos, leads, documentos y configuraciones.
+                  This action cannot be undone. All your data, leads, documents and settings will be permanently deleted.
                 </p>
                 <Button variant="secondary" className="bg-red-600 hover:bg-red-700 text-white">
-                  Eliminar Cuenta
+                  Delete Account
                 </Button>
               </div>
             </div>

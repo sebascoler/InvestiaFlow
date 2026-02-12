@@ -39,8 +39,8 @@ export const useLeadNotifications = () => {
           if (!existingNotification) {
             addNotification(
               'warning',
-              'Follow-up necesario',
-              `${lead.name} necesita seguimiento (${daysSinceContact} días sin contacto)`,
+              'Follow-up needed',
+              `${lead.name} needs follow-up (${daysSinceContact} days without contact)`,
               `/crm?lead=${lead.id}`
             );
           }
@@ -53,14 +53,14 @@ export const useLeadNotifications = () => {
 
         if (daysSinceStage >= 14) {
           const existingNotification = notifications.find(
-            n => n.message.includes(lead.name) && n.message.includes('sin contacto')
+            n => n.message.includes(lead.name) && n.message.includes('without contact')
           );
 
           if (!existingNotification) {
             addNotification(
               'warning',
-              'Follow-up necesario',
-              `${lead.name} está en ${lead.stage} desde hace ${daysSinceStage} días sin contacto`,
+              'Follow-up needed',
+              `${lead.name} has been in ${lead.stage} for ${daysSinceStage} days without contact`,
               `/crm?lead=${lead.id}`
             );
           }
@@ -81,8 +81,8 @@ export const useLeadNotifications = () => {
           if (!existingNotification) {
             addNotification(
               'info',
-              'Due Diligence extendido',
-              `${lead.name} lleva ${daysInStage} días en Due Diligence`,
+              'Extended Due Diligence',
+              `${lead.name} has been in Due Diligence for ${daysInStage} days`,
               `/crm?lead=${lead.id}`
             );
           }

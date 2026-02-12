@@ -15,7 +15,7 @@ let documentsDB: Document[] = [
     uploadedAt: new Date('2025-01-10'),
     fileSize: 2458392,
     fileType: 'application/pdf',
-    description: 'Pitch deck actualizado con métricas Q4 2024',
+    description: 'Pitch deck updated with Q4 2024 metrics',
   },
   {
     id: 'doc-2',
@@ -26,7 +26,7 @@ let documentsDB: Document[] = [
     uploadedAt: new Date('2025-01-12'),
     fileSize: 1024000,
     fileType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    description: 'Modelo financiero proyectado para 2025-2027',
+    description: 'Projected financial model for 2025-2027',
   },
   {
     id: 'doc-3',
@@ -37,7 +37,7 @@ let documentsDB: Document[] = [
     uploadedAt: new Date('2025-01-15'),
     fileSize: 512000,
     fileType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    description: 'Plantilla de term sheet estándar',
+    description: 'Standard term sheet template',
   },
   {
     id: 'doc-4',
@@ -48,7 +48,7 @@ let documentsDB: Document[] = [
     uploadedAt: new Date('2025-01-18'),
     fileSize: 1536000,
     fileType: 'application/pdf',
-    description: 'Dashboard con métricas de usuarios y crecimiento',
+    description: 'Dashboard with user and growth metrics',
   },
   {
     id: 'doc-5',
@@ -59,7 +59,7 @@ let documentsDB: Document[] = [
     uploadedAt: new Date('2025-01-20'),
     fileSize: 768000,
     fileType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    description: 'Tabla de capitalización actualizada',
+    description: 'Updated cap table',
   },
   {
     id: 'doc-6',
@@ -70,7 +70,7 @@ let documentsDB: Document[] = [
     uploadedAt: new Date('2025-01-22'),
     fileSize: 256000,
     fileType: 'application/pdf',
-    description: 'Política de privacidad y términos de servicio',
+    description: 'Privacy policy and terms of service',
   },
 ];
 

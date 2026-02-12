@@ -217,10 +217,10 @@ export const calculateDocumentMetrics = async (
   
   const categoryNames: Record<string, string> = {
     pitch: 'Pitch',
-    financials: 'Financieros',
-    legal: 'Legales',
-    metrics: 'Métricas',
-    other: 'Otros',
+    financials: 'Financials',
+    legal: 'Legal',
+    metrics: 'Metrics',
+    other: 'Other',
   };
   
   const documentsByCategory = Object.entries(categoryCounts).map(([category, count]) => ({

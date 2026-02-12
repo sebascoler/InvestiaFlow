@@ -131,7 +131,7 @@ export const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
           {/* Stage Filters */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Filtrar por Stage
+              Filter by Stage
             </label>
             <div className="flex flex-wrap gap-2">
               {STAGES.map((stage) => {
@@ -158,23 +158,23 @@ export const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
           {/* Tag Filters */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Filtrar por Tags
+              Filter by Tags
               {filters.tags.length > 0 && (
                 <span className="ml-2 text-xs text-gray-500">
-                  ({filters.tags.length} seleccionado{filters.tags.length > 1 ? 's' : ''})
+                  ({filters.tags.length} selected)
                 </span>
               )}
             </label>
             {availableTags.length === 0 ? (
               <p className="text-sm text-gray-500 italic">
-                No hay tags disponibles. Agrega tags a tus leads para filtrarlos.
+                No tags available. Add tags to your leads to filter by them.
               </p>
             ) : (
               <div className="space-y-3">
                 {/* Tags seleccionados */}
                 {filters.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2 items-center">
-                    <span className="text-xs text-gray-500 font-medium">Seleccionados:</span>
+                    <span className="text-xs text-gray-500 font-medium">Selected:</span>
                     {filters.tags.map((tag) => (
                       <button
                         key={tag}
@@ -215,14 +215,14 @@ export const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
           {/* Sort Options */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Ordenar por
+              Sort by
             </label>
             <div className="flex flex-wrap gap-2">
               {[
-                { value: 'name' as const, label: 'Nombre' },
-                { value: 'createdAt' as const, label: 'Fecha creación' },
-                { value: 'updatedAt' as const, label: 'Última actualización' },
-                { value: 'lastContactDate' as const, label: 'Último contacto' },
+                { value: 'name' as const, label: 'Name' },
+                { value: 'createdAt' as const, label: 'Date created' },
+                { value: 'updatedAt' as const, label: 'Last updated' },
+                { value: 'lastContactDate' as const, label: 'Last contact' },
                 { value: 'stage' as const, label: 'Stage' },
               ].map((option) => {
                 const isActive = filters.sortBy === option.value;

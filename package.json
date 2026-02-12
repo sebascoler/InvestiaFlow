@@ -10,6 +10,7 @@
     "lint": "eslint src --ext .ts,.tsx",
     "dev:next": "next dev",
     "build:next": "next build",
+    "build:landing": "./scripts/build-landing.sh",
     "preview": "vite preview"
   },
   "dependencies": {

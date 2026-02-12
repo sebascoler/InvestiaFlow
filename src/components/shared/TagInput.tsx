@@ -63,7 +63,7 @@ export const TagInput: React.FC<TagInputProps> = ({
         />
       </div>
       <p className="text-xs text-gray-500 mt-1">
-        Presiona Enter para agregar un tag, Backspace para eliminar el último
+        Press Enter to add a tag, Backspace to remove the last one
       </p>
     </div>
   );

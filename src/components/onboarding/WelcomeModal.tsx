@@ -4,27 +4,27 @@ import { useOnboarding } from '../../hooks/useOnboarding';
 
 const welcomeSlides = [
   {
-    title: '¡Bienvenido a InvestiaFlow!',
+    title: 'Welcome to InvestiaFlow!',
     content: (
       <div className="space-y-3">
         <p>
-          InvestiaFlow es tu CRM completo para gestionar todo el proceso de fundraising.
+          InvestiaFlow is your complete CRM to manage the entire fundraising process.
         </p>
         <p>
-          Te ayudamos a organizar tus leads, compartir documentos con inversores y hacer seguimiento de cada etapa del proceso.
+          We help you organize your leads, share documents with investors, and track every stage of the process.
         </p>
       </div>
     ),
   },
   {
-    title: 'Pipeline de CRM',
+    title: 'CRM Pipeline',
     content: (
       <div className="space-y-3">
         <p>
-          Organiza tus inversores potenciales en un pipeline visual con 8 stages diferentes, desde el primer contacto hasta el cierre.
+          Organize your potential investors in a visual pipeline with 8 different stages, from first contact to close.
         </p>
         <p>
-          Arrastra y suelta leads entre stages para reflejar el progreso real de cada conversación.
+          Drag and drop leads between stages to reflect the real progress of each conversation.
         </p>
       </div>
     ),
@@ -34,23 +34,23 @@ const welcomeSlides = [
     content: (
       <div className="space-y-3">
         <p>
-          Comparte documentos de forma segura con inversores. Configura cuándo compartir cada documento según el stage del lead.
+          Share documents securely with investors. Configure when to share each document based on the lead's stage.
         </p>
         <p>
-          Haz seguimiento de qué documentos han visto o descargado tus inversores.
+          Track which documents your investors have viewed or downloaded.
         </p>
       </div>
     ),
   },
   {
-    title: 'Trabajo en Equipo',
+    title: 'Team Collaboration',
     content: (
       <div className="space-y-3">
         <p>
-          Invita miembros a tu equipo y asigna roles según sus responsabilidades.
+          Invite team members and assign roles according to their responsibilities.
         </p>
         <p>
-          Personaliza el branding de tu equipo con tu logo y colores corporativos.
+          Customize your team branding with your logo and corporate colors.
         </p>
       </div>
     ),

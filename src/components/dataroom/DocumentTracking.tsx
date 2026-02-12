@@ -45,9 +45,9 @@ export const DocumentTracking: React.FC<DocumentTrackingProps> = ({ documentId }
     return (
       <div className="text-center py-4 text-gray-500 text-sm">
         <Eye className="mx-auto mb-2 text-gray-400" size={24} />
-        <p>Este documento aún no ha sido compartido con ningún lead</p>
+        <p>This document has not been shared with any lead yet</p>
         <p className="text-xs text-gray-400 mt-1">
-          Se compartirá automáticamente cuando los leads alcancen los stages configurados
+          It will be shared automatically when leads reach the configured stages
         </p>
       </div>
     );
@@ -62,7 +62,7 @@ export const DocumentTracking: React.FC<DocumentTrackingProps> = ({ documentId }
     <div className="space-y-4">
       {/* Summary Stats */}
       <div className="bg-gradient-to-r from-primary-50 to-blue-50 rounded-lg p-4 border border-primary-200">
-        <h3 className="font-semibold text-gray-900 mb-3">Resumen de Estadísticas</h3>
+        <h3 className="font-semibold text-gray-900 mb-3">Statistics Summary</h3>
         <div className="grid grid-cols-2 gap-4">
           <div className="bg-white rounded-lg p-3 border border-gray-200">
             <div className="flex items-center gap-2 mb-1">

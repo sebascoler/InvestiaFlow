@@ -7,14 +7,14 @@ import { PipelineMetrics, DocumentMetrics } from '../services/metricsService';
 export const exportLeadsToCSV = (leads: Lead[]): void => {
   const headers = [
     'ID',
-    'Nombre',
+    'Name',
     'Email',
-    'Firma',
+    'Firm',
     'Stage',
-    'Fecha Creación',
-    'Última Actualización',
-    'Último Contacto',
-    'Notas',
+    'Date Created',
+    'Last Updated',
+    'Last Contact',
+    'Notes',
   ];
 
   const rows = leads.map(lead => [
@@ -45,31 +45,31 @@ export const exportMetricsToCSV = (
   documentMetrics: DocumentMetrics
 ): void => {
   const csvContent = [
-    'MÉTRICAS DEL PIPELINE',
+    'PIPELINE METRICS',
     '',
-    'Métricas Generales',
+    'General Metrics',
     `Total Leads,${pipelineMetrics.totalLeads}`,
-    `Leads Activos,${pipelineMetrics.activeLeads}`,
-    `Tasa de Conversión,${pipelineMetrics.conversionRate}%`,
-    `Tiempo Promedio en Pipeline,${pipelineMetrics.averageTimeInPipeline} días`,
+    `Active Leads,${pipelineMetrics.activeLeads}`,
+    `Conversion Rate,${pipelineMetrics.conversionRate}%`,
+    `Average Time in Pipeline,${pipelineMetrics.averageTimeInPipeline} days`,
     '',
-    'Métricas por Stage',
-    'Stage,Count,Porcentaje,Tiempo Promedio (días)',
+    'Metrics by Stage',
+    'Stage,Count,Percentage,Average Time (days)',
     ...pipelineMetrics.stageMetrics.map(stage =>
       `${stage.stageName},${stage.count},${stage.percentage.toFixed(2)}%,${stage.averageTimeInStage}`
     ),
     '',
-    'MÉTRICAS DE DOCUMENTOS',
+    'DOCUMENT METRICS',
     '',
-    `Total Documentos,${documentMetrics.totalDocuments}`,
-    `Total Compartidos,${documentMetrics.totalShares}`,
-    `Total Vistos,${documentMetrics.totalViews}`,
-    `Total Descargados,${documentMetrics.totalDownloads}`,
-    `Tasa de Visualización,${documentMetrics.viewRate}%`,
-    `Tasa de Descarga,${documentMetrics.downloadRate}%`,
+    `Total Documents,${documentMetrics.totalDocuments}`,
+    `Total Shared,${documentMetrics.totalShares}`,
+    `Total Viewed,${documentMetrics.totalViews}`,
+    `Total Downloaded,${documentMetrics.totalDownloads}`,
+    `View Rate,${documentMetrics.viewRate}%`,
+    `Download Rate,${documentMetrics.downloadRate}%`,
     '',
-    'Documentos por Categoría',
-    'Categoría,Cantidad',
+    'Documents by Category',
+    'Category,Count',
     ...documentMetrics.documentsByCategory.map(cat =>
       `${cat.category},${cat.count}`
     ),

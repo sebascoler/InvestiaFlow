@@ -126,7 +126,7 @@ export const LeadHistory: React.FC<LeadHistoryProps> = ({ leadId }) => {
                 setNewComment('');
               }}
             >
-              Cancelar
+              Cancel
             </Button>
           </div>
         </div>
@@ -136,7 +136,7 @@ export const LeadHistory: React.FC<LeadHistoryProps> = ({ leadId }) => {
       {allItems.length === 0 ? (
         <div className="text-center py-8 text-gray-500 text-sm">
           <Clock className="mx-auto mb-2 text-gray-400" size={32} />
-          <p>No hay historial aún</p>
+          <p>No history yet</p>
         </div>
       ) : (
         <div className="space-y-4">

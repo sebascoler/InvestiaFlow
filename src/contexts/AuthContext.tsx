@@ -107,7 +107,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser({
         id: 'user-1',
         email: 'sebas@investia.capital',
-        name: 'Sebastián',
+        name: 'User',
       });
       setLoading(false);
     };

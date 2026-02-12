@@ -127,7 +127,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
             <FileText size={48} className="mb-4 text-gray-400" />
             <p className="text-lg font-medium">Vista previa no disponible</p>
             <p className="text-sm mt-2">Este tipo de archivo no se puede previsualizar</p>
-            <p className="text-xs mt-1 text-gray-400">Tipos soportados: PDF, imágenes (PNG, JPG, GIF, WebP)</p>
+            <p className="text-xs mt-1 text-gray-400">Supported types: PDF, images (PNG, JPG, GIF, WebP)</p>
           </div>
         );
     }
@@ -146,7 +146,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
         <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-gray-200">
           <Button variant="secondary" onClick={onClose}>
             <X size={16} className="mr-2" />
-            Cerrar
+            Close
           </Button>
           <Button
             variant="primary"
@@ -154,7 +154,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
               window.open(documentUrl, '_blank');
             }}
           >
-            Abrir en nueva pestaña
+            Open in new tab
           </Button>
         </div>
       </div>

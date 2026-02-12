@@ -110,7 +110,7 @@ const DashboardPage: React.FC = () => {
   if (!pipelineMetrics || !documentMetrics) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-gray-600">No se pudieron cargar las métricas</p>
+        <p className="text-gray-600">Failed to load metrics</p>
       </div>
     );
   }
@@ -130,16 +130,16 @@ const DashboardPage: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600 mt-1">Métricas y análisis del pipeline</p>
+            <p className="text-gray-600 mt-1">Pipeline metrics and analysis</p>
           </div>
           <div className="flex gap-3">
             <Button variant="secondary" onClick={handleExportLeads} data-tour="dashboard-export">
               <Download size={16} className="mr-2" />
-              Exportar Leads
+              Export Leads
             </Button>
             <Button variant="secondary" onClick={handleExportMetrics}>
               <Download size={16} className="mr-2" />
-              Exportar Métricas
+              Export Metrics
             </Button>
           </div>
         </div>
@@ -149,25 +149,25 @@ const DashboardPage: React.FC = () => {
         <MetricCard
           title="Total Leads"
           value={pipelineMetrics.totalLeads}
-          subtitle={`${pipelineMetrics.activeLeads} activos`}
+          subtitle={`${pipelineMetrics.activeLeads} active`}
           icon={Users}
         />
         <MetricCard
-          title="Tasa de Conversión"
+          title="Conversion Rate"
           value={`${pipelineMetrics.conversionRate}%`}
-          subtitle="Leads que llegaron a Committed"
+          subtitle="Leads that reached Committed"
           icon={TrendingUp}
         />
         <MetricCard
-          title="Tiempo Promedio"
-          value={`${pipelineMetrics.averageTimeInPipeline} días`}
-          subtitle="En el pipeline completo"
+          title="Average Time"
+          value={`${pipelineMetrics.averageTimeInPipeline} days`}
+          subtitle="In the full pipeline"
           icon={TrendingUp}
         />
         <MetricCard
           title="Documentos"
           value={documentMetrics.totalDocuments}
-          subtitle={`${documentMetrics.totalShares} compartidos`}
+          subtitle={`${documentMetrics.totalShares} shared`}
           icon={FileText}
         />
       </div>
@@ -175,7 +175,7 @@ const DashboardPage: React.FC = () => {
       {/* Gráficos de stages */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" data-tour="dashboard-charts">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Leads por Stage</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Leads by Stage</h2>
           <BarChart
             data={pipelineMetrics.stageMetrics.map(stage => ({
               label: stage.stageName,
@@ -187,7 +187,7 @@ const DashboardPage: React.FC = () => {
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Tiempo Promedio por Stage</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Average Time by Stage</h2>
           <BarChart
             data={pipelineMetrics.stageMetrics
               .filter(stage => stage.averageTimeInStage > 0)
@@ -198,14 +198,14 @@ const DashboardPage: React.FC = () => {
               }))}
             height={250}
           />
-          <p className="text-xs text-gray-500 mt-2">En días</p>
+          <p className="text-xs text-gray-500 mt-2">In days</p>
         </div>
       </div>
 
       {/* Gráficos temporales */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Leads por Mes</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Leads by Month</h2>
           <LineChart
             data={pipelineMetrics.leadsByMonth.map(item => ({
               label: item.month,
@@ -217,7 +217,7 @@ const DashboardPage: React.FC = () => {
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Leads por Semana</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Leads by Week</h2>
           <LineChart
             data={pipelineMetrics.leadsByWeek.map(item => ({
               label: item.week,
@@ -232,19 +232,19 @@ const DashboardPage: React.FC = () => {
       {/* Métricas de documentos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Estadísticas de Documentos</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Document Statistics</h2>
           <div className="grid grid-cols-2 gap-4">
             <MetricCard
-              title="Vistos"
+              title="Viewed"
               value={`${documentMetrics.totalViews}`}
-              subtitle={`${documentMetrics.viewRate}% de shares`}
+              subtitle={`${documentMetrics.viewRate}% of shares`}
               icon={Eye}
               className="border-0 shadow-none p-4"
             />
             <MetricCard
-              title="Descargados"
+              title="Downloaded"
               value={`${documentMetrics.totalDownloads}`}
-              subtitle={`${documentMetrics.downloadRate}% de shares`}
+              subtitle={`${documentMetrics.downloadRate}% of shares`}
               icon={DownloadIcon}
               className="border-0 shadow-none p-4"
             />
@@ -252,7 +252,7 @@ const DashboardPage: React.FC = () => {
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Documentos por Categoría</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Documents by Category</h2>
           <BarChart
             data={documentMetrics.documentsByCategory.map(cat => ({
               label: cat.category,

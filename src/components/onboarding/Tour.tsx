@@ -114,11 +114,11 @@ export const Tour: React.FC<TourProps> = ({
         },
       }}
       locale={{
-        back: 'Atrás',
-        close: 'Cerrar',
-        last: 'Finalizar',
-        next: 'Siguiente',
-        skip: 'Saltar',
+        back: 'Back',
+        close: 'Close',
+        last: 'Finish',
+        next: 'Next',
+        skip: 'Skip',
       }}
     />
   );

@@ -4,23 +4,23 @@ import { Step } from 'react-joyride';
 export const dashboardSteps: Step[] = [
   {
     target: '[data-tour="sidebar"]',
-    content: 'Este es el menú principal. Desde aquí puedes navegar a todas las secciones de InvestiaFlow.',
+    content: 'This is the main menu. From here you can navigate to all sections of InvestiaFlow.',
     placement: 'right',
     disableBeacon: true,
   },
   {
     target: '[data-tour="dashboard-metrics"]',
-    content: 'Aquí puedes ver las métricas clave de tu pipeline de fundraising: leads totales, conversión y documentos compartidos.',
+    content: 'Here you can see key fundraising pipeline metrics: total leads, conversion, and shared documents.',
     placement: 'bottom',
   },
   {
     target: '[data-tour="dashboard-charts"]',
-    content: 'Los gráficos te muestran la distribución de leads por stage y el progreso a lo largo del tiempo.',
+    content: 'The charts show lead distribution by stage and progress over time.',
     placement: 'top',
   },
   {
     target: '[data-tour="dashboard-export"]',
-    content: 'Puedes exportar tus datos y métricas en formato CSV para análisis externos.',
+    content: 'You can export your data and metrics to CSV for external analysis.',
     placement: 'left',
   },
 ];
@@ -28,23 +28,23 @@ export const dashboardSteps: Step[] = [
 export const crmSteps: Step[] = [
   {
     target: '[data-tour="crm-add-lead"]',
-    content: 'Haz clic aquí para agregar un nuevo lead (inversor potencial) a tu pipeline.',
+    content: 'Click here to add a new lead (potential investor) to your pipeline.',
     placement: 'bottom',
     disableBeacon: true,
   },
   {
     target: '[data-tour="crm-kanban"]',
-    content: 'Arrastra y suelta los leads entre las columnas para cambiar su stage. Cada stage representa una fase del proceso de fundraising.',
+    content: 'Drag and drop leads between columns to change their stage. Each stage represents a phase of the fundraising process.',
     placement: 'top',
   },
   {
     target: '[data-tour="crm-filters"]',
-    content: 'Usa los filtros para buscar leads específicos por nombre, stage, tags o fecha.',
+    content: 'Use filters to search for specific leads by name, stage, tags, or date.',
     placement: 'bottom',
   },
   {
     target: '[data-tour="crm-kanban"]',
-    content: 'Haz clic en cualquier lead para ver sus detalles completos, historial y documentos compartidos.',
+    content: 'Click on any lead to view full details, history, and shared documents.',
     placement: 'top',
   },
 ];
@@ -52,13 +52,13 @@ export const crmSteps: Step[] = [
 export const dataroomSteps: Step[] = [
   {
     target: '[data-tour="dataroom-upload"]',
-    content: 'Sube documentos importantes como pitch decks, términos de inversión, o información financiera.',
+    content: 'Upload important documents such as pitch decks, investment terms, or financial information.',
     placement: 'bottom',
     disableBeacon: true,
   },
   {
     target: '[data-tour="dataroom-document-list"]',
-    content: 'Aquí verás todos tus documentos organizados por categoría. Puedes ver, descargar o eliminar cada uno. Haz clic en el ícono de configuración (⚙️) para configurar permisos de compartir automático.',
+    content: 'Here you\'ll see all your documents organized by category. You can view, download, or delete each one. Click the settings icon (⚙️) to configure automatic sharing permissions.',
     placement: 'top',
   },
 ];
@@ -66,18 +66,18 @@ export const dataroomSteps: Step[] = [
 export const teamSteps: Step[] = [
   {
     target: '[data-tour="team-invite"]',
-    content: 'Invita miembros a tu equipo para colaborar en el proceso de fundraising.',
+    content: 'Invite team members to collaborate on the fundraising process.',
     placement: 'bottom',
     disableBeacon: true,
   },
   {
     target: '[data-tour="team-members"]',
-    content: 'Gestiona los roles y permisos de cada miembro del equipo. Puedes asignar roles de Owner, Admin, Editor o Viewer.',
+    content: 'Manage roles and permissions for each team member. You can assign Owner, Admin, Editor, or Viewer roles.',
     placement: 'top',
   },
   {
     target: '[data-tour="team-branding"]',
-    content: 'Personaliza el branding de tu equipo: sube tu logo y configura los colores de la aplicación.',
+    content: 'Customize your team branding: upload your logo and set application colors.',
     placement: 'bottom',
   },
 ];

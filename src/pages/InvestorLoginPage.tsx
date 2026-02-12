@@ -49,8 +49,8 @@ const InvestorLoginPage: React.FC = () => {
       if (msg.includes('No documents have been shared') || msg.includes('No account found')) {
         setError(
           msg.includes('No account found')
-            ? 'No encontramos una cuenta con este correo. Verifica el email o contacta a quien te invitó al Data Room.'
-            : 'Aún no hay documentos compartidos con este correo. Recibirás un email con el código cuando te compartan documentos.'
+            ? 'We could not find an account with this email. Check the email or contact whoever invited you to the Data Room.'
+            : 'No documents have been shared with this email yet. You will receive an email with the code when documents are shared with you.'
         );
       } else {
         setError(msg);

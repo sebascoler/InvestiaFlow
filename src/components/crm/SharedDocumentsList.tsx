@@ -70,9 +70,9 @@ export const SharedDocumentsList: React.FC<SharedDocumentsListProps> = ({ lead }
     return (
       <div className="text-center py-4 text-gray-500 text-sm">
         <FileText className="mx-auto mb-2 text-gray-400" size={24} />
-        <p>No hay documentos compartidos con este lead</p>
+        <p>No documents shared with this lead</p>
         <p className="text-xs text-gray-400 mt-1">
-          Los documentos se compartirán automáticamente cuando el lead alcance stages configurados
+          Documents will be shared automatically when the lead reaches configured stages
         </p>
       </div>
     );
@@ -80,7 +80,7 @@ export const SharedDocumentsList: React.FC<SharedDocumentsListProps> = ({ lead }
 
   return (
     <div className="space-y-3">
-      <h3 className="font-semibold text-gray-900 mb-3">Documentos Compartidos ({sharedDocs.length})</h3>
+      <h3 className="font-semibold text-gray-900 mb-3">Shared Documents ({sharedDocs.length})</h3>
       {sharedDocs.map((shared) => {
         const docName = getDocumentName(shared.documentId);
         return (
@@ -94,7 +94,7 @@ export const SharedDocumentsList: React.FC<SharedDocumentsListProps> = ({ lead }
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-gray-900 text-sm truncate">{docName}</p>
                   <p className="text-xs text-gray-500 mt-1">
-                    Compartido {formatDate(shared.sharedAt)}
+                    Shared {formatDate(shared.sharedAt)}
                   </p>
                 </div>
               </div>
@@ -107,7 +107,7 @@ export const SharedDocumentsList: React.FC<SharedDocumentsListProps> = ({ lead }
                   size={14}
                 />
                 <span className={shared.viewedAt ? 'text-green-700' : 'text-gray-500'}>
-                  {shared.viewedAt ? `Visto ${formatDate(shared.viewedAt)}` : 'No visto'}
+                  {shared.viewedAt ? `Viewed ${formatDate(shared.viewedAt)}` : 'Not viewed'}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-xs">
@@ -116,7 +116,7 @@ export const SharedDocumentsList: React.FC<SharedDocumentsListProps> = ({ lead }
                   size={14}
                 />
                 <span className={shared.downloadedAt ? 'text-blue-700' : 'text-gray-500'}>
-                  {shared.downloadedAt ? `Descargado ${formatDate(shared.downloadedAt)}` : 'No descargado'}
+                  {shared.downloadedAt ? `Downloaded ${formatDate(shared.downloadedAt)}` : 'Not downloaded'}
                 </span>
               </div>
             </div>
@@ -127,14 +127,14 @@ export const SharedDocumentsList: React.FC<SharedDocumentsListProps> = ({ lead }
                   onClick={() => handleView(shared)}
                   className="text-xs px-2 py-1 bg-green-50 text-green-700 rounded hover:bg-green-100 transition-colors"
                 >
-                  Marcar como visto
+                  Mark as viewed
                 </button>
               )}
               <button
                 onClick={() => handleDownload(shared)}
                 className="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition-colors"
               >
-                {shared.downloadedAt ? 'Marcar como descargado de nuevo' : 'Marcar como descargado'}
+                {shared.downloadedAt ? 'Mark as downloaded again' : 'Mark as downloaded'}
               </button>
             </div>
           </div>

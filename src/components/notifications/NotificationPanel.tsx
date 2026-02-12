@@ -75,15 +75,15 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose })
             <button
               onClick={markAllAsRead}
               className="text-xs text-gray-600 hover:text-gray-900"
-              title="Marcar todas como leídas"
+              title="Mark all as read"
             >
-              Marcar todas
+              Mark all
             </button>
           )}
           <button
             onClick={onClose}
             className="p-1 hover:bg-gray-100 rounded"
-            aria-label="Cerrar"
+            aria-label="Close"
           >
             <X size={18} />
           </button>
@@ -95,7 +95,7 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose })
         {notifications.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
             <AlertCircle className="mx-auto mb-2 text-gray-400" size={32} />
-            <p>No hay notificaciones</p>
+            <p>No notifications</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-100">
@@ -130,7 +130,7 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose })
                             removeNotification(notification.id);
                           }}
                           className="p-1 hover:bg-gray-200 rounded opacity-70 hover:opacity-100 transition-opacity"
-                          aria-label="Eliminar notificación"
+                          aria-label="Remove notification"
                         >
                           <X size={14} className="text-gray-400" />
                         </button>

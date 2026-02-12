@@ -66,96 +66,96 @@ const HelpPage: React.FC = () => {
 
   const faqs: FAQItem[] = [
     {
-      question: '¿Cómo agrego un nuevo lead?',
-      answer: 'Puedes agregar un lead de dos formas: 1) Haz clic en el botón "Add Lead" en la parte superior del CRM, o 2) Haz clic en el botón "+ Add Lead" en cualquier columna del Kanban. El nuevo lead se creará en el stage "Target" por defecto.',
+      question: 'How do I add a new lead?',
+      answer: 'You can add a lead in two ways: 1) Click the "Add Lead" button at the top of the CRM, or 2) Click the "+ Add Lead" button in any Kanban column. The new lead will be created in the "Target" stage by default.',
     },
     {
-      question: '¿Cómo muevo un lead entre stages?',
-      answer: 'Simplemente arrastra y suelta la tarjeta del lead desde su columna actual a la columna del stage deseado. La automatización se ejecutará automáticamente si tienes reglas configuradas para ese stage.',
+      question: 'How do I move a lead between stages?',
+      answer: 'Simply drag and drop the lead card from its current column to the desired stage column. Automation will run automatically if you have rules configured for that stage.',
     },
     {
-      question: '¿Cómo funcionan las automatizaciones?',
-      answer: 'Las automatizaciones comparten documentos automáticamente cuando un lead alcanza un stage específico. Puedes configurar qué documentos compartir, si hay un delay, y opcionalmente enviar un email de notificación personalizado. Ve a la página Automation para crear y gestionar reglas.',
+      question: 'How do automations work?',
+      answer: 'Automations share documents automatically when a lead reaches a specific stage. You can configure which documents to share, set a delay, and optionally send a custom notification email. Go to the Automation page to create and manage rules.',
     },
     {
-      question: '¿Puedo configurar permisos diferentes para cada documento?',
-      answer: 'Sí, cada documento puede tener permisos independientes. Haz clic en el ícono de configuración (⚙️) en cualquier documento y selecciona en qué stages debe compartirse automáticamente.',
+      question: 'Can I set different permissions for each document?',
+      answer: 'Yes, each document can have independent permissions. Click the settings icon (⚙️) on any document and select which stages should automatically share it.',
     },
     {
-      question: '¿Qué pasa si muevo un lead a un stage y no tengo reglas configuradas?',
-      answer: 'El lead se moverá normalmente, pero no se compartirán documentos automáticamente. Puedes compartir documentos manualmente desde el Data Room o crear una regla de automatización para futuros leads.',
+      question: 'What happens if I move a lead to a stage and have no rules configured?',
+      answer: 'The lead will move normally, but documents won\'t be shared automatically. You can share documents manually from the Data Room or create an automation rule for future leads.',
     },
     {
-      question: '¿Cómo veo qué documentos se han compartido con un lead?',
-      answer: 'Los documentos compartidos con cada lead están disponibles en su Data Room personalizado. Cuando un inversor accede con su email y código de verificación, puede ver todos los documentos que le has compartido, junto con el tracking de visualizaciones y descargas.',
+      question: 'How do I see which documents have been shared with a lead?',
+      answer: 'Documents shared with each lead are available in their personalized Data Room. When an investor signs in with their email and verification code, they see all documents you\'ve shared with them, plus view and download tracking.',
     },
     {
-      question: '¿Cómo acceden los inversores al Data Room?',
-      answer: 'Los inversores reciben un email con un código de verificación de 6 dígitos cuando les compartes documentos. Deben ingresar a /investor/login, ingresar su email, recibir el código por email, y luego accederán a su Data Room personalizado donde solo verán los documentos compartidos con ellos.',
+      question: 'How do investors access the Data Room?',
+      answer: 'Investors receive an email with a 6-digit verification code when you share documents with them. They go to /investor/login, enter their email, receive the code by email, and then access their personalized Data Room where they only see documents shared with them.',
     },
     {
-      question: '¿Puedo editar un lead después de crearlo?',
-      answer: 'Sí, haz clic en cualquier tarjeta de lead para abrir el panel de detalles lateral. Desde ahí puedes editar toda la información del lead, cambiar su stage, o eliminarlo.',
+      question: 'Can I edit a lead after creating it?',
+      answer: 'Yes, click any lead card to open the details panel. From there you can edit all lead information, change their stage, or delete the lead.',
     },
     {
-      question: '¿Qué formatos de archivo puedo subir?',
-      answer: 'Puedes subir PDFs, documentos de Word, hojas de cálculo de Excel, e imágenes. El tamaño máximo recomendado es 50MB por archivo.',
+      question: 'What file formats can I upload?',
+      answer: 'You can upload PDFs, Word documents, Excel spreadsheets, and images. Recommended maximum size is 50MB per file.',
     },
   ];
 
   const tips = [
     {
       icon: <Lightbulb className="text-yellow-500" size={20} />,
-      text: 'Organiza tus documentos por categorías para encontrarlos más fácilmente',
+      text: 'Organize documents by category to find them more easily',
     },
     {
       icon: <Lightbulb className="text-yellow-500" size={20} />,
-      text: 'Usa la búsqueda y filtros en el Data Room para gestionar muchos documentos',
+      text: 'Use search and filters in the Data Room to manage many documents',
     },
     {
       icon: <Lightbulb className="text-yellow-500" size={20} />,
-      text: 'Crea reglas de automatización para stages comunes como "Pitch Shared" o "Due Diligence"',
+      text: 'Create automation rules for common stages like "Pitch Shared" or "Due Diligence"',
     },
     {
       icon: <Lightbulb className="text-yellow-500" size={20} />,
-      text: 'Los inversores acceden al Data Room con su email y un código de verificación que reciben por correo',
+      text: 'Investors access the Data Room with their email and a verification code they receive by email',
     },
     {
       icon: <Lightbulb className="text-yellow-500" size={20} />,
-      text: 'Usa Automation Rules para enviar emails personalizados, los permisos de documentos solo comparten archivos',
+      text: 'Use Automation Rules to send custom emails; document permissions only share files',
     },
     {
       icon: <Lightbulb className="text-yellow-500" size={20} />,
-      text: 'Mantén actualizada la fecha de último contacto para identificar leads que necesitan seguimiento',
+      text: 'Keep the last contact date updated to identify leads that need follow-up',
     },
     {
       icon: <Lightbulb className="text-yellow-500" size={20} />,
-      text: 'Usa las notas en cada lead para recordar detalles importantes de las conversaciones',
+      text: 'Use notes on each lead to remember important conversation details',
     },
   ];
 
   const sections: HelpSection[] = [
     {
       id: 'getting-started',
-      title: 'Comenzando con InvestiaFlow',
+      title: 'Getting Started with InvestiaFlow',
       icon: <Book size={20} />,
       content: (
         <div className="space-y-4">
           <div>
-            <h3 className="font-semibold text-gray-900 mb-2">¿Qué es InvestiaFlow?</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">What is InvestiaFlow?</h3>
             <p className="text-gray-600">
-              InvestiaFlow es una plataforma que automatiza la gestión de fundraising para startups. 
-              Combina un CRM visual tipo Kanban con un Data Room inteligente que comparte documentos 
-              automáticamente según el progreso de cada inversor potencial en tu pipeline.
+              InvestiaFlow is a platform that automates fundraising management for startups.
+              It combines a visual Kanban-style CRM with a smart Data Room that shares documents
+              automatically based on each potential investor's progress in your pipeline.
             </p>
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Navegación Principal</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">Main Navigation</h3>
             <ul className="list-disc list-inside space-y-2 text-gray-600">
-              <li><strong>CRM Pipeline:</strong> Gestiona tus leads e inversores en un tablero Kanban visual</li>
-              <li><strong>Data Room:</strong> Sube y organiza documentos para compartir con inversores</li>
-              <li><strong>Automation:</strong> Configura reglas para compartir documentos automáticamente</li>
-              <li><strong>Settings:</strong> Configuración de tu cuenta (próximamente)</li>
+              <li><strong>CRM Pipeline:</strong> Manage your leads and investors on a visual Kanban board</li>
+              <li><strong>Data Room:</strong> Upload and organize documents to share with investors</li>
+              <li><strong>Automation:</strong> Set up rules to share documents automatically</li>
+              <li><strong>Settings:</strong> Your account settings</li>
             </ul>
           </div>
         </div>
@@ -163,25 +163,25 @@ const HelpPage: React.FC = () => {
     },
     {
       id: 'crm',
-      title: 'Usando el CRM Pipeline',
+      title: 'Using the CRM Pipeline',
       icon: <LayoutDashboard size={20} />,
       content: (
         <div className="space-y-4">
           <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Stages del Pipeline</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">Pipeline Stages</h3>
             <p className="text-gray-600 mb-3">
-              Tu pipeline está organizado en 8 stages que representan el progreso de cada inversor:
+              Your pipeline is organized into 8 stages that represent each investor's progress:
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {[
-                { emoji: '🎯', name: 'Target', desc: 'Inversores identificados pero sin contacto' },
-                { emoji: '📧', name: 'First Contact', desc: 'Primera comunicación establecida' },
-                { emoji: '💬', name: 'In Conversation', desc: 'Conversaciones activas en curso' },
-                { emoji: '📊', name: 'Pitch Shared', desc: 'Pitch deck compartido' },
-                { emoji: '🔍', name: 'Due Diligence', desc: 'Proceso de due diligence iniciado' },
-                { emoji: '📝', name: 'Term Sheet', desc: 'Term sheet recibido o en negociación' },
-                { emoji: '✅', name: 'Committed', desc: 'Inversor comprometido' },
-                { emoji: '❌', name: 'Passed', desc: 'Inversor que no avanzó' },
+                { emoji: '🎯', name: 'Target', desc: 'Identified investors, no contact yet' },
+                { emoji: '📧', name: 'First Contact', desc: 'First communication established' },
+                { emoji: '💬', name: 'In Conversation', desc: 'Active conversations in progress' },
+                { emoji: '📊', name: 'Pitch Shared', desc: 'Pitch deck shared' },
+                { emoji: '🔍', name: 'Due Diligence', desc: 'Due diligence process started' },
+                { emoji: '📝', name: 'Term Sheet', desc: 'Term sheet received or under negotiation' },
+                { emoji: '✅', name: 'Committed', desc: 'Investor committed' },
+                { emoji: '❌', name: 'Passed', desc: 'Investor did not move forward' },
               ].map((stage) => (
                 <div key={stage.name} className="flex items-start gap-2 p-2 bg-gray-50 rounded">
                   <span className="text-xl">{stage.emoji}</span>
@@ -194,21 +194,21 @@ const HelpPage: React.FC = () => {
             </div>
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Gestión de Leads</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">Lead Management</h3>
             <ul className="list-disc list-inside space-y-2 text-gray-600">
-              <li><strong>Agregar Lead:</strong> Usa el botón "Add Lead" o el botón "+" en cualquier columna</li>
-              <li><strong>Mover Lead:</strong> Arrastra y suelta la tarjeta entre columnas</li>
-              <li><strong>Ver Detalles:</strong> Haz clic en cualquier tarjeta para abrir el panel lateral</li>
-              <li><strong>Editar Lead:</strong> Abre el panel de detalles y haz clic en "Edit Lead"</li>
-              <li><strong>Eliminar Lead:</strong> Desde el panel de detalles, haz clic en "Delete Lead"</li>
+              <li><strong>Add Lead:</strong> Use the "Add Lead" button or the "+" button in any column</li>
+              <li><strong>Move Lead:</strong> Drag and drop the card between columns</li>
+              <li><strong>View Details:</strong> Click any card to open the side panel</li>
+              <li><strong>Edit Lead:</strong> Open the details panel and click "Edit Lead"</li>
+              <li><strong>Delete Lead:</strong> From the details panel, click "Delete Lead"</li>
             </ul>
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Indicadores Visuales</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">Visual Indicators</h3>
             <ul className="list-disc list-inside space-y-2 text-gray-600">
-              <li><strong>Badge "Follow up needed":</strong> Aparece cuando un lead no ha tenido contacto en más de 14 días</li>
-              <li><strong>Borde naranja:</strong> Indica que el lead necesita seguimiento</li>
-              <li><strong>Contador en columnas:</strong> Muestra cuántos leads hay en cada stage</li>
+              <li><strong>Badge "Follow up needed":</strong> Appears when a lead has had no contact for more than 14 days</li>
+              <li><strong>Orange border:</strong> Indicates the lead needs follow-up</li>
+              <li><strong>Column count:</strong> Shows how many leads are in each stage</li>
             </ul>
           </div>
         </div>
@@ -216,48 +216,48 @@ const HelpPage: React.FC = () => {
     },
     {
       id: 'dataroom',
-      title: 'Gestionando el Data Room',
+      title: 'Managing the Data Room',
       icon: <FolderOpen size={20} />,
       content: (
         <div className="space-y-4">
           <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Subir Documentos</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">Uploading Documents</h3>
             <ol className="list-decimal list-inside space-y-2 text-gray-600">
-              <li>Haz clic en "Upload Document"</li>
-              <li>Arrastra y suelta un archivo o haz clic para seleccionarlo</li>
-              <li>Selecciona la categoría (Pitch, Financials, Legal, Metrics, Other)</li>
-              <li>Agrega una descripción opcional</li>
-              <li>Haz clic en "Upload Document"</li>
+              <li>Click "Upload Document"</li>
+              <li>Drag and drop a file or click to select one</li>
+              <li>Select the category (Pitch, Financials, Legal, Metrics, Other)</li>
+              <li>Add an optional description</li>
+              <li>Click "Upload Document"</li>
             </ol>
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Categorías de Documentos</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">Document Categories</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-gray-600">
-              <div><strong>Pitch:</strong> Pitch decks, presentaciones</div>
-              <div><strong>Financials:</strong> Modelos financieros, cap tables</div>
-              <div><strong>Legal:</strong> Term sheets, contratos, políticas</div>
-              <div><strong>Metrics:</strong> Dashboards, métricas de producto</div>
-              <div><strong>Other:</strong> Otros documentos relevantes</div>
+              <div><strong>Pitch:</strong> Pitch decks, presentations</div>
+              <div><strong>Financials:</strong> Financial models, cap tables</div>
+              <div><strong>Legal:</strong> Term sheets, contracts, policies</div>
+              <div><strong>Metrics:</strong> Dashboards, product metrics</div>
+              <div><strong>Other:</strong> Other relevant documents</div>
             </div>
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Configurar Permisos</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">Configuring Permissions</h3>
             <ol className="list-decimal list-inside space-y-2 text-gray-600">
-              <li>Haz clic en el ícono de configuración (⚙️) en cualquier documento</li>
-              <li>Marca los stages en los que quieres compartir el documento automáticamente</li>
-              <li>Configura un delay opcional (días después del stage)</li>
-              <li>Guarda los cambios</li>
+              <li>Click the settings icon (⚙️) on any document</li>
+              <li>Check the stages where you want to share the document automatically</li>
+              <li>Set an optional delay (days after the stage)</li>
+              <li>Save changes</li>
             </ol>
             <p className="text-sm text-gray-500 mt-2">
-              <strong>Nota:</strong> Para enviar emails de notificación a los inversores, debes crear una Regla de Automatización en la página Automation. Los permisos de documentos solo controlan cuándo se comparten los archivos, no el envío de emails.
+              <strong>Note:</strong> To send notification emails to investors, you must create an Automation Rule on the Automation page. Document permissions only control when files are shared, not email sending.
             </p>
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Búsqueda y Filtros</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">Search and Filters</h3>
             <ul className="list-disc list-inside space-y-2 text-gray-600">
-              <li>Usa la barra de búsqueda para encontrar documentos por nombre o descripción</li>
-              <li>Filtra por categoría usando el dropdown</li>
-              <li>Los resultados se actualizan en tiempo real</li>
+              <li>Use the search bar to find documents by name or description</li>
+              <li>Filter by category using the dropdown</li>
+              <li>Results update in real time</li>
             </ul>
           </div>
         </div>
@@ -265,47 +265,47 @@ const HelpPage: React.FC = () => {
     },
     {
       id: 'investor-access',
-        title: 'Acceso de Inversores al Data Room',
+        title: 'Investor Access to the Data Room',
         icon: <MessageSquare size={20} />,
         content: (
           <div className="space-y-4">
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">¿Cómo funciona el acceso de inversores?</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">How does investor access work?</h3>
               <p className="text-gray-600 mb-3">
-                Cuando compartes documentos con un lead mediante permisos o automatizaciones, el inversor puede acceder 
-                a su Data Room personalizado usando su email y un código de verificación de 6 dígitos.
+                When you share documents with a lead via permissions or automations, the investor can access
+                their personalized Data Room using their email and a 6-digit verification code.
               </p>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Proceso de Acceso</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">Access Process</h3>
               <ol className="list-decimal list-inside space-y-2 text-gray-600">
-                <li>El inversor recibe un email con un código de verificación cuando se le comparten documentos</li>
-                <li>El inversor ingresa a la URL del Data Room (normalmente compartida en el email)</li>
-                <li>Ingresa su email y solicita el código de verificación</li>
-                <li>Recibe un código de 6 dígitos por email</li>
-                <li>Ingresa el código para acceder a su Data Room personalizado</li>
+                <li>The investor receives an email with a verification code when documents are shared with them</li>
+                <li>The investor goes to the Data Room URL (usually shared in the email)</li>
+                <li>They enter their email and request the verification code</li>
+                <li>They receive a 6-digit code by email</li>
+                <li>They enter the code to access their personalized Data Room</li>
               </ol>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">¿Qué ve el inversor?</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">What does the investor see?</h3>
               <ul className="list-disc list-inside space-y-2 text-gray-600">
-                <li>Solo los documentos que le has compartido específicamente</li>
-                <li>Información de cuándo fue compartido cada documento</li>
-                <li>Tracking de qué documentos ha visto y descargado</li>
-                <li>Puede ver y descargar los documentos compartidos</li>
+                <li>Only the documents you have shared with them specifically</li>
+                <li>Information on when each document was shared</li>
+                <li>Tracking of which documents they have viewed and downloaded</li>
+                <li>They can view and download shared documents</li>
               </ul>
             </div>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-sm text-blue-800">
-                <strong>🔒 Seguridad:</strong> Cada inversor solo ve sus propios documentos. El sistema valida 
-                que el email corresponda a un lead en tu CRM antes de permitir el acceso.
+                <strong>🔒 Security:</strong> Each investor only sees their own documents. The system validates
+                that the email matches a lead in your CRM before allowing access.
               </p>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Tracking de Actividad</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">Activity Tracking</h3>
               <p className="text-gray-600">
-                Puedes ver qué documentos han sido vistos y descargados por cada inversor. Esta información 
-                te ayuda a entender el nivel de interés y engagement de cada lead en tu pipeline.
+                You can see which documents have been viewed and downloaded by each investor. This information
+                helps you understand the level of interest and engagement of each lead in your pipeline.
               </p>
             </div>
           </div>
@@ -313,154 +313,154 @@ const HelpPage: React.FC = () => {
       },
       {
         id: 'automation',
-        title: 'Configurando Automatizaciones',
+        title: 'Configuring Automations',
         icon: <Zap size={20} />,
         content: (
           <div className="space-y-4">
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">¿Qué son las Automatizaciones?</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">What are Automations?</h3>
               <p className="text-gray-600">
-                Las automatizaciones te permiten compartir documentos automáticamente cuando un lead 
-                alcanza un stage específico. Esto ahorra tiempo y asegura que los inversores reciban 
-                la información correcta en el momento adecuado.
+                Automations let you share documents automatically when a lead
+                reaches a specific stage. This saves time and ensures investors receive
+                the right information at the right time.
               </p>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Crear una Regla de Automatización</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">Creating an Automation Rule</h3>
               <ol className="list-decimal list-inside space-y-2 text-gray-600">
-                <li>Ve a la página "Automation"</li>
-                <li>Haz clic en "Create Rule"</li>
-                <li>Dale un nombre descriptivo a tu regla</li>
-                <li>Selecciona el stage que activará la regla (trigger stage)</li>
-                <li>Elige los documentos que quieres compartir</li>
-                <li>Configura un delay opcional (0 = inmediato)</li>
-                <li>Opcionalmente, configura un email de notificación con variables como {'{{name}}'}, {'{{firm}}'}</li>
-                <li>Activa la regla y guárdala</li>
+                <li>Go to the "Automation" page</li>
+                <li>Click "Create Rule"</li>
+                <li>Give your rule a descriptive name</li>
+                <li>Select the stage that will trigger the rule (trigger stage)</li>
+                <li>Choose the documents you want to share</li>
+                <li>Set an optional delay (0 = immediate)</li>
+                <li>Optionally, set up a notification email with variables like {'{{name}}'}, {'{{firm}}'}</li>
+                <li>Enable the rule and save it</li>
               </ol>
             </div>
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-900 mb-2">⏱️ ¿Para qué sirve el Delay y cómo usarlo bien?</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">⏱️ What is Delay and how to use it?</h3>
               <p className="text-gray-700 mb-3">
-                El <strong>delay</strong> es el número de días que esperarás <em>después</em> de que un lead 
-                alcance un stage antes de compartir los documentos automáticamente.
+                The <strong>delay</strong> is the number of days you wait <em>after</em> a lead
+                reaches a stage before sharing documents automatically.
               </p>
               <div className="space-y-3">
                 <div>
-                  <p className="font-medium text-gray-900 mb-1">Delay = 0 (Inmediato):</p>
+                  <p className="font-medium text-gray-900 mb-1">Delay = 0 (Immediate):</p>
                   <p className="text-gray-700 text-sm">
-                    Los documentos se comparten tan pronto como el lead entra al stage. 
-                    <strong> Úsalo cuando:</strong> Quieres que el inversor tenga acceso inmediato a la información 
-                    (ej: compartir pitch deck cuando llega a "Pitch Shared").
+                    Documents are shared as soon as the lead enters the stage.
+                    <strong> Use when:</strong> You want the investor to have immediate access to the information
+                    (e.g. share pitch deck when they reach "Pitch Shared").
                   </p>
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900 mb-1">Delay {'>'} 0 (Con espera):</p>
+                  <p className="font-medium text-gray-900 mb-1">Delay {'>'} 0 (With wait):</p>
                   <p className="text-gray-700 text-sm">
-                    Los documentos se comparten después de X días en el stage. 
-                    <strong> Úsalo cuando:</strong> Quieres dar tiempo para que el inversor procese información 
-                    antes de compartir más documentos, o cuando hay un proceso secuencial (ej: compartir 
-                    financials 3 días después de entrar a "Due Diligence" para que primero revisen el pitch).
+                    Documents are shared after X days in the stage.
+                    <strong> Use when:</strong> You want to give the investor time to process information
+                    before sharing more documents, or when there is a sequential process (e.g. share
+                    financials 3 days after entering "Due Diligence" so they review the pitch first).
                   </p>
                 </div>
                 <div className="bg-white p-3 rounded border border-yellow-300">
-                  <p className="text-sm font-medium text-gray-900 mb-1">💡 Ejemplo práctico:</p>
+                  <p className="text-sm font-medium text-gray-900 mb-1">💡 Example:</p>
                   <p className="text-sm text-gray-700">
-                    Lead entra a "Due Diligence" el 1 de febrero. Si configuras delay de 5 días, 
-                    los documentos se compartirán automáticamente el 6 de febrero, dando tiempo 
-                    para que el inversor revise primero los documentos iniciales.
+                    Lead enters "Due Diligence" on February 1. If you set a 5-day delay,
+                    documents will be shared automatically on February 6, giving the investor
+                    time to review the initial documents first.
                   </p>
                 </div>
               </div>
             </div>
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-900 mb-2">🚀 ¿Cómo hacer Automatizaciones Eficientes?</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">🚀 How to Make Automations Efficient</h3>
               <p className="text-gray-700 mb-3">
-                La clave está en entender la <strong>diferencia entre Permisos de Documentos y Reglas de Automatización</strong>, 
-                y cuándo usar cada una:
+                The key is understanding the <strong>difference between Document Permissions and Automation Rules</strong>,
+                and when to use each:
               </p>
               <div className="space-y-4">
                 <div className="bg-white p-3 rounded border border-green-300">
-                  <p className="font-medium text-gray-900 mb-2">📋 Permisos de Documentos (Data Room):</p>
+                  <p className="font-medium text-gray-900 mb-2">📋 Document Permissions (Data Room):</p>
                   <ul className="list-disc list-inside space-y-1 text-sm text-gray-700 mb-2">
-                    <li>Definen <strong>cuándo</strong> un documento puede ser compartido</li>
-                    <li>Se configuran por documento individual</li>
-                    <li>Son más simples: solo marcas stages y delays</li>
-                    <li>Útiles para documentos que siempre se comparten en los mismos stages</li>
-                    <li><strong>No envían emails</strong> - solo comparten documentos automáticamente</li>
+                    <li>Define <strong>when</strong> a document can be shared</li>
+                    <li>Configured per individual document</li>
+                    <li>Simpler: just check stages and delays</li>
+                    <li>Useful for documents that are always shared in the same stages</li>
+                    <li><strong>Do not send emails</strong> - they only share documents automatically</li>
                   </ul>
                   <p className="text-xs text-gray-600 italic">
-                    Ejemplo: "El pitch deck siempre se comparte cuando un lead llega a 'Pitch Shared'"
+                    Example: "The pitch deck is always shared when a lead reaches 'Pitch Shared'"
                   </p>
                 </div>
                 <div className="bg-white p-3 rounded border border-green-300">
-                  <p className="font-medium text-gray-900 mb-2">⚙️ Reglas de Automatización:</p>
+                  <p className="font-medium text-gray-900 mb-2">⚙️ Automation Rules:</p>
                   <ul className="list-disc list-inside space-y-1 text-sm text-gray-700 mb-2">
-                    <li>Definen <strong>qué documentos</strong> compartir y <strong>cómo</strong> hacerlo</li>
-                    <li>Pueden agrupar múltiples documentos en una acción</li>
-                    <li>Permiten personalizar emails con templates</li>
-                    <li>Útiles para flujos complejos o cuando quieres controlar el proceso</li>
+                    <li>Define <strong>which documents</strong> to share and <strong>how</strong></li>
+                    <li>Can group multiple documents in one action</li>
+                    <li>Allow custom emails with templates</li>
+                    <li>Useful for complex flows or when you want to control the process</li>
                   </ul>
                   <p className="text-xs text-gray-600 italic">
-                    Ejemplo: "Cuando un lead llega a 'Due Diligence', compartir financials Y cap table, 
-                    con un email personalizado explicando qué incluyen"
+                    Example: "When a lead reaches 'Due Diligence', share financials AND cap table,
+                    with a custom email explaining what they include"
                   </p>
                 </div>
                 <div className="bg-blue-50 p-3 rounded border border-blue-300">
-                  <p className="font-medium text-gray-900 mb-2">🎯 Cuándo usar cada una:</p>
+                  <p className="font-medium text-gray-900 mb-2">🎯 When to use each:</p>
                   <div className="space-y-2 text-sm">
                     <div>
-                      <p className="font-medium text-gray-900">Usa Permisos cuando:</p>
+                      <p className="font-medium text-gray-900">Use Permissions when:</p>
                       <ul className="list-disc list-inside text-gray-700 ml-2">
-                        <li>Tienes documentos que siempre se comparten igual</li>
-                        <li>Quieres configuración rápida y simple</li>
-                        <li>Cada documento tiene su propio timing</li>
+                        <li>You have documents that are always shared the same way</li>
+                        <li>You want quick, simple setup</li>
+                        <li>Each document has its own timing</li>
                       </ul>
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">Usa Reglas cuando:</p>
+                      <p className="font-medium text-gray-900">Use Rules when:</p>
                       <ul className="list-disc list-inside text-gray-700 ml-2">
-                        <li>Quieres agrupar varios documentos en una acción</li>
-                        <li>Necesitas emails personalizados con contexto</li>
-                        <li>Tienes flujos complejos que requieren lógica específica</li>
-                        <li>Quieres activar/desactivar grupos de documentos fácilmente</li>
+                        <li>You want to group several documents in one action</li>
+                        <li>You need custom emails with context</li>
+                        <li>You have complex flows that need specific logic</li>
+                        <li>You want to easily enable/disable groups of documents</li>
                       </ul>
                     </div>
                   </div>
                 </div>
                 <div className="bg-purple-50 p-3 rounded border border-purple-300">
-                  <p className="font-medium text-gray-900 mb-2">✨ Mejores Prácticas:</p>
+                  <p className="font-medium text-gray-900 mb-2">✨ Best Practices:</p>
                   <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700">
-                    <li><strong>Combina ambos:</strong> Usa permisos para documentos básicos y reglas para paquetes especiales</li>
-                    <li><strong>Nombra bien tus reglas:</strong> "Share Pitch Package on Pitch Shared" es mejor que "Rule 1"</li>
-                    <li><strong>Revisa regularmente:</strong> Desactiva reglas que ya no uses</li>
-                    <li><strong>Prueba primero:</strong> Crea un lead de prueba para verificar que las automatizaciones funcionen</li>
-                    <li><strong>Documenta en notas:</strong> Cuando mueves un lead, agrega notas explicando por qué</li>
+                    <li><strong>Combine both:</strong> Use permissions for basic documents and rules for special packages</li>
+                    <li><strong>Name your rules well:</strong> "Share Pitch Package on Pitch Shared" is better than "Rule 1"</li>
+                    <li><strong>Review regularly:</strong> Disable rules you no longer use</li>
+                    <li><strong>Test first:</strong> Create a test lead to verify automations work</li>
+                    <li><strong>Document in notes:</strong> When you move a lead, add notes explaining why</li>
                   </ol>
                 </div>
               </div>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Variables de Email</h3>
-              <p className="text-gray-600 mb-2">Puedes usar estas variables en tus templates de email:</p>
+              <h3 className="font-semibold text-gray-900 mb-2">Email Variables</h3>
+              <p className="text-gray-600 mb-2">You can use these variables in your email templates:</p>
               <div className="bg-gray-50 p-3 rounded space-y-1 text-sm">
-                <div><code className="bg-white px-2 py-1 rounded">{'{{name}}'}</code> - Nombre del lead</div>
-                <div><code className="bg-white px-2 py-1 rounded">{'{{firm}}'}</code> - Nombre de la firma</div>
-                <div><code className="bg-white px-2 py-1 rounded">{'{{email}}'}</code> - Email del lead</div>
+                <div><code className="bg-white px-2 py-1 rounded">{'{{name}}'}</code> - Lead name</div>
+                <div><code className="bg-white px-2 py-1 rounded">{'{{firm}}'}</code> - Firm name</div>
+                <div><code className="bg-white px-2 py-1 rounded">{'{{email}}'}</code> - Lead email</div>
               </div>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-2">Gestionar Reglas</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">Managing Rules</h3>
               <ul className="list-disc list-inside space-y-2 text-gray-600">
-                <li><strong>Activar/Desactivar:</strong> Usa el toggle en cada regla para activarla o desactivarla</li>
-                <li><strong>Editar:</strong> Haz clic en el ícono de editar para modificar una regla existente</li>
-                <li><strong>Eliminar:</strong> Haz clic en el ícono de eliminar para borrar una regla</li>
-                <li><strong>Múltiples Reglas:</strong> Puedes tener varias reglas para el mismo stage</li>
+                <li><strong>Enable/Disable:</strong> Use the toggle on each rule to turn it on or off</li>
+                <li><strong>Edit:</strong> Click the edit icon to modify an existing rule</li>
+                <li><strong>Delete:</strong> Click the delete icon to remove a rule</li>
+                <li><strong>Multiple Rules:</strong> You can have several rules for the same stage</li>
               </ul>
             </div>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-sm text-blue-800">
-                <strong>💡 Tip:</strong> Las automatizaciones se ejecutan automáticamente cuando mueves un lead 
-                a un nuevo stage. Revisa la consola del navegador para ver los logs de ejecución.
+                <strong>💡 Tip:</strong> Automations run automatically when you move a lead
+                to a new stage. Check the browser console to see execution logs.
               </p>
             </div>
           </div>
@@ -473,18 +473,18 @@ const HelpPage: React.FC = () => {
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
           <HelpCircle className="text-primary-600" size={32} />
-          <h1 className="text-3xl font-bold text-gray-900">Centro de Ayuda</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Help Center</h1>
         </div>
         <p className="text-gray-600 mb-4">
-          Aprende a usar InvestiaFlow para gestionar tu proceso de fundraising de manera eficiente
+          Learn how to use InvestiaFlow to manage your fundraising process efficiently
         </p>
         <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <BookOpen className="text-primary-600" size={24} />
             <div>
-              <h3 className="font-semibold text-gray-900">Tutoriales Interactivos</h3>
+              <h3 className="font-semibold text-gray-900">Interactive Tutorials</h3>
               <p className="text-sm text-gray-600">
-                Aprende paso a paso con nuestros tours guiados por la aplicación
+                Learn step by step with our guided in-app tours
               </p>
             </div>
           </div>
@@ -495,7 +495,7 @@ const HelpPage: React.FC = () => {
             disabled={isResettingOnboarding}
           >
             <PlayCircle size={16} className="mr-2" />
-            Iniciar Tutoriales
+            Start Tutorials
           </Button>
         </div>
       </div>
@@ -531,7 +531,7 @@ const HelpPage: React.FC = () => {
       <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
         <div className="flex items-center gap-2 mb-6">
           <MessageSquare className="text-primary-600" size={24} />
-          <h2 className="text-xl font-semibold text-gray-900">Preguntas Frecuentes</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Frequently Asked Questions</h2>
         </div>
         <div className="space-y-3">
           {faqs.map((faq, index) => (
@@ -561,7 +561,7 @@ const HelpPage: React.FC = () => {
       <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border border-yellow-200 p-6">
         <div className="flex items-center gap-2 mb-4">
           <Lightbulb className="text-yellow-600" size={24} />
-          <h2 className="text-xl font-semibold text-gray-900">Tips y Mejores Prácticas</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Tips and Best Practices</h2>
         </div>
         <div className="space-y-3">
           {tips.map((tip, index) => (
@@ -576,7 +576,7 @@ const HelpPage: React.FC = () => {
       {/* Contacto */}
       <div className="mt-8 text-center text-gray-600 text-sm">
         <p>
-          ¿Necesitas más ayuda? Contacta a{' '}
+          Need more help? Contact{' '}
           <a href="mailto:sebas@investia.capital" className="text-primary-600 hover:underline">
             sebas@investia.capital
           </a>
