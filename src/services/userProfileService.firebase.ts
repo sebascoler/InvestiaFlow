@@ -73,7 +73,8 @@ export const userProfileServiceFirebase = {
       const converted = firestoreToProfile(profile);
       // Convert onboardingProgress dates if present
       if (converted.onboardingProgress?.lastCompletedAt && typeof converted.onboardingProgress.lastCompletedAt !== 'object') {
-        converted.onboardingProgress.lastCompletedAt = timestampToDate(converted.onboardingProgress.lastCompletedAt as any);
+        const d = timestampToDate(converted.onboardingProgress.lastCompletedAt as any);
+        converted.onboardingProgress.lastCompletedAt = d ?? undefined;
       }
       return converted;
     } catch (error) {

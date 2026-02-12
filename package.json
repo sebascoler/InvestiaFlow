@@ -4,13 +4,13 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "dev:vite": "vite",
-    "build:vite": "tsc && vite build",
-    "preview:vite": "vite preview"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "start": "vite preview",
+    "lint": "eslint src --ext .ts,.tsx",
+    "dev:next": "next dev",
+    "build:next": "next build",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^16.5.0",

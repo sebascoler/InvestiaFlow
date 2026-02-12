@@ -13,7 +13,7 @@ import { getTourSteps } from '../utils/onboardingSteps';
 import { useOnboarding } from '../hooks/useOnboarding';
 import { teamService } from '../services/teamService';
 import { invitationService } from '../services/invitationService';
-import { TeamMemberRole, TeamBranding } from '../types/team';
+import { TeamMemberRole, TeamBranding, TeamMember } from '../types/team';
 import { PermissionGate, usePermission } from '../components/shared/PermissionGate';
 import { storageService } from '../firebase/storage';
 
@@ -36,7 +36,7 @@ const TeamPage: React.FC = () => {
   // Show tour if user is owner/admin and should see team tutorial
   useEffect(() => {
     const isOwner = currentTeam?.ownerId === user?.id;
-    const canManageTeam = isOwner || (currentTeam?.members?.find(m => m.userId === user?.id)?.role === 'admin');
+    const canManageTeam = isOwner || (members?.find((m: TeamMember) => m.userId === user?.id)?.role === 'admin');
     if (shouldShowTutorial('team') && progress && !progress.completed && canManageTeam) {
       const verifyElements = () => {
         const invite = document.querySelector('[data-tour="team-invite"]');
