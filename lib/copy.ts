@@ -50,11 +50,19 @@ export const copy: Record<Lang, {
     title: string
     subtitle: string
     note: string
+    billingMonthly: string
+    billingYearly: string
+    saveYearly: string
     plans: {
       name: string
       price: string
+      pricePeriod?: string
+      priceAnnual?: string
+      pricePeriodYearly?: string
       bestFor: string
       features: string[]
+      badge?: string
+      cta?: string
     }[]
   }
   faq: {
@@ -188,55 +196,43 @@ export const copy: Record<Lang, {
       title: 'Pricing',
       subtitle: 'Simple, transparent pricing',
       note: 'Prices in EUR. Cancel anytime.',
+      billingMonthly: 'Monthly',
+      billingYearly: 'Yearly',
+      saveYearly: 'Save 14%',
       plans: [
         {
           name: 'Free',
           price: '€0',
           bestFor: 'First-time raise / getting organized',
           features: [
-            'Up to 10 investors',
+            'Up to 10 investors/leads',
             'Basic pipeline board',
-            'Document storage',
+            'Data Room',
+            'Document sharing automation',
             'Investor portal access',
+            'No personalization',
+            'No automated emails',
           ],
-        },
-        {
-          name: 'Starter',
-          price: '€59',
-          bestFor: 'Active Seed raise',
-          features: [
-            'Unlimited investors',
-            'Full pipeline CRM',
-            'Stage-based permissions',
-            'Basic automations',
-            'Team collaboration included',
-            'Engagement tracking',
-          ],
+          cta: 'Start free',
         },
         {
           name: 'Pro',
-          price: '€149',
-          bestFor: 'High-velocity pipeline + advanced workflows',
+          price: '€35',
+          pricePeriod: '/mo',
+          priceAnnual: '€360',
+          pricePeriodYearly: '/yr',
+          bestFor: 'Serious raises with automation',
           features: [
-            'Everything in Starter',
-            'Advanced automations',
-            'Custom email templates',
-            'Priority support',
-            'CSV export',
-            'Team branding',
+            '250 investors/leads',
+            'Customizable pipeline',
+            'Data Room',
+            'Document sharing automation',
+            'Investor portal access',
+            'Personalized branding',
+            'Automated emails',
           ],
-        },
-        {
-          name: 'Advisor',
-          price: '€399',
-          bestFor: 'Fundraising advisors / multiple startups',
-          features: [
-            'Everything in Pro',
-            'Multiple teams',
-            'Advanced analytics',
-            'Dedicated support',
-            'Custom integrations',
-          ],
+          badge: 'Recommended',
+          cta: 'Upgrade to Pro',
         },
       ],
     },
@@ -265,7 +261,7 @@ export const copy: Record<Lang, {
         },
         {
           question: 'Can my team collaborate with roles?',
-          answer: 'Yes. Invite team members with roles: Viewer (read-only), Editor (manage leads and documents), Admin (team management and branding), or Owner (full control). Team collaboration is included in all paid plans.',
+          answer: 'Yes. Invite team members with roles: Viewer (read-only), Editor (manage leads and documents), Admin (team management and branding), or Owner (full control). Team collaboration is included in the Pro plan.',
         },
         {
           question: 'Do you track views and downloads?',
@@ -401,55 +397,43 @@ export const copy: Record<Lang, {
       title: 'Precios',
       subtitle: 'Precios simples y transparentes',
       note: 'Precios en EUR. Cancela cuando quieras.',
+      billingMonthly: 'Mensual',
+      billingYearly: 'Anual',
+      saveYearly: 'Ahorra 14%',
       plans: [
         {
           name: 'Gratis',
           price: '€0',
           bestFor: 'Primera ronda / organizarse',
           features: [
-            'Hasta 10 inversores',
+            'Hasta 10 inversores/leads',
             'Tablero básico de pipeline',
-            'Almacenamiento de documentos',
+            'Data Room',
+            'Automatización de compartir documentos',
             'Acceso al portal de inversores',
+            'Sin personalización',
+            'Sin emails automatizados',
           ],
-        },
-        {
-          name: 'Starter',
-          price: '€59',
-          bestFor: 'Ronda Seed activa',
-          features: [
-            'Inversores ilimitados',
-            'CRM completo de pipeline',
-            'Permisos por etapas',
-            'Automatizaciones básicas',
-            'Colaboración en equipo incluida',
-            'Seguimiento de engagement',
-          ],
+          cta: 'Empezar gratis',
         },
         {
           name: 'Pro',
-          price: '€149',
-          bestFor: 'Pipeline de alta velocidad + flujos avanzados',
+          price: '€35',
+          pricePeriod: '/mes',
+          priceAnnual: '€360',
+          pricePeriodYearly: '/año',
+          bestFor: 'Rondas serias con automatización',
           features: [
-            'Todo lo de Starter',
-            'Automatizaciones avanzadas',
-            'Plantillas de email personalizadas',
-            'Soporte prioritario',
-            'Exportación CSV',
-            'Marca del equipo',
+            '250 inversores/leads',
+            'Pipeline personalizable',
+            'Data Room',
+            'Automatización de compartir documentos',
+            'Acceso al portal de inversores',
+            'Marca personalizada',
+            'Emails automatizados',
           ],
-        },
-        {
-          name: 'Advisor',
-          price: '€399',
-          bestFor: 'Asesores de fundraising / múltiples startups',
-          features: [
-            'Todo lo de Pro',
-            'Múltiples equipos',
-            'Analíticas avanzadas',
-            'Soporte dedicado',
-            'Integraciones personalizadas',
-          ],
+          badge: 'Recomendado',
+          cta: 'Pasar a Pro',
         },
       ],
     },
@@ -478,7 +462,7 @@ export const copy: Record<Lang, {
         },
         {
           question: '¿Mi equipo puede colaborar con roles?',
-          answer: 'Sí. Invita miembros del equipo con roles: Viewer (solo lectura), Editor (gestionar leads y documentos), Admin (gestión de equipo y marca), u Owner (control total). La colaboración en equipo está incluida en todos los planes de pago.',
+          answer: 'Sí. Invita miembros del equipo con roles: Viewer (solo lectura), Editor (gestionar leads y documentos), Admin (gestión de equipo y marca), u Owner (control total). La colaboración en equipo está incluida en el plan Pro.',
         },
         {
           question: '¿Rastrean visualizaciones y descargas?',

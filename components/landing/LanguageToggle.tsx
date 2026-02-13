@@ -1,11 +1,12 @@
 "use client"
 
-import { useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { copy, type Lang } from '@/lib/copy'
 
 export function LanguageToggle({ lang }: { lang: Lang }) {
   const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
 
   const handleLangChange = (newLang: Lang) => {
@@ -13,7 +14,8 @@ export function LanguageToggle({ lang }: { lang: Lang }) {
     current.set('lang', newLang)
     const search = current.toString()
     const query = search ? `?${search}` : ''
-    router.push(`/${query}`, { scroll: false })
+    const href = `${pathname || '/'}${query}`
+    router.push(href, { scroll: false })
   }
 
   return (

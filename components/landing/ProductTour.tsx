@@ -4,6 +4,21 @@ import { copy, type Lang } from '@/lib/copy'
 import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 
+const tourImages = [
+  {
+    webp: '/images/landing/tour/pipeline-board.webp',
+    png: '/images/landing/tour/pipeline-board.png',
+  },
+  {
+    webp: '/images/landing/tour/rules-automations.webp',
+    png: '/images/landing/tour/rules-automations.png',
+  },
+  {
+    webp: '/images/landing/tour/investor-portal-signals.webp',
+    png: '/images/landing/tour/investor-portal-signals.png',
+  },
+]
+
 export function ProductTour({ lang }: { lang: Lang }) {
   const t = copy[lang]
 
@@ -32,11 +47,17 @@ export function ProductTour({ lang }: { lang: Lang }) {
               transition={{ duration: 0.5, delay: index * 0.15 }}
             >
               <Card className="overflow-hidden">
-                <div className="aspect-video bg-gradient-to-br from-[var(--blue)]/20 to-[var(--teal)]/20 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-5xl mb-4">🖥️</div>
-                    <p className="text-gray-text text-sm">Screen {index + 1}</p>
-                  </div>
+                <div className="aspect-video overflow-hidden border-b border-gray-100">
+                  <picture>
+                    <source srcSet={tourImages[index].webp} type="image/webp" />
+                    <img
+                      src={tourImages[index].png}
+                      alt={screen.title}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </picture>
                 </div>
                 <div className="p-6">
                   <h3 className="font-semibold text-navy mb-2 font-heading">

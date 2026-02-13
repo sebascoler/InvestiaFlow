@@ -1,7 +1,6 @@
 "use client"
 
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { copy, type Lang } from '@/lib/copy'
 import { motion } from 'framer-motion'
 
@@ -17,9 +16,6 @@ export function Hero({ lang }: { lang: Lang }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Badge variant="secondary" className="mb-6">
-              {t.hero.socialProof}
-            </Badge>
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold font-heading text-navy mb-6 leading-tight">
               {t.hero.headline}
             </h1>
@@ -53,28 +49,17 @@ export function Hero({ lang }: { lang: Lang }) {
           className="mt-16"
         >
           <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 md:p-12">
-            <div className="aspect-video bg-gradient-to-br from-[var(--blue)]/10 to-[var(--teal)]/10 rounded-xl flex items-center justify-center relative overflow-hidden">
-              <div className="absolute inset-0 grid grid-cols-3 gap-4 p-8">
-                <div className="bg-white/80 rounded-lg p-4 shadow-md">
-                  <div className="h-2 bg-[var(--blue)] rounded mb-2"></div>
-                  <div className="h-2 bg-[var(--blue)]/60 rounded mb-2 w-3/4"></div>
-                  <div className="h-2 bg-[var(--blue)]/40 rounded"></div>
-                </div>
-                <div className="bg-white/80 rounded-lg p-4 shadow-md">
-                  <div className="h-2 bg-[var(--teal)] rounded mb-2"></div>
-                  <div className="h-2 bg-[var(--teal)]/60 rounded mb-2 w-2/3"></div>
-                  <div className="h-2 bg-[var(--teal)]/40 rounded"></div>
-                </div>
-                <div className="bg-white/80 rounded-lg p-4 shadow-md">
-                  <div className="h-2 bg-[var(--blue)] rounded mb-2"></div>
-                  <div className="h-2 bg-[var(--blue)]/60 rounded mb-2 w-4/5"></div>
-                  <div className="h-2 bg-[var(--blue)]/40 rounded"></div>
-                </div>
-              </div>
-              <div className="relative z-10 text-center">
-                <div className="text-4xl mb-4">📊</div>
-                <p className="text-gray-text font-medium">Product Preview</p>
-              </div>
+            <div className="aspect-video rounded-xl overflow-hidden border border-gray-100">
+              <picture>
+                <source srcSet="/images/landing/hero/hero-preview.webp" type="image/webp" />
+                <img
+                  src="/images/landing/hero/hero-preview.png"
+                  alt="InvestiaFlow CRM pipeline overview"
+                  className="w-full h-full object-cover"
+                  loading="eager"
+                  decoding="async"
+                />
+              </picture>
             </div>
             <div className="grid md:grid-cols-3 gap-6 mt-8">
               <div className="text-center">
@@ -95,12 +80,6 @@ export function Hero({ lang }: { lang: Lang }) {
             </div>
           </div>
         </motion.div>
-
-        <div className="mt-12 flex items-center justify-center gap-8 opacity-60">
-          <div className="h-12 w-24 bg-gray-300 rounded"></div>
-          <div className="h-12 w-24 bg-gray-300 rounded"></div>
-          <div className="h-12 w-24 bg-gray-300 rounded"></div>
-        </div>
       </div>
     </section>
   )

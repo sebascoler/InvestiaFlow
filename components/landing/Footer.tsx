@@ -40,12 +40,12 @@ export function Footer({ lang }: { lang: Lang }) {
             <h4 className="font-semibold mb-4">Legal</h4>
             <ul className="space-y-2 text-sm text-gray-400">
               <li>
-                <Link href="/privacy" className="hover:text-white transition-colors">
+                <Link href={lang === 'es' ? '/privacy?lang=es' : '/privacy'} className="hover:text-white transition-colors">
                   {t.footer.privacy}
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="hover:text-white transition-colors">
+                <Link href={lang === 'es' ? '/terms?lang=es' : '/terms'} className="hover:text-white transition-colors">
                   {t.footer.terms}
                 </Link>
               </li>
