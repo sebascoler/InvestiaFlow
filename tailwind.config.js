@@ -23,6 +23,10 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          /* Ensure primary buttons/links are always visible (e.g. "Add Lead") */
+          500: "var(--color-primary, #0284c7)",
+          600: "var(--color-primary, #0284c7)",
+          700: "var(--color-primary-hover, #0369a1)",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",

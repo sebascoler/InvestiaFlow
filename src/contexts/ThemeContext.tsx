@@ -56,7 +56,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   useEffect(() => {
     const root = document.documentElement;
     
-    // Set CSS variables for colors
+    // Set CSS variables for colors (used by buttons, links, primary-600 etc.)
     root.style.setProperty('--color-primary', primaryColor);
     root.style.setProperty('--color-secondary', secondaryColor);
     root.style.setProperty('--color-accent', accentColor);

@@ -11,6 +11,10 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Brand colors – fallback so primary buttons/links are always visible (e.g. "Add Lead") */
+  --color-primary: #0284c7;
+  --color-primary-hover: #0369a1;
 }
 
 body {
