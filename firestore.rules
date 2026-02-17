@@ -81,23 +81,68 @@ service cloud.firestore {
     }
     
     // Document Permissions collection
+    // Permissions reference a documentId — scope access to the document's owner or team
     match /documentPermissions/{permissionId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update: if isAuthenticated();
-      allow delete: if isAuthenticated();
-      // Note: Permissions are tied to documents, so we check document ownership
-      // This is a simplified version - you might want to add document ownership checks
+      allow read: if isAuthenticated() && (
+        // Owner of the referenced document
+        exists(/databases/$(database)/documents/documents/$(resource.data.documentId)) &&
+        (get(/databases/$(database)/documents/documents/$(resource.data.documentId)).data.userId == request.auth.uid ||
+         // Team member (team exists for this document)
+         (get(/databases/$(database)/documents/documents/$(resource.data.documentId)).data.teamId != null &&
+          get(/databases/$(database)/documents/documents/$(resource.data.documentId)).data.teamId != '' &&
+          exists(/databases/$(database)/documents/teams/$(get(/databases/$(database)/documents/documents/$(resource.data.documentId)).data.teamId))))
+      );
+      allow create: if isAuthenticated() && (
+        exists(/databases/$(database)/documents/documents/$(request.resource.data.documentId)) &&
+        (get(/databases/$(database)/documents/documents/$(request.resource.data.documentId)).data.userId == request.auth.uid ||
+         (get(/databases/$(database)/documents/documents/$(request.resource.data.documentId)).data.teamId != null &&
+          get(/databases/$(database)/documents/documents/$(request.resource.data.documentId)).data.teamId != '' &&
+          exists(/databases/$(database)/documents/teams/$(get(/databases/$(database)/documents/documents/$(request.resource.data.documentId)).data.teamId))))
+      );
+      allow update: if isAuthenticated() && (
+        exists(/databases/$(database)/documents/documents/$(resource.data.documentId)) &&
+        (get(/databases/$(database)/documents/documents/$(resource.data.documentId)).data.userId == request.auth.uid ||
+         (get(/databases/$(database)/documents/documents/$(resource.data.documentId)).data.teamId != null &&
+          get(/databases/$(database)/documents/documents/$(resource.data.documentId)).data.teamId != '' &&
+          exists(/databases/$(database)/documents/teams/$(get(/databases/$(database)/documents/documents/$(resource.data.documentId)).data.teamId))))
+      );
+      allow delete: if isAuthenticated() && (
+        exists(/databases/$(database)/documents/documents/$(resource.data.documentId)) &&
+        (get(/databases/$(database)/documents/documents/$(resource.data.documentId)).data.userId == request.auth.uid ||
+         (get(/databases/$(database)/documents/documents/$(resource.data.documentId)).data.teamId != null &&
+          get(/databases/$(database)/documents/documents/$(resource.data.documentId)).data.teamId != '' &&
+          exists(/databases/$(database)/documents/teams/$(get(/databases/$(database)/documents/documents/$(resource.data.documentId)).data.teamId))))
+      );
     }
-    
+
     // Shared Documents collection (for tracking)
+    // Shared docs reference a documentId — scope access to the document's owner or team
     match /sharedDocuments/{sharedId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update: if isAuthenticated();
-      allow delete: if isAuthenticated();
-      // Note: Shared documents are tied to leads and documents
-      // You might want to add more specific checks based on your needs
+      allow read: if isAuthenticated() && (
+        exists(/databases/$(database)/documents/documents/$(resource.data.documentId)) &&
+        (get(/databases/$(database)/documents/documents/$(resource.data.documentId)).data.userId == request.auth.uid ||
+         (get(/databases/$(database)/documents/documents/$(resource.data.documentId)).data.teamId != null &&
+          get(/databases/$(database)/documents/documents/$(resource.data.documentId)).data.teamId != '' &&
+          exists(/databases/$(database)/documents/teams/$(get(/databases/$(database)/documents/documents/$(resource.data.documentId)).data.teamId))))
+      );
+      allow create: if isAuthenticated() && (
+        exists(/databases/$(database)/documents/documents/$(request.resource.data.documentId)) &&
+        (get(/databases/$(database)/documents/documents/$(request.resource.data.documentId)).data.userId == request.auth.uid ||
+         (get(/databases/$(database)/documents/documents/$(request.resource.data.documentId)).data.teamId != null &&
+          get(/databases/$(database)/documents/documents/$(request.resource.data.documentId)).data.teamId != '' &&
+          exists(/databases/$(database)/documents/teams/$(get(/databases/$(database)/documents/documents/$(request.resource.data.documentId)).data.teamId))))
+      );
+      allow update: if isAuthenticated() && (
+        exists(/databases/$(database)/documents/documents/$(resource.data.documentId)) &&
+        (get(/databases/$(database)/documents/documents/$(resource.data.documentId)).data.userId == request.auth.uid ||
+         (get(/databases/$(database)/documents/documents/$(resource.data.documentId)).data.teamId != null &&
+          get(/databases/$(database)/documents/documents/$(resource.data.documentId)).data.teamId != '' &&
+          exists(/databases/$(database)/documents/teams/$(get(/databases/$(database)/documents/documents/$(resource.data.documentId)).data.teamId))))
+      );
+      allow delete: if isAuthenticated() && (
+        exists(/databases/$(database)/documents/documents/$(resource.data.documentId)) &&
+        get(/databases/$(database)/documents/documents/$(resource.data.documentId)).data.userId == request.auth.uid
+      );
     }
     
     // Automation Rules collection
@@ -182,21 +227,46 @@ service cloud.firestore {
     // Team Members collection
     match /teamMembers/{memberId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update: if isAuthenticated() && (
-        resource.data.userId == request.auth.uid || // User can update their own status
-        // Team owner/admin can update roles (checked via team ownership)
-        true // Will be validated in Cloud Functions
+      allow create: if isAuthenticated() && (
+        // Only team owner can add members, or user is accepting their own invitation
+        request.resource.data.userId == request.auth.uid ||
+        (request.resource.data.teamId != null &&
+         exists(/databases/$(database)/documents/teams/$(request.resource.data.teamId)) &&
+         get(/databases/$(database)/documents/teams/$(request.resource.data.teamId)).data.ownerId == request.auth.uid)
       );
-      allow delete: if isAuthenticated(); // Will be validated in Cloud Functions
+      allow update: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid || // User can update their own membership
+        // Team owner can update roles
+        (resource.data.teamId != null &&
+         exists(/databases/$(database)/documents/teams/$(resource.data.teamId)) &&
+         get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.ownerId == request.auth.uid)
+      );
+      allow delete: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid || // User can leave team
+        // Team owner can remove members
+        (resource.data.teamId != null &&
+         exists(/databases/$(database)/documents/teams/$(resource.data.teamId)) &&
+         get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.ownerId == request.auth.uid)
+      );
     }
-    
+
     // Team Invitations collection
     match /teamInvitations/{invitationId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update: if isAuthenticated();
-      allow delete: if isAuthenticated();
+      allow create: if isAuthenticated() && (
+        // Only team owner/members can create invitations
+        request.resource.data.teamId != null &&
+        exists(/databases/$(database)/documents/teams/$(request.resource.data.teamId)) &&
+        get(/databases/$(database)/documents/teams/$(request.resource.data.teamId)).data.ownerId == request.auth.uid
+      );
+      allow update: if isAuthenticated(); // Accepting invitations
+      allow delete: if isAuthenticated() && (
+        // Inviter or team owner can delete
+        resource.data.invitedBy == request.auth.uid ||
+        (resource.data.teamId != null &&
+         exists(/databases/$(database)/documents/teams/$(resource.data.teamId)) &&
+         get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.ownerId == request.auth.uid)
+      );
     }
     
     // Investor Verification Codes collection
