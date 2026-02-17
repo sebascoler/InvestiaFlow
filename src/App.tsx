@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ErrorBoundary } from './components/shared/ErrorBoundary'
 import { AuthProvider } from './contexts/AuthContext'
@@ -5,17 +6,28 @@ import { TeamProvider } from './contexts/TeamContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { OnboardingProvider } from './contexts/OnboardingContext'
 import Layout from './components/layout/Layout'
-import DashboardPage from './pages/DashboardPage'
-import CRMPage from './pages/CRMPage'
-import DataRoomPage from './pages/DataRoomPage'
-import AutomationPage from './pages/AutomationPage'
-import TeamPage from './pages/TeamPage'
-import SettingsPage from './pages/SettingsPage'
-import HelpPage from './pages/HelpPage'
+import { Loader } from './components/shared/Loader'
 import LoginPage from './pages/LoginPage'
 import InvestorLoginPage from './pages/InvestorLoginPage'
-import InvestorDataRoomPage from './pages/InvestorDataRoomPage'
-import InviteAcceptPage from './pages/InviteAcceptPage'
+
+// Lazy-loaded pages
+const DashboardPage = lazy(() => import('./pages/DashboardPage'))
+const CRMPage = lazy(() => import('./pages/CRMPage'))
+const DataRoomPage = lazy(() => import('./pages/DataRoomPage'))
+const AutomationPage = lazy(() => import('./pages/AutomationPage'))
+const TeamPage = lazy(() => import('./pages/TeamPage'))
+const SettingsPage = lazy(() => import('./pages/SettingsPage'))
+const HelpPage = lazy(() => import('./pages/HelpPage'))
+const InvestorDataRoomPage = lazy(() => import('./pages/InvestorDataRoomPage'))
+const InviteAcceptPage = lazy(() => import('./pages/InviteAcceptPage'))
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-[50vh]">
+      <Loader size="lg" />
+    </div>
+  )
+}
 
 function App() {
   return (
@@ -25,6 +37,7 @@ function App() {
           <ThemeProvider>
             <OnboardingProvider>
               <BrowserRouter>
+            <Suspense fallback={<PageLoader />}>
             <Routes>
             <Route path="/login" element={<LoginPage />} />
             {/* Investor public routes */}
@@ -44,6 +57,7 @@ function App() {
               <Route path="help" element={<HelpPage />} />
               </Route>
             </Routes>
+            </Suspense>
           </BrowserRouter>
             </OnboardingProvider>
           </ThemeProvider>
