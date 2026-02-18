@@ -5,22 +5,89 @@ const teamsDB: Team[] = [];
 const teamMembersDB: TeamMember[] = [];
 const teamInvitationsDB: TeamInvitation[] = [];
 
+// ── localStorage helpers for mock team persistence across reloads ──
+
+const TEAM_STORAGE_KEY = 'investiaflow_mock_team';
+const MEMBER_STORAGE_KEY = 'investiaflow_mock_member';
+
+function persistTeamToStorage(team: Team): void {
+  try {
+    localStorage.setItem(`${TEAM_STORAGE_KEY}_${team.ownerId}`, JSON.stringify(team));
+  } catch { /* localStorage unavailable */ }
+}
+
+function loadTeamFromStorage(userId: string): Team | null {
+  try {
+    const raw = localStorage.getItem(`${TEAM_STORAGE_KEY}_${userId}`);
+    if (!raw) return null;
+    const team = JSON.parse(raw);
+    // Restore Date objects
+    if (team.createdAt) team.createdAt = new Date(team.createdAt);
+    if (team.updatedAt) team.updatedAt = new Date(team.updatedAt);
+    return team;
+  } catch { return null; }
+}
+
+function persistMemberToStorage(member: TeamMember): void {
+  try {
+    localStorage.setItem(`${MEMBER_STORAGE_KEY}_${member.userId}`, JSON.stringify(member));
+  } catch { /* localStorage unavailable */ }
+}
+
+function loadMemberFromStorage(userId: string): TeamMember | null {
+  try {
+    const raw = localStorage.getItem(`${MEMBER_STORAGE_KEY}_${userId}`);
+    if (!raw) return null;
+    const member = JSON.parse(raw);
+    if (member.joinedAt) member.joinedAt = new Date(member.joinedAt);
+    return member;
+  } catch { return null; }
+}
+
+/** Ensure a persisted team is loaded into the in-memory arrays */
+function restoreTeamIfNeeded(userId: string): void {
+  // Already in memory?
+  const existingMember = teamMembersDB.find(m => m.userId === userId && m.status === 'active');
+  if (existingMember && teamsDB.find(t => t.id === existingMember.teamId)) return;
+
+  // Try localStorage
+  const storedTeam = loadTeamFromStorage(userId);
+  if (!storedTeam) return;
+
+  if (!teamsDB.find(t => t.id === storedTeam.id)) {
+    teamsDB.push(storedTeam);
+  }
+
+  const storedMember = loadMemberFromStorage(userId);
+  if (storedMember && !teamMembersDB.find(m => m.userId === userId && m.teamId === storedTeam.id)) {
+    teamMembersDB.push(storedMember);
+  }
+}
+
 export const teamServiceMock = {
   async createTeam(userId: string, name: string): Promise<Team> {
+    // Use a deterministic ID so it's stable across page reloads
+    const teamId = `team-mock-${userId}`;
+
+    // If this team already exists (restored from storage), return it
+    const existing = teamsDB.find(t => t.id === teamId);
+    if (existing) return { ...existing };
+
     const now = new Date();
     const team: Team = {
-      id: `team-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: teamId,
       name,
       ownerId: userId,
       createdAt: now,
       updatedAt: now,
     };
-    
+
     teamsDB.push(team);
-    
+    persistTeamToStorage(team);
+
     // Auto-add owner as member
     const ownerMember: TeamMember = {
-      id: `member-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `member-mock-${userId}`,
       teamId: team.id,
       userId,
       email: 'owner@example.com',
@@ -31,7 +98,8 @@ export const teamServiceMock = {
       status: 'active',
     };
     teamMembersDB.push(ownerMember);
-    
+    persistMemberToStorage(ownerMember);
+
     return { ...team };
   },
 
@@ -41,10 +109,13 @@ export const teamServiceMock = {
   },
 
   async getUserTeams(userId: string): Promise<Team[]> {
+    // Restore from localStorage if the in-memory arrays are empty
+    restoreTeamIfNeeded(userId);
+
     const memberTeamIds = teamMembersDB
       .filter(m => m.userId === userId && m.status === 'active')
       .map(m => m.teamId);
-    
+
     return teamsDB
       .filter(t => memberTeamIds.includes(t.id))
       .map(t => ({ ...t }));
@@ -122,6 +193,8 @@ export const teamServiceMock = {
       ...team.branding,
       ...branding,
     };
+    team.updatedAt = new Date();
+    persistTeamToStorage(team);
 
     return { ...team };
   },
@@ -137,6 +210,7 @@ export const teamServiceMock = {
       ...settings,
     };
     team.updatedAt = new Date();
+    persistTeamToStorage(team);
 
     return { ...team };
   },
