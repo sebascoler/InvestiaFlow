@@ -313,12 +313,12 @@ export const leadServiceFirebase = {
     const firebaseFirestore = await import('firebase/firestore');
     const where = firebaseFirestore.where;
     const or = firebaseFirestore.or;
-    const { STAGES } = await import('../types/stage');
-    
+    const { DEFAULT_STAGES } = await import('../types/stage');
+
     if (!where) {
       throw new Error('where function not available');
     }
-    
+
     // Build query: if teamId is provided, get leads with teamId OR leads from owner (for migration)
     // Otherwise, filter by userId (for users without teams)
     let queryConstraints;
@@ -335,20 +335,20 @@ export const leadServiceFirebase = {
       // Fallback to userId only (for users without teams)
       queryConstraints = [where('userId', '==', userId)];
     }
-    
+
     // Get all leads for this user/team
     const allLeads = await firestoreService.getDocs<Lead>(
       COLLECTION_NAME,
       queryConstraints
     );
-    
+
     const mappedLeads = allLeads.map(firestoreToLead);
-    
+
     // Filter leads that are in minStage or higher stages
-    const minStageOrder = STAGES.find(s => s.id === minStage)?.order ?? -1;
-    
+    const minStageOrder = DEFAULT_STAGES.find(s => s.id === minStage)?.order ?? -1;
+
     return mappedLeads.filter(lead => {
-      const leadStageOrder = STAGES.find(s => s.id === lead.stage)?.order ?? -1;
+      const leadStageOrder = DEFAULT_STAGES.find(s => s.id === lead.stage)?.order ?? -1;
       return leadStageOrder >= minStageOrder;
     });
   },

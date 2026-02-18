@@ -4,6 +4,8 @@ import { LayoutDashboard, FolderOpen, Zap, Settings, LogOut, HelpCircle, BarChar
 import { useAuth } from '../../contexts/AuthContext';
 import { useMobileMenu } from '../../contexts/MobileMenuContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { ReminderBadge } from '../reminders/ReminderBadge';
+import { useReminders } from '../../hooks/useReminders';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
@@ -20,6 +22,7 @@ export const Sidebar: React.FC = () => {
   const { logout } = useAuth();
   const { isOpen, closeMenu } = useMobileMenu();
   const { logoUrl, companyName } = useTheme();
+  const { reminderCount, urgentCount } = useReminders();
 
   // Close menu when route changes (only if menu is open)
   useEffect(() => {
@@ -114,7 +117,10 @@ export const Sidebar: React.FC = () => {
                   `}
                 >
                   <Icon size={18} className="lg:w-5 lg:h-5" />
-                  <span className="text-sm lg:text-base">{item.name}</span>
+                  <span className="text-sm lg:text-base flex-1">{item.name}</span>
+                  {item.href === '/crm' && (
+                    <ReminderBadge count={reminderCount} urgentCount={urgentCount} />
+                  )}
                 </Link>
               </li>
             );

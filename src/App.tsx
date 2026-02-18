@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ErrorBoundary } from './components/shared/ErrorBoundary'
 import { AuthProvider } from './contexts/AuthContext'
 import { TeamProvider } from './contexts/TeamContext'
+import { StagesProvider } from './contexts/StagesContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { OnboardingProvider } from './contexts/OnboardingContext'
 import Layout from './components/layout/Layout'
@@ -34,6 +35,7 @@ function App() {
     <ErrorBoundary>
       <AuthProvider>
         <TeamProvider>
+          <StagesProvider>
           <ThemeProvider>
             <OnboardingProvider>
               <BrowserRouter>
@@ -61,6 +63,7 @@ function App() {
           </BrowserRouter>
             </OnboardingProvider>
           </ThemeProvider>
+          </StagesProvider>
         </TeamProvider>
       </AuthProvider>
     </ErrorBoundary>

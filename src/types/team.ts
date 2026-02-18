@@ -1,3 +1,5 @@
+import { FollowUpRule } from './reminder';
+
 export type TeamMemberRole = 'owner' | 'admin' | 'editor' | 'viewer';
 export type TeamMemberStatus = 'pending' | 'active';
 
@@ -14,6 +16,7 @@ export interface Team {
 export interface TeamSettings {
   allowMemberInvites?: boolean;
   defaultRole?: TeamMemberRole;
+  followUpRules?: FollowUpRule[];
 }
 
 export interface TeamBranding {

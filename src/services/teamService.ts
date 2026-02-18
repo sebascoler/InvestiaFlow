@@ -1,5 +1,5 @@
 // Team Service - Mock implementation
-import { Team, TeamMember, TeamInvitation, TeamMemberRole } from '../types/team';
+import { Team, TeamMember, TeamInvitation, TeamMemberRole, TeamSettings } from '../types/team';
 
 const teamsDB: Team[] = [];
 const teamMembersDB: TeamMember[] = [];
@@ -117,12 +117,27 @@ export const teamServiceMock = {
     if (!team) {
       throw new Error('Team not found');
     }
-    
+
     team.branding = {
       ...team.branding,
       ...branding,
     };
-    
+
+    return { ...team };
+  },
+
+  async updateSettings(teamId: string, settings: Partial<TeamSettings>): Promise<Team> {
+    const team = teamsDB.find(t => t.id === teamId);
+    if (!team) {
+      throw new Error('Team not found');
+    }
+
+    team.settings = {
+      ...team.settings,
+      ...settings,
+    };
+    team.updatedAt = new Date();
+
     return { ...team };
   },
 };
@@ -202,8 +217,15 @@ export const teamService = {
 
   async updateBranding(teamId: string, branding: Partial<import('../types/team').TeamBranding>): Promise<Team> {
     const service = await getFirebaseService();
-    return service 
-      ? service.updateBranding(teamId, branding) 
+    return service
+      ? service.updateBranding(teamId, branding)
       : teamServiceMock.updateBranding(teamId, branding);
+  },
+
+  async updateSettings(teamId: string, settings: Partial<TeamSettings>): Promise<Team> {
+    const service = await getFirebaseService();
+    return service
+      ? service.updateSettings(teamId, settings)
+      : teamServiceMock.updateSettings(teamId, settings);
   },
 };

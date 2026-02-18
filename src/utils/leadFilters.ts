@@ -1,10 +1,11 @@
 import { Lead } from '../types/lead';
+import { Stage, DEFAULT_STAGES } from '../types/stage';
 import { FilterOptions } from '../components/crm/SearchAndFilters';
 
 /**
  * Filtra y ordena leads según los filtros aplicados
  */
-export const filterAndSortLeads = (leads: Lead[], filters: FilterOptions): Lead[] => {
+export const filterAndSortLeads = (leads: Lead[], filters: FilterOptions, stages?: Stage[]): Lead[] => {
   let filtered = [...leads];
 
   // Aplicar búsqueda por texto
@@ -57,18 +58,10 @@ export const filterAndSortLeads = (leads: Lead[], filters: FilterOptions): Lead[
         break;
       case 'stage':
         // Ordenar por el orden del stage
+        const resolvedStages = stages || DEFAULT_STAGES;
         const stageOrder = (stage: string) => {
-          const stageMap: Record<string, number> = {
-            target: 0,
-            first_contact: 1,
-            in_conversation: 2,
-            pitch_shared: 3,
-            due_diligence: 4,
-            term_sheet: 5,
-            committed: 6,
-            passed: 7,
-          };
-          return stageMap[stage] ?? 999;
+          const index = resolvedStages.findIndex(s => s.id === stage);
+          return index >= 0 ? index : 999;
         };
         comparison = stageOrder(a.stage) - stageOrder(b.stage);
         break;

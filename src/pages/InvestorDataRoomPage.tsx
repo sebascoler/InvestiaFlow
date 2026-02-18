@@ -8,6 +8,7 @@ import { Loader } from '../components/shared/Loader';
 import { investorDocumentService } from '../services/investorDocumentService';
 import { investorAuthService } from '../services/investorAuthService';
 import { InvestorDocument } from '../types/investorAuth';
+import { InvestorQASection } from '../components/investor/InvestorQASection';
 
 const InvestorDataRoomPage: React.FC = () => {
   const navigate = useNavigate();
@@ -167,6 +168,11 @@ const InvestorDataRoomPage: React.FC = () => {
           ))}
         </div>
       )}
+
+      {/* Q&A Section */}
+      <div className="mt-8">
+        <InvestorQASection />
+      </div>
 
       {previewDocument && (
         <DocumentPreview

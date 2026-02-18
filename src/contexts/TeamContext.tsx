@@ -1,9 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Team, TeamMember } from '../types/team';
+import { Team, TeamMember, TeamInvitation, TeamSettings } from '../types/team';
 import { useAuth } from './AuthContext';
 import { teamService } from '../services/teamService';
-
-import { TeamInvitation } from '../types/team';
 
 interface TeamContextType {
   currentTeam: Team | null;
@@ -18,6 +16,7 @@ interface TeamContextType {
   refreshInvitations: () => Promise<void>;
   createTeam: (name: string) => Promise<Team>;
   updateBranding: (teamId: string, branding: Partial<import('../types/team').TeamBranding>) => Promise<void>;
+  updateSettings: (teamId: string, settings: Partial<TeamSettings>) => Promise<void>;
 }
 
 const TeamContext = createContext<TeamContextType | undefined>(undefined);
@@ -143,6 +142,24 @@ export const TeamProvider: React.FC<TeamProviderProps> = ({ children }) => {
     }
   };
 
+  const updateSettings = async (teamId: string, settings: Partial<TeamSettings>): Promise<void> => {
+    try {
+      setError(null);
+      await teamService.updateSettings(teamId, settings);
+      await refreshTeams();
+      if (currentTeam?.id === teamId) {
+        const updatedTeam = await teamService.getTeam(teamId);
+        if (updatedTeam) {
+          setCurrentTeam(updatedTeam);
+        }
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update settings';
+      setError(errorMessage);
+      throw err;
+    }
+  };
+
   // Load teams when user changes
   useEffect(() => {
     refreshTeams();
@@ -169,6 +186,7 @@ export const TeamProvider: React.FC<TeamProviderProps> = ({ children }) => {
         refreshInvitations,
         createTeam,
         updateBranding,
+        updateSettings,
       }}
     >
       {children}

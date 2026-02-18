@@ -237,12 +237,12 @@ const leadServiceMock = {
 
   // Obtener leads por stage o stages superiores
   async getLeadsByStageOrHigher(userId: string, minStage: StageId): Promise<Lead[]> {
-    const { STAGES } = await import('../types/stage');
+    const { DEFAULT_STAGES } = await import('../types/stage');
     const userLeads = leadsDB.filter(lead => lead.userId === userId);
-    const minStageOrder = STAGES.find(s => s.id === minStage)?.order ?? -1;
-    
+    const minStageOrder = DEFAULT_STAGES.find(s => s.id === minStage)?.order ?? -1;
+
     return userLeads.filter(lead => {
-      const leadStageOrder = STAGES.find(s => s.id === lead.stage)?.order ?? -1;
+      const leadStageOrder = DEFAULT_STAGES.find(s => s.id === lead.stage)?.order ?? -1;
       return leadStageOrder >= minStageOrder;
     });
   },

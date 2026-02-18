@@ -1,5 +1,5 @@
 import { Lead } from '../types/lead';
-import { StageId, STAGES } from '../types/stage';
+import { StageId, Stage, DEFAULT_STAGES } from '../types/stage';
 import { Document, SharedDocument } from '../types/document';
 
 export interface StageMetrics {
@@ -33,7 +33,8 @@ export interface DocumentMetrics {
 /**
  * Calcula métricas del pipeline de leads
  */
-export const calculatePipelineMetrics = (leads: Lead[]): PipelineMetrics => {
+export const calculatePipelineMetrics = (leads: Lead[], stages?: Stage[]): PipelineMetrics => {
+  const resolvedStages = stages || DEFAULT_STAGES;
   const totalLeads = leads.length;
   const activeLeads = leads.filter(l => l.stage !== 'passed' && l.stage !== 'committed').length;
   
@@ -52,7 +53,7 @@ export const calculatePipelineMetrics = (leads: Lead[]): PipelineMetrics => {
     : 0;
   
   // Métricas por stage
-  const stageMetrics: StageMetrics[] = STAGES.map(stage => {
+  const stageMetrics: StageMetrics[] = resolvedStages.map(stage => {
     const stageLeads = leads.filter(l => l.stage === stage.id);
     const count = stageLeads.length;
     const percentage = totalLeads > 0 ? (count / totalLeads) * 100 : 0;

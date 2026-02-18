@@ -1,7 +1,7 @@
 import React from 'react';
 import { ToggleLeft, ToggleRight, Edit, Trash2, FileText, Clock, Mail } from 'lucide-react';
 import { AutomationRule } from '../../types/automation';
-import { STAGES } from '../../types/stage';
+import { useStages } from '../../contexts/StagesContext';
 import { formatDate } from '../../utils/formatters';
 
 interface RuleCardProps {
@@ -19,7 +19,8 @@ export const RuleCard: React.FC<RuleCardProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const triggerStage = STAGES.find(s => s.id === rule.triggerStage);
+  const { getStageById } = useStages();
+  const triggerStage = getStageById(rule.triggerStage);
   const ruleDocuments = documents.filter(doc => rule.documentIds.includes(doc.id));
 
   return (

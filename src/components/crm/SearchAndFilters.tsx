@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Search, Filter, X } from 'lucide-react';
-import { StageId, STAGES } from '../../types/stage';
+import { StageId } from '../../types/stage';
 import { Input } from '../shared/Input';
 import { Button } from '../shared/Button';
+import { useStages } from '../../contexts/StagesContext';
 
 export interface FilterOptions {
   searchQuery: string;
@@ -29,6 +30,7 @@ export const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
   onClearFilters,
   availableTags = [],
 }) => {
+  const { stages } = useStages();
   const [showFilters, setShowFilters] = useState(false);
 
   const handleSearchChange = (value: string) => {
@@ -135,7 +137,7 @@ export const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
               Filter by Stage
             </label>
             <div className="flex flex-wrap gap-2">
-              {STAGES.map((stage) => {
+              {stages.map((stage) => {
                 const isSelected = filters.stages.includes(stage.id);
                 return (
                   <button

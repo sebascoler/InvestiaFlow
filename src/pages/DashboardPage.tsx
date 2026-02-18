@@ -6,6 +6,8 @@ import { calculatePipelineMetrics, calculateDocumentMetrics, PipelineMetrics, Do
 import { MetricCard } from '../components/dashboard/MetricCard';
 import { BarChart } from '../components/dashboard/BarChart';
 import { LineChart } from '../components/dashboard/LineChart';
+import { RemindersList } from '../components/reminders/RemindersList';
+import { ActivityFeed } from '../components/activity/ActivityFeed';
 import { Loader } from '../components/shared/Loader';
 import { Button } from '../components/shared/Button';
 import { exportLeadsToCSV, exportMetricsToCSV } from '../utils/csvExport';
@@ -170,6 +172,12 @@ const DashboardPage: React.FC = () => {
           subtitle={`${documentMetrics.totalShares} shared`}
           icon={FileText}
         />
+      </div>
+
+      {/* Reminders & Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <RemindersList maxItems={5} />
+        <ActivityFeed maxItems={8} />
       </div>
 
       {/* Gráficos de stages */}

@@ -1,4 +1,4 @@
-export type NotificationType = 'info' | 'success' | 'warning' | 'error' | 'investor_viewed' | 'investor_downloaded';
+export type NotificationType = 'info' | 'success' | 'warning' | 'error' | 'investor_viewed' | 'investor_downloaded' | 'qa_new_question' | 'qa_reply';
 
 export interface Notification {
   id: string;

@@ -427,8 +427,8 @@ export const documentServiceFirebase = {
     teamId?: string | null
   ): Promise<void> {
     const { leadService } = await import('./leadService');
-    const { STAGES } = await import('../types/stage');
-    
+    const { DEFAULT_STAGES } = await import('../types/stage');
+
     // Get leads in this stage or higher
     const eligibleLeads = await leadService.getLeadsByStageOrHigher(userId, requiredStage, teamId);
     
@@ -446,9 +446,9 @@ export const documentServiceFirebase = {
   // Obtener documentos que deben compartirse para un stage específico
   // (documentos con requiredStage <= currentStage)
   async getDocumentsForStage(userId: string, stageId: StageId, teamId?: string | null, ownerId?: string | null): Promise<Document[]> {
-    const { STAGES } = await import('../types/stage');
-    
-    const currentStageOrder = STAGES.find(s => s.id === stageId)?.order ?? -1;
+    const { DEFAULT_STAGES } = await import('../types/stage');
+
+    const currentStageOrder = DEFAULT_STAGES.find(s => s.id === stageId)?.order ?? -1;
     
     // Get all documents for this user/team
     const allDocuments = await this.getDocuments(userId, teamId, ownerId);
@@ -466,7 +466,7 @@ export const documentServiceFirebase = {
       .filter(({ permissions }) => {
         // Document is eligible if it has at least one permission with requiredStage <= currentStage
         return permissions.some(perm => {
-          const permStageOrder = STAGES.find(s => s.id === perm.requiredStage)?.order ?? -1;
+          const permStageOrder = DEFAULT_STAGES.find(s => s.id === perm.requiredStage)?.order ?? -1;
           return permStageOrder <= currentStageOrder;
         });
       })

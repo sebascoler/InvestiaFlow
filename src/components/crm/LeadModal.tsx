@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Lead, LeadFormData } from '../../types/lead';
-import { StageId, STAGES } from '../../types/stage';
+import { StageId } from '../../types/stage';
+import { useStages } from '../../contexts/StagesContext';
 import { Modal } from '../shared/Modal';
 import { Button } from '../shared/Button';
 import { Input } from '../shared/Input';
@@ -23,6 +24,7 @@ export const LeadModal: React.FC<LeadModalProps> = ({
   lead,
   initialStage,
 }) => {
+  const { stages } = useStages();
   const [formData, setFormData] = useState<LeadFormData>({
     name: '',
     email: '',
@@ -112,7 +114,7 @@ export const LeadModal: React.FC<LeadModalProps> = ({
     }
   };
 
-  const stageOptions = STAGES.map(s => ({ value: s.id, label: `${s.emoji} ${s.name}` }));
+  const stageOptions = stages.map(s => ({ value: s.id, label: `${s.emoji} ${s.name}` }));
 
   return (
     <Modal
