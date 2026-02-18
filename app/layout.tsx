@@ -14,9 +14,19 @@ const sora = Sora({
   display: 'swap',
 })
 
+const SITE_URL = 'https://investiaflow.com';
+
 export const metadata: Metadata = {
   title: 'InvestiaFlow — Fundraising, organized and automated',
   description: 'Move investors through stages. InvestiaFlow automatically shares the right documents at the right time—so you don\'t have to.',
+  metadataBase: new URL(SITE_URL),
+  alternates: {
+    canonical: '/',
+    languages: {
+      en: '/',
+      es: '/?lang=es',
+    },
+  },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
@@ -30,11 +40,27 @@ export const metadata: Metadata = {
     title: 'InvestiaFlow — Fundraising, organized and automated',
     description: 'Move investors through stages. InvestiaFlow automatically shares the right documents at the right time—so you don\'t have to.',
     type: 'website',
+    url: SITE_URL,
   },
   twitter: {
     card: 'summary_large_image',
     title: 'InvestiaFlow — Fundraising, organized and automated',
     description: 'Move investors through stages. InvestiaFlow automatically shares the right documents at the right time—so you don\'t have to.',
+  },
+}
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'InvestiaFlow',
+  applicationCategory: 'BusinessApplication',
+  description: 'Fundraising CRM with automated document sharing and investor pipeline management.',
+  url: SITE_URL,
+  operatingSystem: 'Web',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
   },
 }
 
@@ -45,7 +71,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${sora.variable}`}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        {children}
+      </body>
     </html>
   )
 }
