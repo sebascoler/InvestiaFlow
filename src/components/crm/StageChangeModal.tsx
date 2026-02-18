@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Modal } from '../shared/Modal';
 import { Button } from '../shared/Button';
 import { Input } from '../shared/Input';
-import { StageId, STAGES } from '../../types/stage';
+import { StageId } from '../../types/stage';
+import { useStages } from '../../contexts/StagesContext';
 
 interface StageChangeModalProps {
   isOpen: boolean;
@@ -21,11 +22,12 @@ export const StageChangeModal: React.FC<StageChangeModalProps> = ({
   toStage,
   leadName,
 }) => {
+  const { getStageById } = useStages();
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const fromStageData = STAGES.find(s => s.id === fromStage);
-  const toStageData = STAGES.find(s => s.id === toStage);
+  const fromStageData = getStageById(fromStage);
+  const toStageData = getStageById(toStage);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

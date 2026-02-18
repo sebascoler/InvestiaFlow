@@ -269,6 +269,15 @@ service cloud.firestore {
       );
     }
     
+    // Team Stages collection (custom pipeline stages per team)
+    match /teamStages/{teamId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() &&
+        exists(/databases/$(database)/documents/teams/$(teamId)) &&
+        get(/databases/$(database)/documents/teams/$(teamId)).data.ownerId == request.auth.uid;
+      allow delete: if false; // Never delete, reset to defaults instead
+    }
+
     // Investor Verification Codes collection
     // Note: Cloud Functions use Admin SDK and bypass these rules
     // These rules are for direct client access (which should not happen)

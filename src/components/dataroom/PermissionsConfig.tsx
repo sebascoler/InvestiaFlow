@@ -3,8 +3,9 @@ import { Modal } from '../shared/Modal';
 import { Button } from '../shared/Button';
 import { Input } from '../shared/Input';
 import { Document, DocumentPermission } from '../../types/document';
-import { STAGES, StageId } from '../../types/stage';
+import { StageId } from '../../types/stage';
 import { useDocuments } from '../../contexts/DocumentsContext';
+import { useStages } from '../../contexts/StagesContext';
 
 interface PermissionsConfigProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ export const PermissionsConfig: React.FC<PermissionsConfigProps> = ({
   document,
 }) => {
   const { getPermissions, setPermissions } = useDocuments();
+  const { stages } = useStages();
   const [stagePermissions, setStagePermissions] = useState<StagePermission[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -42,7 +44,7 @@ export const PermissionsConfig: React.FC<PermissionsConfigProps> = ({
       const existingPermissions = await getPermissions(document.id);
       
       // Initialize all stages with default values
-      const initialPermissions: StagePermission[] = STAGES.map((stage) => {
+      const initialPermissions: StagePermission[] = stages.map((stage) => {
         const existing = existingPermissions.find(p => p.requiredStage === stage.id);
         return {
           stageId: stage.id,
@@ -123,7 +125,7 @@ export const PermissionsConfig: React.FC<PermissionsConfigProps> = ({
           </p>
 
           <div className="space-y-3">
-            {STAGES.map((stage) => {
+            {stages.map((stage) => {
               const permission = stagePermissions.find((p) => p.stageId === stage.id);
               if (!permission) return null;
 

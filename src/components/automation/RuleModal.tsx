@@ -4,7 +4,8 @@ import { Button } from '../shared/Button';
 import { Input } from '../shared/Input';
 import { Select } from '../shared/Select';
 import { AutomationRule } from '../../types/automation';
-import { StageId, STAGES } from '../../types/stage';
+import { StageId } from '../../types/stage';
+import { useStages } from '../../contexts/StagesContext';
 import { Document } from '../../types/document';
 
 interface RuleModalProps {
@@ -22,6 +23,7 @@ export const RuleModal: React.FC<RuleModalProps> = ({
   rule,
   documents,
 }) => {
+  const { stages } = useStages();
   const [formData, setFormData] = useState({
     name: '',
     triggerStage: 'target' as StageId,
@@ -103,7 +105,7 @@ export const RuleModal: React.FC<RuleModalProps> = ({
     }));
   };
 
-  const stageOptions = STAGES.map(s => ({ value: s.id, label: `${s.emoji} ${s.name}` }));
+  const stageOptions = stages.map(s => ({ value: s.id, label: `${s.emoji} ${s.name}` }));
 
   return (
     <Modal

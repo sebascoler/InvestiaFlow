@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Bell, Shield, Info, Save, X, BookOpen } from 'lucide-react';
+import { User, Bell, Shield, Info, Save, X, BookOpen, GitBranch } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotifications } from '../contexts/NotificationsContext';
 import { Button } from '../components/shared/Button';
@@ -7,6 +7,7 @@ import { Input } from '../components/shared/Input';
 import { ToastContainer, ToastType } from '../components/shared/Toast';
 import { useOnboarding } from '../hooks/useOnboarding';
 import { userProfileService } from '../services/userProfileService';
+import { StageManager } from '../components/settings/StageManager';
 
 interface Toast {
   id: string;
@@ -18,7 +19,7 @@ const SettingsPage: React.FC = () => {
   const { user, firebaseUser, updateProfile } = useAuth();
   const { unreadCount } = useNotifications();
   const { resetOnboarding } = useOnboarding();
-  const [activeTab, setActiveTab] = useState<'profile' | 'preferences' | 'account'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'pipeline' | 'preferences' | 'account'>('profile');
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [isResettingOnboarding, setIsResettingOnboarding] = useState(false);
   
@@ -151,6 +152,7 @@ const SettingsPage: React.FC = () => {
 
   const tabs = [
     { id: 'profile' as const, label: 'Profile', icon: User },
+    { id: 'pipeline' as const, label: 'Pipeline', icon: GitBranch },
     { id: 'preferences' as const, label: 'Preferences', icon: Bell },
     { id: 'account' as const, label: 'Account', icon: Shield },
   ];
@@ -305,6 +307,13 @@ const SettingsPage: React.FC = () => {
             </div>
           </div>
           )}
+        </div>
+      )}
+
+      {/* Pipeline Tab */}
+      {activeTab === 'pipeline' && (
+        <div className="space-y-6">
+          <StageManager />
         </div>
       )}
 

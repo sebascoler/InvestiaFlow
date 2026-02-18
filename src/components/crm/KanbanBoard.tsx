@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { DragDropContext, DropResult } from '@hello-pangea/dnd';
-import { STAGES, StageId } from '../../types/stage';
+import { StageId } from '../../types/stage';
 import { Lead } from '../../types/lead';
 import { StageColumn } from './StageColumn';
 import { StageChangeModal } from './StageChangeModal';
 import { useLeads } from '../../contexts/LeadsContext';
+import { useStages } from '../../contexts/StagesContext';
 import { Loader } from '../shared/Loader';
 
 interface KanbanBoardProps {
@@ -16,6 +17,7 @@ interface KanbanBoardProps {
 
 export const KanbanBoard: React.FC<KanbanBoardProps> = ({ leads: filteredLeads, filteredStages, onLeadClick, onAddLead }) => {
   const { leads: allLeads, loading, changeStage } = useLeads();
+  const { stages } = useStages();
   const leads = filteredLeads || allLeads;
   const [pendingStageChange, setPendingStageChange] = useState<{
     leadId: string;
@@ -92,8 +94,8 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ leads: filteredLeads, 
         ) : (
           <div className="flex gap-4 overflow-x-auto pb-4" role="region" aria-label="Investor pipeline board">
             {(filteredStages && filteredStages.length > 0
-              ? STAGES.filter(stage => filteredStages.includes(stage.id))
-              : STAGES
+              ? stages.filter(stage => filteredStages.includes(stage.id))
+              : stages
             ).map((stage) => (
               <StageColumn
                 key={stage.id}

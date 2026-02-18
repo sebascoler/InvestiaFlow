@@ -133,11 +133,11 @@ export const automationServiceFirebase = {
       for (const doc of documentsToShare) {
         // Check if document should be shared (based on permissions)
         const permissions = await documentService.getPermissions(doc.id);
-        const { STAGES } = await import('../types/stage');
-        const currentStageOrder = STAGES.find(s => s.id === newStage)?.order ?? -1;
-        
+        const { DEFAULT_STAGES } = await import('../types/stage');
+        const currentStageOrder = DEFAULT_STAGES.find(s => s.id === newStage)?.order ?? -1;
+
         const shouldShare = permissions.some(perm => {
-          const permStageOrder = STAGES.find(s => s.id === perm.requiredStage)?.order ?? -1;
+          const permStageOrder = DEFAULT_STAGES.find(s => s.id === perm.requiredStage)?.order ?? -1;
           return permStageOrder <= currentStageOrder;
         });
         
