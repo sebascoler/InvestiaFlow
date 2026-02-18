@@ -29,7 +29,6 @@ export const Sidebar: React.FC = () => {
     if (isOpen) {
       closeMenu();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]); // Only depend on pathname, not closeMenu to avoid infinite loop
 
   // Prevent body scroll when menu is open on mobile

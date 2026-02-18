@@ -30,7 +30,6 @@ const LoginPage: React.FC = () => {
     if (emailHint && !email) {
       setEmail(emailHint);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [emailHint]);
 
   // Navigate after successful signup when user becomes authenticated

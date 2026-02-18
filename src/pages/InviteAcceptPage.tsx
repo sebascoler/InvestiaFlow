@@ -47,7 +47,6 @@ const InviteAcceptPage: React.FC = () => {
 
     // Load invitation details when user is authenticated
     loadInvitation();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, user?.id]); // Only depend on user.id to avoid infinite loops
 
   const loadInvitation = async () => {
