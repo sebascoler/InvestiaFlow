@@ -166,8 +166,8 @@ const TeamPage: React.FC = () => {
       setInviteEmail('');
       setIsInviteModalOpen(false);
       await refreshInvitations(); // Refresh invitations list
-    } catch (err: any) {
-      addToast(err.message || 'Failed to send invitation', 'error');
+    } catch (err: unknown) {
+      addToast(err instanceof Error ? err.message : 'Failed to send invitation', 'error');
     } finally {
       setIsInviting(false);
     }
@@ -190,8 +190,8 @@ const TeamPage: React.FC = () => {
       addToast('Team created successfully', 'success');
       setNewTeamName('');
       setIsCreateTeamModalOpen(false);
-    } catch (err: any) {
-      addToast(err.message || 'Failed to create team', 'error');
+    } catch (err: unknown) {
+      addToast(err instanceof Error ? err.message : 'Failed to create team', 'error');
     } finally {
       setIsCreatingTeam(false);
     }
@@ -205,8 +205,8 @@ const TeamPage: React.FC = () => {
       addToast('Member role updated', 'success');
       await refreshMembers();
       await refreshInvitations();
-    } catch (err: any) {
-      addToast(err.message || 'Failed to update role', 'error');
+    } catch (err: unknown) {
+      addToast(err instanceof Error ? err.message : 'Failed to update role', 'error');
     }
   };
 
@@ -230,8 +230,8 @@ const TeamPage: React.FC = () => {
       addToast('Member removed', 'success');
       await refreshMembers();
       await refreshInvitations();
-    } catch (err: any) {
-      addToast(err.message || 'Failed to remove member', 'error');
+    } catch (err: unknown) {
+      addToast(err instanceof Error ? err.message : 'Failed to remove member', 'error');
     }
   };
 
@@ -406,8 +406,8 @@ const TeamPage: React.FC = () => {
       addToast('Branding updated successfully', 'success');
       setIsBrandingModalOpen(false);
       setLogoFile(null);
-    } catch (err: any) {
-      addToast(err.message || 'Failed to update branding', 'error');
+    } catch (err: unknown) {
+      addToast(err instanceof Error ? err.message : 'Failed to update branding', 'error');
     } finally {
       setIsUpdatingBranding(false);
     }
