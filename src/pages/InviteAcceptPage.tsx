@@ -87,9 +87,9 @@ const InviteAcceptPage: React.FC = () => {
       if (user) {
         await handleAccept();
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setStatus('error');
-      setErrorMessage(err.message || 'Failed to load invitation');
+      setErrorMessage(err instanceof Error ? err.message : 'Failed to load invitation');
       setLoading(false);
     }
   };
@@ -114,8 +114,7 @@ const InviteAcceptPage: React.FC = () => {
         
         // Ensure currentTeam is set for the new member
         // refreshTeams should set it, but let's make sure
-        const { currentTeam: refreshedTeam } = useTeam();
-        if (!refreshedTeam && teams.length > 0) {
+        if (!currentTeam && teams.length > 0) {
           setCurrentTeam(teams[0]);
         }
       } catch (refreshError) {
@@ -129,9 +128,9 @@ const InviteAcceptPage: React.FC = () => {
       setTimeout(() => {
         navigate('/team');
       }, 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setStatus('error');
-      setErrorMessage(err.message || 'Failed to accept invitation');
+      setErrorMessage(err instanceof Error ? err.message : 'Failed to accept invitation');
     } finally {
       setAccepting(false);
       setLoading(false);
@@ -159,7 +158,7 @@ const InviteAcceptPage: React.FC = () => {
             <CheckCircle size={64} className="mx-auto text-green-500 mb-4" />
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Invitation Accepted!</h1>
             <p className="text-gray-600 mb-6">
-              You've successfully joined the team. Redirecting to team page...
+              You&apos;ve successfully joined the team. Redirecting to team page...
             </p>
             <Button variant="primary" onClick={() => navigate('/team')}>
               Go to Team Page
@@ -196,7 +195,7 @@ const InviteAcceptPage: React.FC = () => {
             <CheckCircle size={64} className="mx-auto text-blue-500 mb-4" />
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Already Accepted</h1>
             <p className="text-gray-600 mb-6">
-              You've already accepted this invitation.
+              You&apos;ve already accepted this invitation.
             </p>
             <Button variant="primary" onClick={() => navigate('/team')}>
               Go to Team Page

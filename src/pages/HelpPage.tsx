@@ -146,7 +146,7 @@ const HelpPage: React.FC = () => {
             <p className="text-gray-600">
               InvestiaFlow is a platform that automates fundraising management for startups.
               It combines a visual Kanban-style CRM with a smart Data Room that shares documents
-              automatically based on each potential investor's progress in your pipeline.
+              automatically based on each potential investor&apos;s progress in your pipeline.
             </p>
           </div>
           <div>
@@ -170,7 +170,7 @@ const HelpPage: React.FC = () => {
           <div>
             <h3 className="font-semibold text-gray-900 mb-2">Pipeline Stages</h3>
             <p className="text-gray-600 mb-3">
-              Your pipeline is organized into 8 stages that represent each investor's progress:
+              Your pipeline is organized into 8 stages that represent each investor&apos;s progress:
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {[
@@ -196,17 +196,17 @@ const HelpPage: React.FC = () => {
           <div>
             <h3 className="font-semibold text-gray-900 mb-2">Lead Management</h3>
             <ul className="list-disc list-inside space-y-2 text-gray-600">
-              <li><strong>Add Lead:</strong> Use the "Add Lead" button or the "+" button in any column</li>
+              <li><strong>Add Lead:</strong> Use the &quot;Add Lead&quot; button or the &quot;+&quot; button in any column</li>
               <li><strong>Move Lead:</strong> Drag and drop the card between columns</li>
               <li><strong>View Details:</strong> Click any card to open the side panel</li>
-              <li><strong>Edit Lead:</strong> Open the details panel and click "Edit Lead"</li>
-              <li><strong>Delete Lead:</strong> From the details panel, click "Delete Lead"</li>
+              <li><strong>Edit Lead:</strong> Open the details panel and click &quot;Edit Lead&quot;</li>
+              <li><strong>Delete Lead:</strong> From the details panel, click &quot;Delete Lead&quot;</li>
             </ul>
           </div>
           <div>
             <h3 className="font-semibold text-gray-900 mb-2">Visual Indicators</h3>
             <ul className="list-disc list-inside space-y-2 text-gray-600">
-              <li><strong>Badge "Follow up needed":</strong> Appears when a lead has had no contact for more than 14 days</li>
+              <li><strong>Badge &quot;Follow up needed&quot;:</strong> Appears when a lead has had no contact for more than 14 days</li>
               <li><strong>Orange border:</strong> Indicates the lead needs follow-up</li>
               <li><strong>Column count:</strong> Shows how many leads are in each stage</li>
             </ul>
@@ -223,11 +223,11 @@ const HelpPage: React.FC = () => {
           <div>
             <h3 className="font-semibold text-gray-900 mb-2">Uploading Documents</h3>
             <ol className="list-decimal list-inside space-y-2 text-gray-600">
-              <li>Click "Upload Document"</li>
+              <li>Click &quot;Upload Document&quot;</li>
               <li>Drag and drop a file or click to select one</li>
               <li>Select the category (Pitch, Financials, Legal, Metrics, Other)</li>
               <li>Add an optional description</li>
-              <li>Click "Upload Document"</li>
+              <li>Click &quot;Upload Document&quot;</li>
             </ol>
           </div>
           <div>
@@ -328,8 +328,8 @@ const HelpPage: React.FC = () => {
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">Creating an Automation Rule</h3>
               <ol className="list-decimal list-inside space-y-2 text-gray-600">
-                <li>Go to the "Automation" page</li>
-                <li>Click "Create Rule"</li>
+                <li>Go to the &quot;Automation&quot; page</li>
+                <li>Click &quot;Create Rule&quot;</li>
                 <li>Give your rule a descriptive name</li>
                 <li>Select the stage that will trigger the rule (trigger stage)</li>
                 <li>Choose the documents you want to share</li>
@@ -350,7 +350,7 @@ const HelpPage: React.FC = () => {
                   <p className="text-gray-700 text-sm">
                     Documents are shared as soon as the lead enters the stage.
                     <strong> Use when:</strong> You want the investor to have immediate access to the information
-                    (e.g. share pitch deck when they reach "Pitch Shared").
+                    (e.g. share pitch deck when they reach &quot;Pitch Shared&quot;).
                   </p>
                 </div>
                 <div>
@@ -359,13 +359,13 @@ const HelpPage: React.FC = () => {
                     Documents are shared after X days in the stage.
                     <strong> Use when:</strong> You want to give the investor time to process information
                     before sharing more documents, or when there is a sequential process (e.g. share
-                    financials 3 days after entering "Due Diligence" so they review the pitch first).
+                    financials 3 days after entering &quot;Due Diligence&quot; so they review the pitch first).
                   </p>
                 </div>
                 <div className="bg-white p-3 rounded border border-yellow-300">
                   <p className="text-sm font-medium text-gray-900 mb-1">💡 Example:</p>
                   <p className="text-sm text-gray-700">
-                    Lead enters "Due Diligence" on February 1. If you set a 5-day delay,
+                    Lead enters &quot;Due Diligence&quot; on February 1. If you set a 5-day delay,
                     documents will be shared automatically on February 6, giving the investor
                     time to review the initial documents first.
                   </p>
@@ -389,7 +389,7 @@ const HelpPage: React.FC = () => {
                     <li><strong>Do not send emails</strong> - they only share documents automatically</li>
                   </ul>
                   <p className="text-xs text-gray-600 italic">
-                    Example: "The pitch deck is always shared when a lead reaches 'Pitch Shared'"
+                    Example: &quot;The pitch deck is always shared when a lead reaches &apos;Pitch Shared&apos;&quot;
                   </p>
                 </div>
                 <div className="bg-white p-3 rounded border border-green-300">
@@ -401,8 +401,8 @@ const HelpPage: React.FC = () => {
                     <li>Useful for complex flows or when you want to control the process</li>
                   </ul>
                   <p className="text-xs text-gray-600 italic">
-                    Example: "When a lead reaches 'Due Diligence', share financials AND cap table,
-                    with a custom email explaining what they include"
+                    Example: &quot;When a lead reaches &apos;Due Diligence&apos;, share financials AND cap table,
+                    with a custom email explaining what they include&quot;
                   </p>
                 </div>
                 <div className="bg-blue-50 p-3 rounded border border-blue-300">
@@ -431,7 +431,7 @@ const HelpPage: React.FC = () => {
                   <p className="font-medium text-gray-900 mb-2">✨ Best Practices:</p>
                   <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700">
                     <li><strong>Combine both:</strong> Use permissions for basic documents and rules for special packages</li>
-                    <li><strong>Name your rules well:</strong> "Share Pitch Package on Pitch Shared" is better than "Rule 1"</li>
+                    <li><strong>Name your rules well:</strong> &quot;Share Pitch Package on Pitch Shared&quot; is better than &quot;Rule 1&quot;</li>
                     <li><strong>Review regularly:</strong> Disable rules you no longer use</li>
                     <li><strong>Test first:</strong> Create a test lead to verify automations work</li>
                     <li><strong>Document in notes:</strong> When you move a lead, add notes explaining why</li>

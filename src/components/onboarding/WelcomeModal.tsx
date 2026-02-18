@@ -34,7 +34,7 @@ const welcomeSlides = [
     content: (
       <div className="space-y-3">
         <p>
-          Share documents securely with investors. Configure when to share each document based on the lead's stage.
+          Share documents securely with investors. Configure when to share each document based on the lead&apos;s stage.
         </p>
         <p>
           Track which documents your investors have viewed or downloaded.

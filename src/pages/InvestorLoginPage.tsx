@@ -197,7 +197,7 @@ const InvestorLoginPage: React.FC = () => {
                 disabled={isLoading}
                 className="text-sm text-primary-600 hover:text-primary-700 disabled:text-gray-400"
               >
-                Didn't receive the code? Resend
+                Didn&apos;t receive the code? Resend
               </button>
             </div>
 

@@ -11,7 +11,7 @@ interface LeadCardProps {
   onClick: () => void;
 }
 
-export const LeadCard: React.FC<LeadCardProps> = memo(({ lead, index, onClick }) => {
+const LeadCardComponent: React.FC<LeadCardProps> = ({ lead, index, onClick }) => {
   const daysSinceContact = lead.lastContactDate
     ? Math.floor((new Date().getTime() - lead.lastContactDate.getTime()) / (1000 * 60 * 60 * 24))
     : null;
@@ -92,8 +92,9 @@ export const LeadCard: React.FC<LeadCardProps> = memo(({ lead, index, onClick })
       )}
     </Draggable>
   );
-}, (prevProps, nextProps) => {
-  // Custom comparison for memo
+};
+
+export const LeadCard = memo(LeadCardComponent, (prevProps, nextProps) => {
   return (
     prevProps.lead.id === nextProps.lead.id &&
     prevProps.lead.stage === nextProps.lead.stage &&
@@ -102,3 +103,4 @@ export const LeadCard: React.FC<LeadCardProps> = memo(({ lead, index, onClick })
     prevProps.index === nextProps.index
   );
 });
+LeadCard.displayName = 'LeadCard';

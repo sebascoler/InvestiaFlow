@@ -39,7 +39,7 @@ const getFileIcon = (fileType: string) => {
   return '📎';
 };
 
-export const DocumentCard: React.FC<DocumentCardProps> = memo(({
+const DocumentCardComponent: React.FC<DocumentCardProps> = ({
   document,
   onConfigurePermissions,
   onDelete,
@@ -214,6 +214,9 @@ export const DocumentCard: React.FC<DocumentCardProps> = memo(({
       )}
     </>
   );
-}, (prevProps, nextProps) => {
+};
+
+export const DocumentCard = memo(DocumentCardComponent, (prevProps, nextProps) => {
   return prevProps.document.id === nextProps.document.id;
 });
+DocumentCard.displayName = 'DocumentCard';

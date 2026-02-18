@@ -215,8 +215,8 @@ const getFirebaseService = async () => {
   if (firebaseService) return firebaseService;
   
   try {
-    const module = await import('./documentService.firebase');
-    firebaseService = module.documentServiceFirebase;
+    const mod = await import('./documentService.firebase');
+    firebaseService = mod.documentServiceFirebase;
     return firebaseService;
   } catch (error) {
     console.warn('Firebase service not available, using mock:', error);

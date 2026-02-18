@@ -75,7 +75,7 @@ export const StageChangeModal: React.FC<StageChangeModalProps> = ({
           </div>
           <p className="text-xs text-gray-600">
             Please add a note explaining the reason for the change. This will help you keep
-            a clear record of the lead's progress.
+            a clear record of the lead&apos;s progress.
           </p>
         </div>
 
@@ -92,7 +92,7 @@ export const StageChangeModal: React.FC<StageChangeModalProps> = ({
             required
           />
           <p className="text-xs text-gray-500 mt-1">
-            This note will be added automatically to the lead's notes
+            This note will be added automatically to the lead&apos;s notes
           </p>
         </div>
 
