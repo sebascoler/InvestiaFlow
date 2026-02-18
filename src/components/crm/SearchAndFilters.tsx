@@ -84,6 +84,7 @@ export const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
               value={filters.searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
               className="pl-10"
+              aria-label="Search leads by name, email, firm, or tags"
             />
           </div>
           <Button
@@ -140,6 +141,8 @@ export const SearchAndFilters: React.FC<SearchAndFiltersProps> = ({
                   <button
                     key={stage.id}
                     onClick={() => toggleStage(stage.id)}
+                    aria-pressed={isSelected}
+                    aria-label={`Filter by stage: ${stage.name}`}
                     className={`
                       px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
                       ${isSelected

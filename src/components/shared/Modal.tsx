@@ -50,14 +50,20 @@ export const Modal: React.FC<ModalProps> = ({
     xl: 'max-w-4xl',
   };
 
+  const modalTitleId = title ? 'modal-title' : undefined;
+
   return (
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${
         isOpen ? 'bg-black bg-opacity-50' : 'bg-black bg-opacity-0'
       }`}
       onClick={onClose}
+      role="presentation"
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={modalTitleId}
         className={`
           bg-white rounded-lg shadow-xl w-full ${sizeStyles[size]}
           transform transition-all duration-300 ease-out
@@ -68,7 +74,7 @@ export const Modal: React.FC<ModalProps> = ({
       >
         {title && (
           <div className="flex items-center justify-between p-6 border-b">
-            <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+            <h2 id="modal-title" className="text-xl font-semibold text-gray-900">{title}</h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"

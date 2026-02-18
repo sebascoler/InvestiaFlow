@@ -90,7 +90,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ leads: filteredLeads, 
             </div>
           </div>
         ) : (
-          <div className="flex gap-4 overflow-x-auto pb-4">
+          <div className="flex gap-4 overflow-x-auto pb-4" role="region" aria-label="Investor pipeline board">
             {(filteredStages && filteredStages.length > 0
               ? STAGES.filter(stage => filteredStages.includes(stage.id))
               : STAGES
