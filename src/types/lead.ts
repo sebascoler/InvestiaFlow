@@ -16,7 +16,7 @@ export interface Lead {
   linkedinUrl?: string;
   phoneNumber?: string;
   tags?: string[]; // Tags/etiquetas para categorizar leads
-  customFields?: Record<string, any>;
+  customFields?: Record<string, string | number | boolean | null>;
 }
 
 // Helper para asegurar que un lead tenga stageEnteredAt

@@ -9,7 +9,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  firebaseUser: any | null;
+  firebaseUser: Record<string, unknown> | null;
   login: (email: string, password: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
@@ -34,7 +34,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [firebaseUser, setFirebaseUser] = useState<any | null>(null);
+  const [firebaseUser, setFirebaseUser] = useState<Record<string, unknown> | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -53,8 +53,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const authInstance = auth();
           
           if (authInstance) {
-            const unsubscribe = firebaseAuth.onAuthStateChanged(authInstance, async (fbUser: any) => {
-              setFirebaseUser(fbUser);
+            const unsubscribe = firebaseAuth.onAuthStateChanged(authInstance, async (fbUser) => {
+              setFirebaseUser(fbUser as Record<string, unknown> | null);
               
               if (fbUser) {
                 // Try to load profile from Firestore
@@ -73,7 +73,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                     const newProfile = await userProfileService.createProfile(fbUser.uid, {
                       name: fbUser.displayName || fbUser.email?.split('@')[0] || 'User',
                       email: fbUser.email || '',
-                      photoURL: fbUser.photoURL,
+                      photoURL: fbUser.photoURL ?? undefined,
                     });
                     setUser({
                       id: newProfile.id,
@@ -129,8 +129,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           await firebaseAuth.signInWithEmailAndPassword(authInstance, email, password);
           return;
         }
-      } catch (error: any) {
-        throw new Error(error.message || 'Failed to login');
+      } catch (error: unknown) {
+        throw new Error(error instanceof Error ? error.message : 'Failed to login');
       }
     }
     
@@ -157,8 +157,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           await firebaseAuth.signInWithPopup(authInstance, provider);
           return;
         }
-      } catch (error: any) {
-        throw new Error(error.message || 'Failed to login with Google');
+      } catch (error: unknown) {
+        throw new Error(error instanceof Error ? error.message : 'Failed to login with Google');
       }
     }
     
@@ -188,8 +188,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
           return;
         }
-      } catch (error: any) {
-        throw new Error(error.message || 'Failed to sign up');
+      } catch (error: unknown) {
+        throw new Error(error instanceof Error ? error.message : 'Failed to sign up');
       }
     }
     
@@ -215,8 +215,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           await firebaseAuth.signOut(authInstance);
           return;
         }
-      } catch (error: any) {
-        throw new Error(error.message || 'Failed to logout');
+      } catch (error: unknown) {
+        throw new Error(error instanceof Error ? error.message : 'Failed to logout');
       }
     }
     
@@ -258,12 +258,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const authInstance = auth();
           
           if (authInstance && firebaseAuth.updateProfile) {
-            const authUpdates: any = {};
+            const authUpdates: { displayName?: string; photoURL?: string } = {};
             if (updates.name) authUpdates.displayName = updates.name;
             if (updates.photoURL) authUpdates.photoURL = updates.photoURL;
             
             if (Object.keys(authUpdates).length > 0) {
-              await firebaseAuth.updateProfile(firebaseUser, authUpdates);
+              await firebaseAuth.updateProfile(authInstance.currentUser!, authUpdates);
             }
           }
         } catch (error) {
@@ -271,8 +271,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // Don't throw - profile was updated in Firestore
         }
       }
-    } catch (error: any) {
-      throw new Error(error.message || 'Failed to update profile');
+    } catch (error: unknown) {
+      throw new Error(error instanceof Error ? error.message : 'Failed to update profile');
     }
   };
 

@@ -84,10 +84,10 @@ const leadHistoryServiceFirebase = {
         ...activity,
         createdAt: timestampToDate(activity.createdAt) || new Date(),
       })).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[LeadHistory] Error getting activities:', error);
       // Si es error de permisos, retornar array vacío en lugar de fallar
-      if (error.code === 'permission-denied' || error.message?.includes('permission')) {
+      if (error instanceof Error && error.message?.includes('permission')) {
         console.warn('[LeadHistory] Permission denied, returning empty array');
         return [];
       }
@@ -166,10 +166,10 @@ const leadHistoryServiceFirebase = {
           updatedAt: updatedAt || undefined,
         };
       }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[LeadHistory] Error getting comments:', error);
       // Si es error de permisos, retornar array vacío en lugar de fallar
-      if (error.code === 'permission-denied' || error.message?.includes('permission')) {
+      if (error instanceof Error && error.message?.includes('permission')) {
         console.warn('[LeadHistory] Permission denied, returning empty array');
         return [];
       }

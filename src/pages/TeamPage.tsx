@@ -153,13 +153,9 @@ const TeamPage: React.FC = () => {
             });
           }
         }
-      } catch (emailError: any) {
+      } catch (emailError: unknown) {
         console.error('Failed to send invitation email:', emailError);
-        // Log more details for debugging
-        if (emailError.code) {
-          console.error('Error code:', emailError.code);
-        }
-        if (emailError.message) {
+        if (emailError instanceof Error) {
           console.error('Error message:', emailError.message);
         }
         // Don't fail the whole operation if email fails

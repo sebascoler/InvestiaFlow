@@ -43,9 +43,9 @@ export const investorAuthService = {
     try {
       const result = await sendVerificationCodeFunction({ email });
       console.log('[Investor Auth] Verification code sent:', result.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[Investor Auth] Error sending verification code:', error);
-      throw new Error(error.message || 'Failed to send verification code');
+      throw new Error(error instanceof Error ? error.message : 'Failed to send verification code');
     }
   },
 
@@ -61,9 +61,9 @@ export const investorAuthService = {
       localStorage.setItem(SESSION_STORAGE_KEY, session.sessionToken);
       
       return session;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[Investor Auth] Error verifying code:', error);
-      throw new Error(error.message || 'Invalid verification code');
+      throw new Error(error instanceof Error ? error.message : 'Invalid verification code');
     }
   },
 

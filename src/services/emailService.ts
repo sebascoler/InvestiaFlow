@@ -77,7 +77,7 @@ const emailServiceCloudFunctions = {
       description: doc.description,
     }));
 
-    let lastError: Error | null = null;
+    let lastError: unknown = null;
 
     // Retry logic
     for (let attempt = 1; attempt <= retries; attempt++) {
@@ -97,16 +97,15 @@ const emailServiceCloudFunctions = {
 
         console.log('[Email Service] Email sent successfully via Cloud Functions:', result.data);
         return; // Success, exit retry loop
-      } catch (error: any) {
+      } catch (error: unknown) {
         lastError = error;
-        console.warn(`[Email Service] Attempt ${attempt}/${retries} failed:`, error.message);
-        
+        const errMsg = error instanceof Error ? error.message : '';
+        console.warn(`[Email Service] Attempt ${attempt}/${retries} failed:`, errMsg);
+
         // Don't retry on certain errors (e.g., invalid email, authentication)
         if (
-          error.message?.includes('Invalid') ||
-          error.message?.includes('not found') ||
-          error.code === 'unauthenticated' ||
-          error.code === 'permission-denied'
+          errMsg.includes('Invalid') ||
+          errMsg.includes('not found')
         ) {
           throw error;
         }
@@ -150,9 +149,9 @@ export const emailService = {
           dataRoomUrl,
           retries
         );
-      } catch (error: any) {
+      } catch (error: unknown) {
         // If Cloud Functions fails, fall back to mock
-        console.warn('[Email Service] Cloud Functions failed, using mock mode:', error.message);
+        console.warn('[Email Service] Cloud Functions failed, using mock mode:', error instanceof Error ? error.message : error);
         return emailServiceMock.sendDocumentEmail(to, subject, body, documentLinks);
       }
     }

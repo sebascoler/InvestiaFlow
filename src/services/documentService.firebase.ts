@@ -93,7 +93,7 @@ export const documentServiceFirebase = {
         );
         console.log('[documentServiceFirebase] Found team documents:', teamDocs.length);
         allDocs.push(...teamDocs);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.warn('[documentServiceFirebase] Error fetching team documents:', error);
       }
       
@@ -105,7 +105,7 @@ export const documentServiceFirebase = {
         );
         console.log('[documentServiceFirebase] Found owner documents:', ownerDocs.length);
         allDocs.push(...ownerDocs);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.warn('[documentServiceFirebase] Error fetching owner documents:', error);
       }
       

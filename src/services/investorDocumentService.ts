@@ -53,9 +53,9 @@ export const investorDocumentService = {
         sessionToken: session.sessionToken,
       });
       return result.data as InvestorDocument[];
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[Investor Documents] Error getting documents:', error);
-      throw new Error(error.message || 'Failed to get documents');
+      throw new Error(error instanceof Error ? error.message : 'Failed to get documents');
     }
   },
 
@@ -74,9 +74,9 @@ export const investorDocumentService = {
         documentId,
       });
       return result.data.downloadUrl as string;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[Investor Documents] Error getting download URL:', error);
-      throw new Error(error.message || 'Failed to get download URL');
+      throw new Error(error instanceof Error ? error.message : 'Failed to get download URL');
     }
   },
 
@@ -94,7 +94,7 @@ export const investorDocumentService = {
         sessionToken: session.sessionToken,
         documentId,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[Investor Documents] Error marking as viewed:', error);
       // No lanzar error, solo loguear
     }
@@ -114,7 +114,7 @@ export const investorDocumentService = {
         sessionToken: session.sessionToken,
         documentId,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[Investor Documents] Error marking as downloaded:', error);
       // No lanzar error, solo loguear
     }

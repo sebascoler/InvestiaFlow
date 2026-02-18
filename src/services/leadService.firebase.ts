@@ -77,7 +77,7 @@ export const leadServiceFirebase = {
           );
           console.log('[leadServiceFirebase] Found team leads:', teamLeads.length);
           allLeads.push(...teamLeads);
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.warn('[leadServiceFirebase] Error fetching team leads:', error);
         }
         
@@ -89,7 +89,7 @@ export const leadServiceFirebase = {
           );
           console.log('[leadServiceFirebase] Found owner leads:', ownerLeads.length);
           allLeads.push(...ownerLeads);
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.warn('[leadServiceFirebase] Error fetching owner leads:', error);
         }
         
@@ -124,9 +124,9 @@ export const leadServiceFirebase = {
       console.log('[leadServiceFirebase] Mapped leads count:', mappedLeads.length);
       
       return mappedLeads;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[leadServiceFirebase] Error getting leads:', error);
-      if (error.message?.includes('permission') || error.code === 'permission-denied') {
+      if (error instanceof Error && error.message?.includes('permission')) {
         console.error('[leadServiceFirebase] Permission denied - check Firestore rules');
       }
       throw error;

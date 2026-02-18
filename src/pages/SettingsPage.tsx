@@ -100,7 +100,7 @@ const SettingsPage: React.FC = () => {
 
     setIsSavingProfile(true);
     try {
-      const updates: any = {
+      const updates: { name: string; company?: string; phone?: string; email?: string } = {
         name: profileName.trim(),
         company: profileCompany.trim() || undefined,
         phone: profilePhone.trim() || undefined,
@@ -115,9 +115,9 @@ const SettingsPage: React.FC = () => {
       
       addToast('Profile updated successfully', 'success');
       setIsEditingProfile(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating profile:', error);
-      addToast(error.message || 'Error updating profile', 'error');
+      addToast(error instanceof Error ? error.message : 'Error updating profile', 'error');
     } finally {
       setIsSavingProfile(false);
     }
@@ -142,8 +142,8 @@ const SettingsPage: React.FC = () => {
     try {
       await resetOnboarding();
       addToast('Tutorials reset successfully', 'success');
-    } catch (error: any) {
-      addToast(error.message || 'Error resetting tutorials', 'error');
+    } catch (error: unknown) {
+      addToast(error instanceof Error ? error.message : 'Error resetting tutorials', 'error');
     } finally {
       setIsResettingOnboarding(false);
     }
@@ -233,7 +233,7 @@ const SettingsPage: React.FC = () => {
                   {profileEmail}
                 </div>
               )}
-              {firebaseUser && (
+              {!!firebaseUser && (
                 <p className="text-xs text-gray-500 mt-1">
                   Email is linked to your Firebase account and cannot be changed here. To change your email, update it in Firebase Auth settings.
                 </p>
@@ -432,18 +432,21 @@ const SettingsPage: React.FC = () => {
                   <p className="text-sm text-gray-500 mt-1">Sign-in method</p>
                 </div>
                 <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium">
-                  {firebaseUser?.providerData?.[0]?.providerId === 'google.com' ? 'Google' : 'Email/Password'}
+                  {(() => {
+                    const providerData = firebaseUser?.providerData as Array<{ providerId?: string }> | undefined;
+                    return providerData?.[0]?.providerId === 'google.com' ? 'Google' : 'Email/Password';
+                  })()}
                 </span>
               </div>
 
-              {firebaseUser?.metadata && (
+              {!!firebaseUser?.metadata && (
                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                   <div>
                     <h3 className="font-medium text-gray-900">Account created</h3>
                     <p className="text-sm text-gray-500 mt-1">Account creation date</p>
                   </div>
                   <span className="text-sm text-gray-700">
-                    {new Date(firebaseUser.metadata.creationTime).toLocaleDateString('en-US', {
+                    {new Date((firebaseUser.metadata as { creationTime: string }).creationTime).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',

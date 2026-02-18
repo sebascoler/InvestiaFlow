@@ -136,9 +136,9 @@ const scheduledTaskServiceFirebase = {
       return tasks
         .map(firestoreToTask)
         .filter(task => task.scheduledAt <= now);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If permission error, return empty array (user might not have access yet)
-      if (error.message?.includes('permission') || error.code === 'permission-denied') {
+      if (error instanceof Error && error.message?.includes('permission')) {
         console.warn('[ScheduledTask] Permission denied, returning empty array');
         return [];
       }
@@ -182,11 +182,11 @@ const scheduledTaskServiceFirebase = {
         status: 'completed',
         executedAt: new Date(),
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Mark as failed
       await firestoreService.updateDoc(COLLECTION_NAME, taskId, {
         status: 'failed',
-        error: error.message || 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
         executedAt: new Date(),
       });
       throw error;
