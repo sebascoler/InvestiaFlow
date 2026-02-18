@@ -278,6 +278,12 @@ service cloud.firestore {
       allow delete: if false; // Never delete, reset to defaults instead
     }
 
+    // Investor Activities collection (audit log for investor document views/downloads)
+    match /investorActivities/{activityId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if false; // Only Cloud Functions can write
+    }
+
     // Investor Verification Codes collection
     // Note: Cloud Functions use Admin SDK and bypass these rules
     // These rules are for direct client access (which should not happen)
