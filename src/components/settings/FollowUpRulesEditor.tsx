@@ -22,7 +22,7 @@ const PRIORITY_OPTIONS: { value: string; label: string }[] = [
 ];
 
 export const FollowUpRulesEditor: React.FC = () => {
-  const { currentTeam } = useTeam();
+  const { currentTeam, updateSettings } = useTeam();
   const { stages } = useStages();
   const [rules, setRules] = useState<FollowUpRule[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
@@ -76,11 +76,10 @@ export const FollowUpRulesEditor: React.FC = () => {
   };
 
   const handleSave = async () => {
+    if (!currentTeam?.id) return;
     setIsSaving(true);
     try {
-      // TODO: Save rules to team settings via teamService when the update endpoint is implemented.
-      // Example: await teamService.updateSettings(currentTeam.id, { followUpRules: rules });
-      console.log('TODO: Save rules to team settings:', rules);
+      await updateSettings(currentTeam.id, { followUpRules: rules });
       addToast('Rules saved', 'success');
       setHasChanges(false);
     } catch (error) {

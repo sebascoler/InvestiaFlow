@@ -309,4 +309,28 @@ export const teamServiceFirebase = {
       throw error;
     }
   },
+
+  async updateSettings(teamId: string, settings: Partial<import('../types/team').TeamSettings>): Promise<Team> {
+    try {
+      const team = await firestoreService.getDoc<Team>(TEAMS_COLLECTION, teamId);
+
+      if (!team) {
+        throw new Error('Team not found');
+      }
+
+      const existingSettings = team.settings || {};
+      const mergedSettings = { ...existingSettings, ...settings };
+
+      await firestoreService.updateDoc(TEAMS_COLLECTION, teamId, {
+        settings: mergedSettings,
+        updatedAt: dateToTimestamp(new Date()),
+      });
+
+      const updatedTeam = await firestoreService.getDoc<Team>(TEAMS_COLLECTION, teamId);
+      return updatedTeam ? firestoreToTeam(updatedTeam) : team;
+    } catch (error) {
+      console.error('[teamServiceFirebase] Error updating settings:', error);
+      throw error;
+    }
+  },
 };
