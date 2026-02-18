@@ -7,6 +7,7 @@ import { PermissionGate } from '../shared/PermissionGate';
 import { SharedDocumentsList } from './SharedDocumentsList';
 import { LeadHistory } from './LeadHistory';
 import { ActivityFeed } from '../activity/ActivityFeed';
+import { QAThreadList } from '../qa/QAThreadList';
 
 interface LeadDetailPanelProps {
   lead: Lead | null;
@@ -167,6 +168,10 @@ export const LeadDetailPanel: React.FC<LeadDetailPanelProps> = ({
 
         <div className="pt-6 border-t border-gray-200">
           <SharedDocumentsList lead={lead} />
+        </div>
+
+        <div className="pt-6 border-t border-gray-200">
+          <QAThreadList leadId={lead.id} compact />
         </div>
 
         <div className="pt-6 border-t border-gray-200">

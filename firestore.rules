@@ -284,6 +284,18 @@ service cloud.firestore {
       allow create, update, delete: if false; // Only Cloud Functions can write
     }
 
+    // Q&A Threads collection
+    match /qaThreads/{threadId} {
+      allow read, create, update: if isAuthenticated();
+      allow delete: if false; // Threads cannot be deleted
+    }
+
+    // Q&A Messages collection
+    match /qaMessages/{messageId} {
+      allow read, create: if isAuthenticated();
+      allow update, delete: if false; // Messages are immutable
+    }
+
     // Investor Verification Codes collection
     // Note: Cloud Functions use Admin SDK and bypass these rules
     // These rules are for direct client access (which should not happen)
