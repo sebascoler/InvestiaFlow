@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import React, { useState, useMemo, useEffect, lazy, Suspense } from 'react';
+import { Plus, Upload } from 'lucide-react';
 import { KanbanBoard } from '../components/crm/KanbanBoard';
 import { LeadModal } from '../components/crm/LeadModal';
 import { LeadDetailPanel } from '../components/crm/LeadDetailPanel';
@@ -14,7 +14,11 @@ import { useOnboarding } from '../hooks/useOnboarding';
 import { useLeads } from '../contexts/LeadsContext';
 import { Lead, LeadFormData } from '../types/lead';
 import { StageId } from '../types/stage';
+import { ImportResult } from '../types/import';
 import { filterAndSortLeads } from '../utils/leadFilters';
+
+// Lazy-load ImportModal to keep xlsx (SheetJS) out of the main CRM chunk
+const ImportModal = lazy(() => import('../components/import/ImportModal').then(m => ({ default: m.ImportModal })));
 
 interface Toast {
   id: string;
@@ -38,6 +42,7 @@ const CRMPage: React.FC = () => {
   } | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [showTour, setShowTour] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     searchQuery: '',
     stages: [],
@@ -179,6 +184,15 @@ const CRMPage: React.FC = () => {
     }
   };
 
+  const handleImportComplete = (result: ImportResult) => {
+    if (result.created > 0) {
+      addToast(`Successfully imported ${result.created} lead${result.created !== 1 ? 's' : ''}`, 'success');
+    }
+    if (result.errors.length > 0) {
+      addToast(`${result.errors.length} row${result.errors.length !== 1 ? 's' : ''} had errors during import`, 'warning');
+    }
+  };
+
   const handleClearFilters = () => {
     setFilters({
       searchQuery: '',
@@ -204,14 +218,23 @@ const CRMPage: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Pipeline</h1>
           <PermissionGate action="create" resource="leads">
-            <Button
-              variant="primary"
-              onClick={() => handleAddLead()}
-              data-tour="crm-add-lead"
-            >
-              <Plus size={20} className="mr-2" />
-              Add Lead
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="secondary"
+                onClick={() => setIsImportModalOpen(true)}
+              >
+                <Upload size={20} className="mr-2" />
+                Import
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => handleAddLead()}
+                data-tour="crm-add-lead"
+              >
+                <Plus size={20} className="mr-2" />
+                Add Lead
+              </Button>
+            </div>
           </PermissionGate>
         </div>
 
@@ -267,6 +290,16 @@ const CRMPage: React.FC = () => {
           leadName={pendingStageChange.leadName}
         />
       )}
+
+        {isImportModalOpen && (
+          <Suspense fallback={null}>
+            <ImportModal
+              isOpen={isImportModalOpen}
+              onClose={() => setIsImportModalOpen(false)}
+              onComplete={handleImportComplete}
+            />
+          </Suspense>
+        )}
 
         <ToastContainer toasts={toasts} removeToast={removeToast} />
       </div>
