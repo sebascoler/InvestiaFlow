@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "start": "vite preview",
-    "lint": "eslint src --ext .ts,.tsx",
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
     "test": "vitest",
     "test:ci": "vitest run",
     "dev:next": "next dev",
@@ -33,6 +33,9 @@
     "tailwind-merge": "^2.2.0",
     "xlsx": "^0.18.5"
   },
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -40,8 +43,8 @@
     "@types/node": "^25.2.3",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
+    "@tailwindcss/postcss": "^4.2.0",
     "@vitejs/plugin-react": "^5.1.4",
-    "autoprefixer": "^10.4.16",
     "eslint": "^10.0.0",
     "eslint-config-next": "^16.1.6",
     "firebase-admin": "^13.6.1",
