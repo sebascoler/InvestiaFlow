@@ -6,6 +6,7 @@ import { calculatePipelineMetrics, calculateDocumentMetrics, PipelineMetrics, Do
 import { MetricCard } from '../components/dashboard/MetricCard';
 import { BarChart } from '../components/dashboard/BarChart';
 import { LineChart } from '../components/dashboard/LineChart';
+import { RemindersList } from '../components/reminders/RemindersList';
 import { Loader } from '../components/shared/Loader';
 import { Button } from '../components/shared/Button';
 import { exportLeadsToCSV, exportMetricsToCSV } from '../utils/csvExport';
@@ -171,6 +172,9 @@ const DashboardPage: React.FC = () => {
           icon={FileText}
         />
       </div>
+
+      {/* Follow-up Reminders */}
+      <RemindersList maxItems={5} />
 
       {/* Gráficos de stages */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" data-tour="dashboard-charts">

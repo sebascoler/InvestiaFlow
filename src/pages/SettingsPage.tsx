@@ -8,6 +8,7 @@ import { ToastContainer, ToastType } from '../components/shared/Toast';
 import { useOnboarding } from '../hooks/useOnboarding';
 import { userProfileService } from '../services/userProfileService';
 import { StageManager } from '../components/settings/StageManager';
+import { FollowUpRulesEditor } from '../components/settings/FollowUpRulesEditor';
 
 interface Toast {
   id: string;
@@ -314,6 +315,7 @@ const SettingsPage: React.FC = () => {
       {activeTab === 'pipeline' && (
         <div className="space-y-6">
           <StageManager />
+          <FollowUpRulesEditor />
         </div>
       )}
 
