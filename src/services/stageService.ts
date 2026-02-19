@@ -1,7 +1,5 @@
 import { Stage, DEFAULT_STAGES } from '../types/stage';
 
-const USE_FIREBASE = !!import.meta.env.VITE_FIREBASE_API_KEY;
-
 // In-memory + localStorage persistence for mock mode
 const STORAGE_PREFIX = 'investiaflow_stages_';
 const stagesCache = new Map<string, Stage[]>();
@@ -18,7 +16,7 @@ function loadStagesFromStorage(teamId: string): Stage[] | null {
   }
 }
 
-function saveStatesToStorage(teamId: string, stages: Stage[]): void {
+function saveStagesToStorage(teamId: string, stages: Stage[]): void {
   try {
     localStorage.setItem(`${STORAGE_PREFIX}${teamId}`, JSON.stringify(stages));
   } catch {
@@ -42,31 +40,43 @@ const stageServiceMock = {
   },
   async saveStages(teamId: string, stages: Stage[]): Promise<void> {
     stagesCache.set(teamId, [...stages]);
-    saveStatesToStorage(teamId, stages);
+    saveStagesToStorage(teamId, stages);
   },
 };
 
-let firebaseService: any = null;
+// Use the same pattern as teamService: try Firebase, fall back to mock
 const getFirebaseService = async () => {
-  if (!USE_FIREBASE) return null;
-  if (firebaseService) return firebaseService;
   try {
-    const mod = await import('./stageService.firebase');
-    firebaseService = mod.stageServiceFirebase;
-    return firebaseService;
-  } catch (error) {
-    console.warn('Firebase stage service not available, using mock:', error);
+    const { isFirebaseReady } = await import('../firebase/config');
+    if (isFirebaseReady()) {
+      const { stageServiceFirebase } = await import('./stageService.firebase');
+      return stageServiceFirebase;
+    }
+    return null;
+  } catch {
     return null;
   }
 };
 
 export const stageService = {
   async getStages(teamId?: string): Promise<Stage[]> {
-    const service = await getFirebaseService();
-    return service ? service.getStages(teamId) : stageServiceMock.getStages(teamId);
+    try {
+      const service = await getFirebaseService();
+      if (service) return service.getStages(teamId);
+    } catch {
+      // Firebase failed — fall through to mock
+    }
+    return stageServiceMock.getStages(teamId);
   },
   async saveStages(teamId: string, stages: Stage[]): Promise<void> {
-    const service = await getFirebaseService();
-    return service ? service.saveStages(teamId, stages) : stageServiceMock.saveStages(teamId, stages);
+    // Always save to mock/localStorage (as a reliable local backup)
+    await stageServiceMock.saveStages(teamId, stages);
+    // Also try Firebase if available
+    try {
+      const service = await getFirebaseService();
+      if (service) await service.saveStages(teamId, stages);
+    } catch {
+      // Firebase write failed (e.g. permissions) — local save already succeeded
+    }
   },
 };
