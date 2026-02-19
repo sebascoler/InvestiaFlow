@@ -1,27 +1,26 @@
+// Firebase implementation of stageService
+// Uses the same pattern as teamService.firebase.ts and leadService.firebase.ts
 import { Stage, DEFAULT_STAGES } from '../types/stage';
+import { firestoreService, dateToTimestamp } from '../firebase/firestore';
+import { ensureFirebase, isFirebaseReady } from '../firebase/config';
 
-// Use the firebase helpers from the codebase
-const getFirestore = async () => {
-  const { db } = await import('../firebase/config');
-  const { doc, getDoc, setDoc } = await import('firebase/firestore');
-  const firestore = db();
-  return { firestore, doc, getDoc, setDoc };
-};
+const COLLECTION_NAME = 'teamStages';
 
 export const stageServiceFirebase = {
   async getStages(teamId?: string): Promise<Stage[]> {
     if (!teamId) return [...DEFAULT_STAGES];
 
+    await ensureFirebase();
+    if (!isFirebaseReady()) {
+      console.warn('[stageServiceFirebase] Firebase not ready, returning defaults');
+      return [...DEFAULT_STAGES];
+    }
+
     try {
-      const { firestore, doc, getDoc: fsGetDoc } = await getFirestore();
-      if (!firestore) return [...DEFAULT_STAGES];
+      const data = await firestoreService.getDoc<{ stages: any[] }>(COLLECTION_NAME, teamId);
 
-      const docRef = doc(firestore, 'teamStages', teamId);
-      const docSnap = await fsGetDoc(docRef);
-
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        return (data.stages || []).map((s: any, index: number) => ({
+      if (data && Array.isArray(data.stages) && data.stages.length > 0) {
+        return data.stages.map((s: any, index: number) => ({
           id: s.id,
           name: s.name,
           emoji: s.emoji,
@@ -33,17 +32,18 @@ export const stageServiceFirebase = {
 
       return [...DEFAULT_STAGES];
     } catch (error) {
-      console.warn('Failed to load custom stages, using defaults:', error);
-      return [...DEFAULT_STAGES];
+      console.error('[stageServiceFirebase] Failed to load stages:', error);
+      throw error;
     }
   },
 
   async saveStages(teamId: string, stages: Stage[]): Promise<void> {
-    const { firestore, doc, setDoc: fsSetDoc } = await getFirestore();
-    if (!firestore) throw new Error('Firestore not available');
+    await ensureFirebase();
+    if (!isFirebaseReady()) {
+      throw new Error('Firebase not available');
+    }
 
-    const docRef = doc(firestore, 'teamStages', teamId);
-    await fsSetDoc(docRef, {
+    await firestoreService.setDoc(COLLECTION_NAME, teamId, {
       teamId,
       stages: stages.map((s, index) => ({
         id: s.id,
@@ -53,7 +53,7 @@ export const stageServiceFirebase = {
         order: index,
         isDefault: s.isDefault ?? false,
       })),
-      updatedAt: new Date(),
-    }, { merge: true });
+      updatedAt: dateToTimestamp(new Date()),
+    });
   },
 };

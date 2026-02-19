@@ -60,23 +60,27 @@ const getFirebaseService = async () => {
 
 export const stageService = {
   async getStages(teamId?: string): Promise<Stage[]> {
-    try {
-      const service = await getFirebaseService();
-      if (service) return service.getStages(teamId);
-    } catch {
-      // Firebase failed — fall through to mock
+    const service = await getFirebaseService();
+    if (service) {
+      try {
+        return await service.getStages(teamId);
+      } catch {
+        // Firebase read failed — fall back to local cache
+        return stageServiceMock.getStages(teamId);
+      }
     }
     return stageServiceMock.getStages(teamId);
   },
   async saveStages(teamId: string, stages: Stage[]): Promise<void> {
-    // Always save to mock/localStorage (as a reliable local backup)
-    await stageServiceMock.saveStages(teamId, stages);
-    // Also try Firebase if available
-    try {
-      const service = await getFirebaseService();
-      if (service) await service.saveStages(teamId, stages);
-    } catch {
-      // Firebase write failed (e.g. permissions) — local save already succeeded
+    const service = await getFirebaseService();
+    if (service) {
+      // Firebase-first: let errors propagate so UI can show them
+      await service.saveStages(teamId, stages);
+      // On success, also update local cache
+      await stageServiceMock.saveStages(teamId, stages);
+      return;
     }
+    // No Firebase available — save to local only
+    return stageServiceMock.saveStages(teamId, stages);
   },
 };
