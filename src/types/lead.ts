@@ -21,6 +21,11 @@ export interface Lead {
   commitmentAmount?: number;
   commitmentDate?: Date;
   commitmentNotes?: string;
+  // Investor Relations fields
+  investorType?: 'angel' | 'vc' | 'family_office' | 'other';
+  irStatus?: 'active' | 'inactive';
+  irTags?: string[];
+  lastUpdateSentAt?: Date;
 }
 
 // Helper para asegurar que un lead tenga stageEnteredAt

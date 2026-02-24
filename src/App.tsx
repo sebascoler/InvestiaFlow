@@ -21,6 +21,7 @@ const SettingsPage = lazy(() => import('./pages/SettingsPage'))
 const HelpPage = lazy(() => import('./pages/HelpPage'))
 const InvestorDataRoomPage = lazy(() => import('./pages/InvestorDataRoomPage'))
 const InviteAcceptPage = lazy(() => import('./pages/InviteAcceptPage'))
+const InvestorRelationsPage = lazy(() => import('./pages/InvestorRelationsPage'))
 
 function PageLoader() {
   return (
@@ -54,6 +55,7 @@ function App() {
               <Route path="crm" element={<CRMPage />} />
               <Route path="dataroom" element={<DataRoomPage />} />
               <Route path="automation" element={<AutomationPage />} />
+              <Route path="investor-relations" element={<InvestorRelationsPage />} />
               <Route path="team" element={<TeamPage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="help" element={<HelpPage />} />

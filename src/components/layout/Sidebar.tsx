@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FolderOpen, Zap, Settings, LogOut, HelpCircle, BarChart3, X, Users } from 'lucide-react';
+import { LayoutDashboard, FolderOpen, Zap, Settings, LogOut, HelpCircle, BarChart3, X, Users, HeartHandshake } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMobileMenu } from '../../contexts/MobileMenuContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -12,6 +12,13 @@ const navigation = [
   { name: 'CRM Pipeline', href: '/crm', icon: LayoutDashboard },
   { name: 'Data Room', href: '/dataroom', icon: FolderOpen },
   { name: 'Automation', href: '/automation', icon: Zap },
+];
+
+const irNavigation = [
+  { name: 'Investor Relations', href: '/investor-relations', icon: HeartHandshake },
+];
+
+const bottomNavigation = [
   { name: 'Team', href: '/team', icon: Users },
   { name: 'Settings', href: '/settings', icon: Settings },
   { name: 'Help', href: '/help', icon: HelpCircle },
@@ -99,10 +106,10 @@ export const Sidebar: React.FC = () => {
         <ul className="space-y-1 lg:space-y-2">
           {navigation.map((item) => {
             const Icon = item.icon;
-            const isActive = location.pathname === item.href || 
+            const isActive = location.pathname === item.href ||
                            (item.href === '/dashboard' && location.pathname === '/') ||
                            (item.href === '/crm' && location.pathname === '/crm');
-            
+
             return (
               <li key={item.name}>
                 <Link
@@ -110,8 +117,8 @@ export const Sidebar: React.FC = () => {
                   onClick={closeMenu}
                   className={`
                     flex items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-lg transition-all duration-200
-                    ${isActive 
-                      ? 'bg-primary-600 text-white shadow-lg' 
+                    ${isActive
+                      ? 'bg-primary-600 text-white shadow-lg'
                       : 'text-gray-300 hover:bg-gray-800 hover:text-white'
                     }
                   `}
@@ -121,6 +128,59 @@ export const Sidebar: React.FC = () => {
                   {item.href === '/crm' && (
                     <ReminderBadge count={reminderCount} urgentCount={urgentCount} />
                   )}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+
+        <div className="my-3 lg:my-4 border-t border-gray-700" />
+        <p className="px-3 lg:px-4 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">Post-Raise</p>
+        <ul className="space-y-1 lg:space-y-2">
+          {irNavigation.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname.startsWith(item.href);
+            return (
+              <li key={item.name}>
+                <Link
+                  to={item.href}
+                  onClick={closeMenu}
+                  className={`
+                    flex items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-lg transition-all duration-200
+                    ${isActive
+                      ? 'bg-primary-600 text-white shadow-lg'
+                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                    }
+                  `}
+                >
+                  <Icon size={18} className="lg:w-5 lg:h-5" />
+                  <span className="text-sm lg:text-base flex-1">{item.name}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+
+        <div className="my-3 lg:my-4 border-t border-gray-700" />
+        <ul className="space-y-1 lg:space-y-2">
+          {bottomNavigation.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.href;
+            return (
+              <li key={item.name}>
+                <Link
+                  to={item.href}
+                  onClick={closeMenu}
+                  className={`
+                    flex items-center gap-2 lg:gap-3 px-3 lg:px-4 py-2 lg:py-3 rounded-lg transition-all duration-200
+                    ${isActive
+                      ? 'bg-primary-600 text-white shadow-lg'
+                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                    }
+                  `}
+                >
+                  <Icon size={18} className="lg:w-5 lg:h-5" />
+                  <span className="text-sm lg:text-base flex-1">{item.name}</span>
                 </Link>
               </li>
             );

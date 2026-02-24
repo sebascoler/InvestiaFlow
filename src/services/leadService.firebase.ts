@@ -16,6 +16,7 @@ const firestoreToLead = (data: any): Lead => {
     lastContactDate: timestampToDate(data.lastContactDate),
     stageEnteredAt: timestampToDate(data.stageEnteredAt) || data.createdAt,
     commitmentDate: timestampToDate(data.commitmentDate),
+    lastUpdateSentAt: timestampToDate(data.lastUpdateSentAt),
   } as Lead;
 };
 
@@ -36,6 +37,7 @@ const leadToFirestore = (lead: Partial<Lead>): any => {
   if (data.lastContactDate) data.lastContactDate = dateToTimestamp(data.lastContactDate);
   if (data.stageEnteredAt) data.stageEnteredAt = dateToTimestamp(data.stageEnteredAt);
   if (data.commitmentDate) data.commitmentDate = dateToTimestamp(data.commitmentDate);
+  if (data.lastUpdateSentAt) data.lastUpdateSentAt = dateToTimestamp(data.lastUpdateSentAt);
   
   return data;
 };
