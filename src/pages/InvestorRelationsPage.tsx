@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { HeartHandshake, Search, Edit, ChevronDown } from 'lucide-react';
+import { HeartHandshake, Search, Edit, ChevronDown, Users, FileText } from 'lucide-react';
 import { useLeads } from '../contexts/LeadsContext';
 import { Lead } from '../types/lead';
 import { formatDate } from '../utils/formatters';
@@ -8,6 +8,9 @@ import { Input } from '../components/shared/Input';
 import { Modal } from '../components/shared/Modal';
 import { EmptyState } from '../components/shared/EmptyState';
 import { Loader } from '../components/shared/Loader';
+import { UpdatesPanel } from '../components/ir/UpdatesPanel';
+
+type IRTab = 'investors' | 'updates';
 
 interface EditIRFieldsModalProps {
   isOpen: boolean;
@@ -132,6 +135,7 @@ const InvestorRelationsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
+  const [activeTab, setActiveTab] = useState<IRTab>('investors');
 
   // Auto-populate: all leads in "committed" stage
   const committedInvestors = useMemo(() => {
@@ -197,6 +201,35 @@ const InvestorRelationsPage: React.FC = () => {
         </p>
       </div>
 
+      {/* Tabs */}
+      <div className="flex border-b border-gray-200 mb-8">
+        <button
+          onClick={() => setActiveTab('investors')}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === 'investors'
+              ? 'border-primary-600 text-primary-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+          }`}
+        >
+          <Users size={16} />
+          Investors
+        </button>
+        <button
+          onClick={() => setActiveTab('updates')}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === 'updates'
+              ? 'border-primary-600 text-primary-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+          }`}
+        >
+          <FileText size={16} />
+          Updates
+        </button>
+      </div>
+
+      {activeTab === 'updates' && <UpdatesPanel />}
+
+      {activeTab === 'investors' && (<>
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <div className="bg-white rounded-xl border border-gray-200 p-5">
@@ -347,6 +380,7 @@ const InvestorRelationsPage: React.FC = () => {
           onSave={handleSaveIRFields}
         />
       )}
+      </>)}
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import { FollowUpRule } from './reminder';
+import { UpdateCadence } from './update';
 
 export type TeamMemberRole = 'owner' | 'admin' | 'editor' | 'viewer';
 export type TeamMemberStatus = 'pending' | 'active';
@@ -17,6 +18,10 @@ export interface TeamSettings {
   allowMemberInvites?: boolean;
   defaultRole?: TeamMemberRole;
   followUpRules?: FollowUpRule[];
+  // Investor update cadence
+  updateCadence?: UpdateCadence;
+  updateCadenceCustomDays?: number;
+  lastUpdateGeneratedAt?: Date;
 }
 
 export interface TeamBranding {
