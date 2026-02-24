@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Mail, Building, Calendar, FileText, Linkedin, Phone, Trash2, Edit, Tag } from 'lucide-react';
+import { X, Mail, Building, Calendar, FileText, Linkedin, Phone, Trash2, Edit, Tag, DollarSign } from 'lucide-react';
 import { Lead } from '../../types/lead';
 import { formatDate } from '../../utils/formatters';
 import { Button } from '../shared/Button';
@@ -152,6 +152,35 @@ export const LeadDetailPanel: React.FC<LeadDetailPanelProps> = ({
                   ))}
                 </div>
               </div>
+            </div>
+          )}
+
+          {lead.stage === 'committed' && (lead.commitmentAmount || lead.commitmentDate || lead.commitmentNotes) && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
+              <h4 className="text-sm font-semibold text-green-800 flex items-center gap-2">
+                <DollarSign size={16} />
+                Commitment Details
+              </h4>
+              {lead.commitmentAmount != null && (
+                <div>
+                  <p className="text-xs text-green-700">Amount</p>
+                  <p className="text-lg font-bold text-green-900">
+                    {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(lead.commitmentAmount)}
+                  </p>
+                </div>
+              )}
+              {lead.commitmentDate && (
+                <div>
+                  <p className="text-xs text-green-700">Commitment Date</p>
+                  <p className="text-sm text-green-900 font-medium">{formatDate(lead.commitmentDate)}</p>
+                </div>
+              )}
+              {lead.commitmentNotes && (
+                <div>
+                  <p className="text-xs text-green-700">Notes</p>
+                  <p className="text-sm text-green-900">{lead.commitmentNotes}</p>
+                </div>
+              )}
             </div>
           )}
 

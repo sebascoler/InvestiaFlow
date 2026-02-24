@@ -206,23 +206,33 @@ const leadServiceMock = {
   },
 
   // Cambiar stage de lead (trigger de automatización)
-  async changeStage(id: string, newStage: StageId, stageChangeNotes?: string): Promise<Lead> {
+  async changeStage(id: string, newStage: StageId, stageChangeNotes?: string, commitmentData?: { commitmentAmount?: number; commitmentDate: Date; commitmentNotes?: string }): Promise<Lead> {
     const lead = await this.getLead(id);
     if (!lead) throw new Error('Lead not found');
 
     const oldStage = lead.stage;
     const now = new Date();
-    
+
     // Actualizar notas si se proporcionan
-    const updatedNotes = stageChangeNotes 
+    const updatedNotes = stageChangeNotes
       ? `${lead.notes ? lead.notes + '\n\n' : ''}[${now.toLocaleDateString()}] Cambio a ${newStage}: ${stageChangeNotes}`
       : lead.notes;
 
-    const updatedLead = await this.updateLead(id, { 
+    // Build update payload
+    const updates: Partial<Lead> = {
       stage: newStage,
       stageEnteredAt: now,
       notes: updatedNotes,
-    });
+    };
+
+    // Persist commitment data when moving to committed
+    if (commitmentData) {
+      updates.commitmentAmount = commitmentData.commitmentAmount;
+      updates.commitmentDate = commitmentData.commitmentDate;
+      updates.commitmentNotes = commitmentData.commitmentNotes;
+    }
+
+    const updatedLead = await this.updateLead(id, updates);
 
     // Trigger automation service
     await automationService.onStageChange(updatedLead, oldStage, newStage);
@@ -290,11 +300,11 @@ export const leadService = {
     return service ? service.updateLead(id, updates) : leadServiceMock.updateLead(id, updates);
   },
 
-  async changeStage(id: string, newStage: StageId, stageChangeNotes?: string): Promise<Lead> {
+  async changeStage(id: string, newStage: StageId, stageChangeNotes?: string, commitmentData?: { commitmentAmount?: number; commitmentDate: Date; commitmentNotes?: string }): Promise<Lead> {
     const service = await getFirebaseService();
-    return service 
-      ? service.changeStage(id, newStage, stageChangeNotes) 
-      : leadServiceMock.changeStage(id, newStage, stageChangeNotes);
+    return service
+      ? service.changeStage(id, newStage, stageChangeNotes, commitmentData)
+      : leadServiceMock.changeStage(id, newStage, stageChangeNotes, commitmentData);
   },
 
   async deleteLead(id: string): Promise<void> {

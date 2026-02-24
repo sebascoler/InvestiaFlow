@@ -3,6 +3,7 @@ import { Lead, LeadFormData } from '../types/lead';
 import { StageId } from '../types/stage';
 import { leadService } from '../services/leadService';
 import { useTeam } from './TeamContext';
+import { CommitmentData } from '../components/crm/StageChangeModal';
 
 interface LeadsContextType {
   leads: Lead[];
@@ -11,7 +12,7 @@ interface LeadsContextType {
   refreshLeads: () => Promise<void>;
   createLead: (data: LeadFormData) => Promise<Lead>;
   updateLead: (id: string, updates: Partial<Lead>) => Promise<Lead>;
-  changeStage: (id: string, newStage: StageId, stageChangeNotes?: string) => Promise<Lead>;
+  changeStage: (id: string, newStage: StageId, stageChangeNotes?: string, commitmentData?: CommitmentData) => Promise<Lead>;
   deleteLead: (id: string) => Promise<void>;
 }
 
@@ -85,10 +86,14 @@ export const LeadsProvider: React.FC<LeadsProviderProps> = ({ children, userId }
     }
   };
 
-  const changeStage = async (id: string, newStage: StageId, stageChangeNotes?: string): Promise<Lead> => {
+  const changeStage = async (id: string, newStage: StageId, stageChangeNotes?: string, commitmentData?: CommitmentData): Promise<Lead> => {
     try {
       setError(null);
-      const updatedLead = await leadService.changeStage(id, newStage, stageChangeNotes);
+      const updatedLead = await leadService.changeStage(id, newStage, stageChangeNotes, commitmentData ? {
+        commitmentAmount: commitmentData.commitmentAmount,
+        commitmentDate: commitmentData.commitmentDate,
+        commitmentNotes: commitmentData.commitmentNotes,
+      } : undefined);
       await refreshLeads();
       return updatedLead;
     } catch (err) {

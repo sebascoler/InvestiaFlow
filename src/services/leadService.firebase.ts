@@ -15,6 +15,7 @@ const firestoreToLead = (data: any): Lead => {
     updatedAt: timestampToDate(data.updatedAt) || new Date(),
     lastContactDate: timestampToDate(data.lastContactDate),
     stageEnteredAt: timestampToDate(data.stageEnteredAt) || data.createdAt,
+    commitmentDate: timestampToDate(data.commitmentDate),
   } as Lead;
 };
 
@@ -34,6 +35,7 @@ const leadToFirestore = (lead: Partial<Lead>): any => {
   if (data.updatedAt) data.updatedAt = dateToTimestamp(data.updatedAt);
   if (data.lastContactDate) data.lastContactDate = dateToTimestamp(data.lastContactDate);
   if (data.stageEnteredAt) data.stageEnteredAt = dateToTimestamp(data.stageEnteredAt);
+  if (data.commitmentDate) data.commitmentDate = dateToTimestamp(data.commitmentDate);
   
   return data;
 };
@@ -252,13 +254,13 @@ export const leadServiceFirebase = {
   },
 
   // Cambiar stage de lead (trigger de automatización)
-  async changeStage(id: string, newStage: StageId, stageChangeNotes?: string): Promise<Lead> {
+  async changeStage(id: string, newStage: StageId, stageChangeNotes?: string, commitmentData?: { commitmentAmount?: number; commitmentDate: Date; commitmentNotes?: string }): Promise<Lead> {
     const lead = await this.getLead(id);
     if (!lead) throw new Error('Lead not found');
 
     const oldStage = lead.stage;
     const now = new Date();
-    
+
     // Registrar actividad de cambio de stage
     try {
       const { leadHistoryService } = await import('./leadHistoryService');
@@ -285,17 +287,27 @@ export const leadServiceFirebase = {
     } catch (error) {
       console.warn('[leadServiceFirebase] Error recording activity:', error);
     }
-    
+
     // Actualizar notas si se proporcionan
-    const updatedNotes = stageChangeNotes 
+    const updatedNotes = stageChangeNotes
       ? `${lead.notes ? lead.notes + '\n\n' : ''}[${now.toLocaleDateString()}] Cambio a ${newStage}: ${stageChangeNotes}`
       : lead.notes;
 
-    const updatedLead = await this.updateLead(id, { 
+    // Build update payload
+    const updates: Partial<Lead> = {
       stage: newStage,
       stageEnteredAt: now,
       notes: updatedNotes,
-    });
+    };
+
+    // Persist commitment data when moving to committed
+    if (commitmentData) {
+      updates.commitmentAmount = commitmentData.commitmentAmount;
+      updates.commitmentDate = commitmentData.commitmentDate;
+      updates.commitmentNotes = commitmentData.commitmentNotes;
+    }
+
+    const updatedLead = await this.updateLead(id, updates);
 
     // Trigger automation service
     await automationService.onStageChange(updatedLead, oldStage, newStage);

@@ -3,7 +3,7 @@ import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import { StageId } from '../../types/stage';
 import { Lead } from '../../types/lead';
 import { StageColumn } from './StageColumn';
-import { StageChangeModal } from './StageChangeModal';
+import { StageChangeModal, CommitmentData } from './StageChangeModal';
 import { useLeads } from '../../contexts/LeadsContext';
 import { useStages } from '../../contexts/StagesContext';
 import { Loader } from '../shared/Loader';
@@ -47,11 +47,11 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({ leads: filteredLeads, 
     });
   };
 
-  const handleStageChangeConfirm = async (notes: string) => {
+  const handleStageChangeConfirm = async (notes: string, commitmentData?: CommitmentData) => {
     if (!pendingStageChange) return;
 
     try {
-      await changeStage(pendingStageChange.leadId, pendingStageChange.toStage, notes);
+      await changeStage(pendingStageChange.leadId, pendingStageChange.toStage, notes, commitmentData);
       setPendingStageChange(null);
     } catch (error) {
       console.error('Error changing stage:', error);

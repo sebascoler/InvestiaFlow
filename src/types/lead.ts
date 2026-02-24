@@ -17,6 +17,10 @@ export interface Lead {
   phoneNumber?: string;
   tags?: string[]; // Tags/etiquetas para categorizar leads
   customFields?: Record<string, string | number | boolean | null>;
+  // Commitment fields (populated when lead moves to "committed" stage)
+  commitmentAmount?: number;
+  commitmentDate?: Date;
+  commitmentNotes?: string;
 }
 
 // Helper para asegurar que un lead tenga stageEnteredAt
