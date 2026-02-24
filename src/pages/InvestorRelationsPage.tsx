@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { HeartHandshake, Search, Edit, ChevronDown, Users, FileText } from 'lucide-react';
+import { HeartHandshake, Search, Edit, ChevronDown, Users, FileText, BarChart3 } from 'lucide-react';
 import { useLeads } from '../contexts/LeadsContext';
 import { Lead } from '../types/lead';
 import { formatDate } from '../utils/formatters';
@@ -9,8 +9,9 @@ import { Modal } from '../components/shared/Modal';
 import { EmptyState } from '../components/shared/EmptyState';
 import { Loader } from '../components/shared/Loader';
 import { UpdatesPanel } from '../components/ir/UpdatesPanel';
+import { MetricsPanel } from '../components/ir/MetricsPanel';
 
-type IRTab = 'investors' | 'updates';
+type IRTab = 'investors' | 'updates' | 'metrics';
 
 interface EditIRFieldsModalProps {
   isOpen: boolean;
@@ -225,9 +226,22 @@ const InvestorRelationsPage: React.FC = () => {
           <FileText size={16} />
           Updates
         </button>
+        <button
+          onClick={() => setActiveTab('metrics')}
+          className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === 'metrics'
+              ? 'border-primary-600 text-primary-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+          }`}
+        >
+          <BarChart3 size={16} />
+          Metrics
+        </button>
       </div>
 
       {activeTab === 'updates' && <UpdatesPanel />}
+
+      {activeTab === 'metrics' && <MetricsPanel />}
 
       {activeTab === 'investors' && (<>
       {/* Stats */}

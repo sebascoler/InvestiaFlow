@@ -292,6 +292,20 @@ service cloud.firestore {
         get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.ownerId == request.auth.uid;
     }
 
+    // Metrics Snapshots collection (monthly metrics for board packs)
+    match /metricsSnapshots/{snapshotId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() &&
+        resource.data.teamId != null &&
+        exists(/databases/$(database)/documents/teams/$(resource.data.teamId)) &&
+        get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.ownerId == request.auth.uid;
+      allow delete: if isAuthenticated() &&
+        resource.data.teamId != null &&
+        exists(/databases/$(database)/documents/teams/$(resource.data.teamId)) &&
+        get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.ownerId == request.auth.uid;
+    }
+
     // Investor Activities collection (audit log for investor document views/downloads)
     match /investorActivities/{activityId} {
       allow read: if isAuthenticated();
